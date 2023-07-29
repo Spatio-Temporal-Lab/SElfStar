@@ -6,7 +6,7 @@ import org.urbcomp.startdb.selfStar.utils.OutputBitStream;
 
 import java.util.Arrays;
 
-public class ElfStarCompressorBatch implements ICompressor {
+public class ElfStarCompressor implements ICompressor {
     private final IXORCompressor xorCompressor;
     private final int[] betaStarList;
     private final long[] vPrimeList;
@@ -17,14 +17,14 @@ public class ElfStarCompressorBatch implements ICompressor {
     private int lastBetaStar = Integer.MAX_VALUE;
     private int numberOfValues = 0;
 
-    public ElfStarCompressorBatch(IXORCompressor xorCompressor, int window) {
+    public ElfStarCompressor(IXORCompressor xorCompressor, int window) {
         this.xorCompressor = xorCompressor;
         this.os = xorCompressor.getOutputStream();
         this.betaStarList = new int[window + 1];     // one for the end sign
         this.vPrimeList = new long[window + 1];      // one for the end sign
     }
 
-    public ElfStarCompressorBatch(IXORCompressor xorCompressor) {
+    public ElfStarCompressor(IXORCompressor xorCompressor) {
         this.xorCompressor = xorCompressor;
         this.os = xorCompressor.getOutputStream();
         this.betaStarList = new int[1001];     // one for the end sign

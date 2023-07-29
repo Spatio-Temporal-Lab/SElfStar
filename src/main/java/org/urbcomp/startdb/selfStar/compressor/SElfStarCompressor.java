@@ -6,7 +6,7 @@ import org.urbcomp.startdb.selfStar.utils.OutputBitStream;
 
 import java.util.Arrays;
 
-public class ElfStarCompressorStream implements ICompressor {
+public class SElfStarCompressor implements ICompressor {
     private final IXORCompressor xorCompressor;
 
     private OutputBitStream os;
@@ -19,7 +19,7 @@ public class ElfStarCompressorStream implements ICompressor {
 
     private double storeCompressionRatio = 0;
 
-    public ElfStarCompressorStream(IXORCompressor xorCompressor) {
+    public SElfStarCompressor(IXORCompressor xorCompressor) {
         this.xorCompressor = xorCompressor;
         os = xorCompressor.getOutputStream();
     }

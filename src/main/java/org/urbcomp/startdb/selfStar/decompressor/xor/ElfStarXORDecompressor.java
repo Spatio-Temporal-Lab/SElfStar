@@ -7,7 +7,7 @@ import org.urbcomp.startdb.selfStar.utils.PostOfficeSolver;
 import java.io.IOException;
 import java.util.Arrays;
 
-public class ElfXORDecompressorAdaLeadAdaTrailAdaSharing implements IXORDecompressor {
+public class ElfStarXORDecompressor implements IXORDecompressor {
     private long storedVal = 0;
     private int storedLeadingZeros = Integer.MAX_VALUE;
     private int storedTrailingZeros = Integer.MAX_VALUE;
@@ -24,7 +24,7 @@ public class ElfXORDecompressorAdaLeadAdaTrailAdaSharing implements IXORDecompre
 
     private int trailingBitsPerValue;
 
-    public ElfXORDecompressorAdaLeadAdaTrailAdaSharing() {
+    public ElfStarXORDecompressor() {
     }
 
     private void initLeadingRepresentation() {

@@ -2,45 +2,31 @@ package org.urbcomp.startdb.selfStar.compressor.xor;
 
 import org.urbcomp.startdb.selfStar.utils.Elf64Utils;
 import org.urbcomp.startdb.selfStar.utils.OutputBitStream;
+import org.urbcomp.startdb.selfStar.utils.PostOfficeSolver;
 
-public class ElfXORCompressorVLDBJ implements IXORCompressor {
-    private final static short[] leadingRepresentation = {
-            0, 0, 0, 0, 0, 0, 0, 0,
-            1, 1, 1, 1, 2, 2, 2, 2,
-            3, 3, 4, 4, 5, 5, 6, 6,
-            7, 7, 7, 7, 7, 7, 7, 7,
-            7, 7, 7, 7, 7, 7, 7, 7,
-            7, 7, 7, 7, 7, 7, 7, 7,
-            7, 7, 7, 7, 7, 7, 7, 7,
-            7, 7, 7, 7, 7, 7, 7, 7
-    };
-    private final static short[] leadingRound = {
-            0, 0, 0, 0, 0, 0, 0, 0,
-            8, 8, 8, 8, 12, 12, 12, 12,
-            16, 16, 18, 18, 20, 20, 22, 22,
-            24, 24, 24, 24, 24, 24, 24, 24,
-            24, 24, 24, 24, 24, 24, 24, 24,
-            24, 24, 24, 24, 24, 24, 24, 24,
-            24, 24, 24, 24, 24, 24, 24, 24,
-            24, 24, 24, 24, 24, 24, 24, 24
-    };
+import java.util.Arrays;
+
+public class ElfStarXORCompressorAdaLead implements IXORCompressor {
+    private final int[] leadingRepresentation = new int[64];
+    private final int[] leadingRound = new int[64];
+    private final int capacity = 1000;
     private int storedLeadingZeros = Integer.MAX_VALUE;
     private int storedTrailingZeros = Integer.MAX_VALUE;
     private long storedVal = 0;
     private boolean first = true;
+    private int[] leadDistribution;
     private OutputBitStream out;
+    private int leadingBitsPerValue;
 
-    private int capacity = 1000;
-
-    public ElfXORCompressorVLDBJ() {
+    public ElfStarXORCompressorAdaLead() {
         out = new OutputBitStream(
                 new byte[(int) (((capacity + 1) * 8 + capacity / 8 + 1) * 1.2)]);
     }
 
-    public ElfXORCompressorVLDBJ(int capacity) {
-        this.capacity = capacity;
-        out = new OutputBitStream(
-                new byte[(int) (((capacity + 1) * 8 + capacity / 8 + 1) * 1.2)]);
+    private int initLeadingRoundAndRepresentation(int[] distribution) {
+        int[] positions = PostOfficeSolver.initRoundAndRepresentation(distribution, leadingRepresentation, leadingRound);
+        leadingBitsPerValue = PostOfficeSolver.positionLength2Bits[positions.length];
+        return PostOfficeSolver.writePositions(positions, out);
     }
 
     @Override
@@ -48,15 +34,10 @@ public class ElfXORCompressorVLDBJ implements IXORCompressor {
         return this.out;
     }
 
-    /**
-     * Adds a new long value to the series. Note, values must be inserted in order.
-     *
-     * @param value next floating point value in the series
-     */
     @Override
     public int addValue(long value) {
         if (first) {
-            return writeFirst(value);
+            return initLeadingRoundAndRepresentation(leadDistribution) + writeFirst(value);
         } else {
             return compressValue(value);
         }
@@ -69,16 +50,6 @@ public class ElfXORCompressorVLDBJ implements IXORCompressor {
         out.writeInt(trailingZeros, 7);
         out.writeLong(storedVal >>> trailingZeros, 64 - trailingZeros);
         return 71 - trailingZeros;
-    }
-
-    /**
-     * Closes the block and writes the remaining stuff to the BitOutput.
-     */
-    @Override
-    public int close() {
-        int thisSize = addValue(Elf64Utils.END_SIGN);
-        out.flush();
-        return thisSize;
     }
 
     private int compressValue(long value) {
@@ -103,6 +74,7 @@ public class ElfXORCompressorVLDBJ implements IXORCompressor {
                 } else {
                     out.writeLong(xor >>> storedTrailingZeros, len);
                 }
+
                 thisSize += len;
             } else {
                 storedLeadingZeros = leadingZeros;
@@ -111,20 +83,31 @@ public class ElfXORCompressorVLDBJ implements IXORCompressor {
 
                 if (centerBits <= 16) {
                     // case 10
-                    out.writeInt((((0x2 << 3) | leadingRepresentation[storedLeadingZeros]) << 4) | (centerBits & 0xf), 9);
+                    out.writeInt((((0x2 << leadingBitsPerValue) | leadingRepresentation[storedLeadingZeros]) << 4)
+                            | (centerBits & 0xf), 6 + leadingBitsPerValue);
                     out.writeLong(xor >>> storedTrailingZeros, centerBits);
 
-                    thisSize += 9 + centerBits;
+                    thisSize += 6 + leadingBitsPerValue + centerBits;
                 } else {
                     // case 11
-                    out.writeInt((((0x3 << 3) | leadingRepresentation[storedLeadingZeros]) << 6) | (centerBits & 0x3f), 11);
+                    out.writeInt((((0x3 << leadingBitsPerValue) | leadingRepresentation[storedLeadingZeros]) << 6)
+                            | (centerBits & 0x3f), 8 + leadingBitsPerValue);
                     out.writeLong(xor >>> storedTrailingZeros, centerBits);
 
-                    thisSize += 11 + centerBits;
+                    thisSize += 8 + leadingBitsPerValue + centerBits;
                 }
             }
+
             storedVal = value;
         }
+
+        return thisSize;
+    }
+
+    @Override
+    public int close() {
+        int thisSize = addValue(Elf64Utils.END_SIGN);
+        out.flush();
         return thisSize;
     }
 
@@ -133,10 +116,8 @@ public class ElfXORCompressorVLDBJ implements IXORCompressor {
         return out.getBuffer();
     }
 
-
     @Override
     public void refresh() {
-
         out = new OutputBitStream(
                 new byte[(int) (((capacity + 1) * 8 + capacity / 8 + 1) * 1.2)]);
         storedLeadingZeros = Integer.MAX_VALUE;
@@ -144,5 +125,12 @@ public class ElfXORCompressorVLDBJ implements IXORCompressor {
         storedTrailingZeros = Integer.MAX_VALUE;
         storedVal = 0;
         first = true;
+        Arrays.fill(leadingRepresentation, 0);
+        Arrays.fill(leadingRound, 0);
+    }
+
+    @Override
+    public void setDistribution(int[] leadDistribution, int[] trailDistribution) {
+        this.leadDistribution = leadDistribution;
     }
 }

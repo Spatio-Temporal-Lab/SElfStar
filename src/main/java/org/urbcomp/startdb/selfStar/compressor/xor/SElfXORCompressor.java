@@ -1,28 +1,77 @@
 package org.urbcomp.startdb.selfStar.compressor.xor;
 
+import org.urbcomp.startdb.selfStar.utils.Elf64Utils;
 import org.urbcomp.startdb.selfStar.utils.OutputBitStream;
 import org.urbcomp.startdb.selfStar.utils.PostOfficeSolver;
 
 import java.util.Arrays;
 
-public class ElfXORCompressorAdaLeadAdaTrail implements IXORCompressor {
-    private final static long END_SIGN = Double.doubleToLongBits(Double.NaN);
-    private final int[] leadingRepresentation = new int[64];
-    private final int[] leadingRound = new int[64];
-    private final int[] trailingRepresentation = new int[64];
-    private final int[] trailingRound = new int[64];
-    private final int capacity = 1000;
+public class SElfXORCompressor implements IXORCompressor {
+    private final int[] leadingRepresentation = {
+            0, 0, 0, 0, 0, 0, 0, 0,
+            1, 1, 1, 1, 2, 2, 2, 2,
+            3, 3, 4, 4, 5, 5, 6, 6,
+            7, 7, 7, 7, 7, 7, 7, 7,
+            7, 7, 7, 7, 7, 7, 7, 7,
+            7, 7, 7, 7, 7, 7, 7, 7,
+            7, 7, 7, 7, 7, 7, 7, 7,
+            7, 7, 7, 7, 7, 7, 7, 7
+    };
+    private final int[] leadingRound = {
+            0, 0, 0, 0, 0, 0, 0, 0,
+            8, 8, 8, 8, 12, 12, 12, 12,
+            16, 16, 18, 18, 20, 20, 22, 22,
+            24, 24, 24, 24, 24, 24, 24, 24,
+            24, 24, 24, 24, 24, 24, 24, 24,
+            24, 24, 24, 24, 24, 24, 24, 24,
+            24, 24, 24, 24, 24, 24, 24, 24,
+            24, 24, 24, 24, 24, 24, 24, 24
+    };
+    private final int[] trailingRepresentation = {
+            0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 1, 1,
+            1, 1, 1, 1, 2, 2, 2, 2,
+            3, 3, 3, 3, 4, 4, 4, 4,
+            5, 5, 6, 6, 6, 6, 7, 7,
+            7, 7, 7, 7, 7, 7, 7, 7,
+            7, 7, 7, 7, 7, 7, 7, 7,
+    };
+    private final int[] trailingRound = {
+            0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 22, 22,
+            22, 22, 22, 22, 28, 28, 28, 28,
+            32, 32, 32, 32, 36, 36, 36, 36,
+            40, 40, 42, 42, 42, 42, 46, 46,
+            46, 46, 46, 46, 46, 46, 46, 46,
+            46, 46, 46, 46, 46, 46, 46, 46,
+    };
+    private final int[] leadDistribution = new int[64];
+    private final int[] trailDistribution = new int[64];
     private int storedLeadingZeros = Integer.MAX_VALUE;
     private int storedTrailingZeros = Integer.MAX_VALUE;
     private long storedVal = 0;
     private boolean first = true;
-    private int[] leadDistribution;
-    private int[] trailDistribution;
+    private int[] leadPositions = {0, 8, 12, 16, 18, 20, 22, 24};
+    private int[] trailPositions = {0, 22, 28, 32, 36, 40, 42, 46};
+    private boolean updatePositions = false;
     private OutputBitStream out;
-    private int leadingBitsPerValue;
-    private int trailingBitsPerValue;
 
-    public ElfXORCompressorAdaLeadAdaTrail() {
+    private int leadingBitsPerValue = 3;
+
+    private int trailingBitsPerValue = 3;
+
+    private int capacity = 1000;
+
+
+    public SElfXORCompressor(int window) {
+        out = new OutputBitStream(
+                new byte[(int) (((capacity + 1) * 8 + capacity / 8 + 1) * 1.2)]);
+        this.capacity = window;
+    }
+
+    public SElfXORCompressor() {
         out = new OutputBitStream(
                 new byte[(int) (((capacity + 1) * 8 + capacity / 8 + 1) * 1.2)]);
     }
@@ -30,18 +79,6 @@ public class ElfXORCompressorAdaLeadAdaTrail implements IXORCompressor {
     @Override
     public OutputBitStream getOutputStream() {
         return this.out;
-    }
-
-    private int initLeadingRoundAndRepresentation(int[] distribution) {
-        int[] positions = PostOfficeSolver.initRoundAndRepresentation(distribution, leadingRepresentation, leadingRound);
-        leadingBitsPerValue = PostOfficeSolver.positionLength2Bits[positions.length];
-        return PostOfficeSolver.writePositions(positions, out);
-    }
-
-    private int initTrailingRoundAndRepresentation(int[] distribution) {
-        int[] positions = PostOfficeSolver.initRoundAndRepresentation(distribution, trailingRepresentation, trailingRound);
-        trailingBitsPerValue = PostOfficeSolver.positionLength2Bits[positions.length];
-        return PostOfficeSolver.writePositions(positions, out);
     }
 
     /**
@@ -52,8 +89,8 @@ public class ElfXORCompressorAdaLeadAdaTrail implements IXORCompressor {
     @Override
     public int addValue(long value) {
         if (first) {
-            return initLeadingRoundAndRepresentation(leadDistribution)
-                    + initTrailingRoundAndRepresentation(trailDistribution)
+            return PostOfficeSolver.writePositions(leadPositions, out)
+                    + PostOfficeSolver.writePositions(trailPositions, out)
                     + writeFirst(value);
         } else {
             return compressValue(value);
@@ -78,10 +115,19 @@ public class ElfXORCompressorAdaLeadAdaTrail implements IXORCompressor {
      */
     @Override
     public int close() {
-        int thisSize = addValue(END_SIGN);
+        int thisSize = addValue(Elf64Utils.END_SIGN);
         out.flush();
+        if (updatePositions) {
+            // we update distribution using the inner info
+            leadPositions = PostOfficeSolver.initRoundAndRepresentation(leadDistribution, leadingRepresentation, leadingRound);
+            leadingBitsPerValue = PostOfficeSolver.positionLength2Bits[leadPositions.length];
+
+            trailPositions = PostOfficeSolver.initRoundAndRepresentation(trailDistribution, trailingRepresentation, trailingRound);
+            trailingBitsPerValue = PostOfficeSolver.positionLength2Bits[trailPositions.length];
+        }
         return thisSize;
     }
+
 
     private int compressValue(long value) {
         int thisSize = 0;
@@ -94,8 +140,11 @@ public class ElfXORCompressorAdaLeadAdaTrail implements IXORCompressor {
         } else {
             int leadingZeros = leadingRound[Long.numberOfLeadingZeros(xor)];
             int trailingZeros = trailingRound[Long.numberOfTrailingZeros(xor)];
+            leadDistribution[Long.numberOfLeadingZeros(xor)]++;
+            trailDistribution[Long.numberOfTrailingZeros(xor)]++;
 
-            if (leadingZeros == storedLeadingZeros && trailingZeros >= storedTrailingZeros) {
+            if (leadingZeros >= storedLeadingZeros && trailingZeros >= storedTrailingZeros &&
+                    (leadingZeros - storedLeadingZeros) + (trailingZeros - storedTrailingZeros) < 1 + leadingBitsPerValue + trailingBitsPerValue) {
                 // case 1
                 int centerBits = 64 - storedLeadingZeros - storedTrailingZeros;
                 int len = 1 + centerBits;
@@ -124,13 +173,10 @@ public class ElfXORCompressorAdaLeadAdaTrail implements IXORCompressor {
                             len
                     );
                 }
-
                 thisSize += len;
             }
-
             storedVal = value;
         }
-
         return thisSize;
     }
 
@@ -147,16 +193,13 @@ public class ElfXORCompressorAdaLeadAdaTrail implements IXORCompressor {
         storedTrailingZeros = Integer.MAX_VALUE;
         storedVal = 0;
         first = true;
-        Arrays.fill(leadingRepresentation, 0);
-        Arrays.fill(leadingRound, 0);
-        Arrays.fill(trailingRepresentation, 0);
-        Arrays.fill(trailingRound, 0);
+        updatePositions = false;
+        Arrays.fill(leadDistribution, 0);
+        Arrays.fill(trailDistribution, 0);
     }
 
     @Override
-    public void setDistribution(int[] leadDistribution, int[] trailDistribution) {
-        this.leadDistribution = leadDistribution;
-        this.trailDistribution = trailDistribution;
+    public void setDistribution(int[] leadDistributionIgnore, int[] trailDistributionIgnore) {
+        this.updatePositions = true;
     }
 }
-

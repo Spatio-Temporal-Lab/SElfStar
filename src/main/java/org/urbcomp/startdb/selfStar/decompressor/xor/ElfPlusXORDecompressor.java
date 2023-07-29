@@ -5,7 +5,7 @@ import org.urbcomp.startdb.selfStar.utils.InputBitStream;
 
 import java.io.IOException;
 
-public class ElfXORDecompressorVLDBJ implements IXORDecompressor {
+public class ElfPlusXORDecompressor implements IXORDecompressor {
     private final static short[] leadingRepresentation = {0, 8, 12, 16, 18, 20, 22, 24};
     private long storedVal = 0;
     private int storedLeadingZeros = Integer.MAX_VALUE;
@@ -14,11 +14,11 @@ public class ElfXORDecompressorVLDBJ implements IXORDecompressor {
     private boolean endOfStream = false;
     private InputBitStream in;
 
-    public ElfXORDecompressorVLDBJ() {
+    public ElfPlusXORDecompressor() {
         this(new byte[0]);
     }
 
-    public ElfXORDecompressorVLDBJ(byte[] bs) {
+    public ElfPlusXORDecompressor(byte[] bs) {
         in = new InputBitStream(bs);
     }
 

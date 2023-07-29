@@ -113,11 +113,11 @@ public class TestCompressor {
                 new BaseCompressor(new ChimpNXORCompressor(128)),
                 new BaseCompressor(new GorillaXORCompressor()),
                 new ElfCompressor(new ElfXORCompressor()),
-                new ElfPlusCompressor(new ElfXORCompressorVLDBJ()),
-                new ElfStarCompressorBatch(new ElfXORCompressorAdaLead()),
-                new ElfStarCompressorBatch(new ElfXORCompressorAdaLeadAdaTrail()),
-                new ElfStarCompressorBatch(new ElfXORCompressorAdaLeadAdaTrailAdaSharing()),
-                new ElfStarCompressorStream(new ElfXORCompressorAdaLeadAdaTrailAdaSharingStream()),
+                new ElfPlusCompressor(new ElfPlusXORCompressor()),
+                new ElfStarCompressor(new ElfStarXORCompressorAdaLead()),
+                new ElfStarCompressor(new ElfStarXORCompressorAdaLeadAdaTrail()),
+                new ElfStarCompressor(new ElfStarXORCompressor()),
+                new SElfStarCompressor(new SElfXORCompressor()),
         };
 
         IDecompressor[] decompressors = new IDecompressor[]{
@@ -125,11 +125,11 @@ public class TestCompressor {
                 new BaseDecompressor(new ChimpNXORDecompressor(128)),
                 new BaseDecompressor(new GorillaXORDecompressor()),
                 new ElfDecompressor(new ElfXORDecompressor()),
-                new ElfPlusDecompressor(new ElfXORDecompressorVLDBJ()),
-                new ElfStarDecompressor(new ElfXORDecompressorAdaLead()),
-                new ElfStarDecompressor(new ElfXORDecompressorAdaLeadAdaTrail()),
-                new ElfStarDecompressor(new ElfXORDecompressorAdaLeadAdaTrailAdaSharing()),
-                new ElfStarDecompressor(new ElfXORDecompressorAdaLeadAdaTrailAdaSharing())     // streaming version is the same
+                new ElfPlusDecompressor(new ElfPlusXORDecompressor()),
+                new ElfStarDecompressor(new ElfStarXORDecompressorAdaLead()),
+                new ElfStarDecompressor(new ElfStarXORDecompressorAdaLeadAdaTrail()),
+                new ElfStarDecompressor(new ElfStarXORDecompressor()),
+                new ElfStarDecompressor(new ElfStarXORDecompressor())     // streaming version is the same
         };
         boolean firstMethod = true;
         for (int i = 0; i < compressors.length; i++) {
@@ -193,13 +193,13 @@ public class TestCompressor {
         fileNameParamToTotalBits.put(fileNameWindow, 0L);
         fileNameParamToTotalBlock.put(fileNameWindow, 0L);
         ICompressor[] compressors = new ICompressor[]{
-                new ElfStarCompressorBatch(new ElfXORCompressorAdaLeadAdaTrailAdaSharing(window), window),
-                new ElfStarCompressorStream(new ElfXORCompressorAdaLeadAdaTrailAdaSharingStream(window)),
+                new ElfStarCompressor(new ElfStarXORCompressor(window), window),
+                new SElfStarCompressor(new SElfXORCompressor(window)),
         };
 
         IDecompressor[] decompressors = new IDecompressor[]{
-                new ElfStarDecompressor(new ElfXORDecompressorAdaLeadAdaTrailAdaSharing()),
-                new ElfStarDecompressor(new ElfXORDecompressorAdaLeadAdaTrailAdaSharing()),     // streaming version is the same
+                new ElfStarDecompressor(new ElfStarXORDecompressor()),
+                new ElfStarDecompressor(new ElfStarXORDecompressor()),     // streaming version is the same
         };
         for (int i = 0; i < compressors.length; i++) {
             ICompressor compressor = compressors[i];

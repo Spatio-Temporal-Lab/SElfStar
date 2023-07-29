@@ -1,40 +1,30 @@
 package org.urbcomp.startdb.selfStar.compressor.xor;
 
-import org.urbcomp.startdb.selfStar.utils.Elf64Utils;
 import org.urbcomp.startdb.selfStar.utils.OutputBitStream;
 import org.urbcomp.startdb.selfStar.utils.PostOfficeSolver;
 
 import java.util.Arrays;
 
-public class ElfXORCompressorAdaLeadAdaTrailAdaSharing implements IXORCompressor {
+public class ElfStarXORCompressorAdaLeadAdaTrail implements IXORCompressor {
+    private final static long END_SIGN = Double.doubleToLongBits(Double.NaN);
     private final int[] leadingRepresentation = new int[64];
     private final int[] leadingRound = new int[64];
     private final int[] trailingRepresentation = new int[64];
     private final int[] trailingRound = new int[64];
+    private final int capacity = 1000;
     private int storedLeadingZeros = Integer.MAX_VALUE;
     private int storedTrailingZeros = Integer.MAX_VALUE;
     private long storedVal = 0;
     private boolean first = true;
     private int[] leadDistribution;
     private int[] trailDistribution;
-
     private OutputBitStream out;
-
     private int leadingBitsPerValue;
-
     private int trailingBitsPerValue;
 
-    private int capacity = 1000;
-
-    public ElfXORCompressorAdaLeadAdaTrailAdaSharing() {
+    public ElfStarXORCompressorAdaLeadAdaTrail() {
         out = new OutputBitStream(
                 new byte[(int) (((capacity + 1) * 8 + capacity / 8 + 1) * 1.2)]);
-    }
-
-    public ElfXORCompressorAdaLeadAdaTrailAdaSharing(int window) {
-        out = new OutputBitStream(
-                new byte[(int) (((capacity + 1) * 8 + capacity / 8 + 1) * 1.2)]);
-        this.capacity = window;
     }
 
     @Override
@@ -88,7 +78,7 @@ public class ElfXORCompressorAdaLeadAdaTrailAdaSharing implements IXORCompressor
      */
     @Override
     public int close() {
-        int thisSize = addValue(Elf64Utils.END_SIGN);
+        int thisSize = addValue(END_SIGN);
         out.flush();
         return thisSize;
     }
@@ -105,8 +95,7 @@ public class ElfXORCompressorAdaLeadAdaTrailAdaSharing implements IXORCompressor
             int leadingZeros = leadingRound[Long.numberOfLeadingZeros(xor)];
             int trailingZeros = trailingRound[Long.numberOfTrailingZeros(xor)];
 
-            if (leadingZeros >= storedLeadingZeros && trailingZeros >= storedTrailingZeros &&
-                    (leadingZeros - storedLeadingZeros) + (trailingZeros - storedTrailingZeros) < 1 + leadingBitsPerValue + trailingBitsPerValue) {
+            if (leadingZeros == storedLeadingZeros && trailingZeros >= storedTrailingZeros) {
                 // case 1
                 int centerBits = 64 - storedLeadingZeros - storedTrailingZeros;
                 int len = 1 + centerBits;
@@ -135,10 +124,13 @@ public class ElfXORCompressorAdaLeadAdaTrailAdaSharing implements IXORCompressor
                             len
                     );
                 }
+
                 thisSize += len;
             }
+
             storedVal = value;
         }
+
         return thisSize;
     }
 
@@ -167,3 +159,4 @@ public class ElfXORCompressorAdaLeadAdaTrailAdaSharing implements IXORCompressor
         this.trailDistribution = trailDistribution;
     }
 }
+
