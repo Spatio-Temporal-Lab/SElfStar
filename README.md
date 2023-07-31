@@ -2,21 +2,21 @@
 
 ***
 Based on the erasing method of ***Elf***, we improved it to get the ***ElfStar*** method. Compared with the ***Elf***
-algorithm, the compression rate has been significantly improved. In addition, ***SelfStar*** suitable for streaming
+algorithm, the compression radio has been significantly improved. In addition, ***SElfStar*** suitable for streaming
 scenarios is also given.
 
-## ElfStar & SelfStar feature
+## ElfStar & SElfStar feature
 
 - ***ElfStar*** proposes the most advanced encoding strategy at present, and optimizes the leading zeros, center bits
-  and sharing conditions of elf encoding.
-- ***SelfStar*** is used in streaming media scenarios and can achieve almost the same compression ratio as ***ElfStar***
+  and sharing conditions of ***Elf*** encoding.
+- ***SElfStar*** is used in streaming scenarios and can achieve almost the same compression ratio as ***ElfStar***
   while enjoying higher efficiency.
 
 ## Project Structure
 
 This project mainly includes the following various compression algorithms:
 
-- The main code for the **XOR-based** algorithm is in the *org/urbcomp/startdb/compress/selfStar* package.
+- The main code for the **XOR-based** algorithm is in the *org/urbcomp/startdb/compress/SElfStar* package.
 
 - The main code for other **general compression** algorithms is in the *org/apache/hadoop/hbase/io/compress* package.
 
@@ -36,7 +36,7 @@ interface.
 - ElfCompressor: This class is the most primitive ***Elf*** algorithm.
 - ElfPlusCompressor: This class ***Elf*** improves the storage of beta.
 - ElfStarCompressor: This class is ***ElfStar***, which is processed in batch mode, and is also the algorithm for the
-  optimal compression rate of the ***Elf*** series. Different XORCompressors can be selected for ablation test.
+  optimal compression radio of the ***Elf*** series. Different XORCompressors can be selected for ablation test.
 - SElfStarCompressorStream: This class is pre-processed for erasure and then compressed using the Gorilla algorithm.
 - BaseCompressor: This class chooses different XORCompressors to implement Chimp, Chimp128 and Gorilla algorithms.
 
