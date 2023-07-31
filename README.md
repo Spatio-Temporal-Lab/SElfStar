@@ -2,7 +2,7 @@
 
 ***
 Based on the erasing method of ***Elf***, we improved it to get the ***ElfStar*** method. Compared with the ***Elf***
-algorithm, the compression radio has been significantly improved. In addition, ***SElfStar*** suitable for streaming
+algorithm, the compression ratio has been significantly improved. In addition, ***SElfStar*** suitable for streaming
 scenarios is also given.
 
 ## ElfStar & SElfStar feature
