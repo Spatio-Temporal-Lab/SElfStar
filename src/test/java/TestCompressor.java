@@ -28,29 +28,29 @@ public class TestCompressor {
     private static final int NO_PARAM = 0;
     private static final String INIT_FILE = "init.csv";     // warm up memory and cpu
     private final String[] fileNames = {
-            INIT_FILE,
-            "Air-pressure.csv",
-            "Air-sensor.csv",
-            "Basel-temp.csv",
-            "Basel-wind.csv",
-            "Bird-migration.csv",
-            "Bitcoin-price.csv",
-            "Blockchain-tr.csv",
-            "City-lat.csv",
-            "City-lon.csv",
-            "City-temp.csv",
-            "Dew-point-temp.csv",
-            "electric_vehicle_charging.csv",
-            "Food-price.csv",
-            "IR-bio-temp.csv",
-            "PM10-dust.csv",
-            "POI-lat.csv",
-            "POI-lon.csv",
-            "SSD-bench.csv",
-            "Stocks-DE.csv",
-            "Stocks-UK.csv",
-            "Stocks-USA.csv",
-            "Wind-Speed.csv"
+        INIT_FILE,
+        "Air-pressure.csv",
+        "Air-sensor.csv",
+        "Basel-temp.csv",
+        "Basel-wind.csv",
+        "Bird-migration.csv",
+        "Bitcoin-price.csv",
+        "Blockchain-tr.csv",
+        "City-lat.csv",
+        "City-lon.csv",
+        "City-temp.csv",
+        "Dew-point-temp.csv",
+        "electric_vehicle_charging.csv",
+        "Food-price.csv",
+        "IR-bio-temp.csv",
+        "PM10-dust.csv",
+        "POI-lat.csv",
+        "POI-lon.csv",
+        "SSD-bench.csv",
+        "Stocks-DE.csv",
+        "Stocks-UK.csv",
+        "Stocks-USA.csv",
+        "Wind-Speed.csv"
     };
 
     private final Map<String, Long> fileNameParamToTotalBits = new HashMap<>();
@@ -109,27 +109,27 @@ public class TestCompressor {
         fileNameParamToTotalBits.put(fileNameParam, 0L);
         fileNameParamToTotalBlock.put(fileNameParam, 0L);
         ICompressor[] compressors = new ICompressor[]{
-                new BaseCompressor(new ChimpXORCompressor()),
-                new BaseCompressor(new ChimpNXORCompressor(128)),
-                new BaseCompressor(new GorillaXORCompressor()),
-                new ElfCompressor(new ElfXORCompressor()),
-                new ElfPlusCompressor(new ElfPlusXORCompressor()),
-                new ElfStarCompressor(new ElfStarXORCompressorAdaLead()),
-                new ElfStarCompressor(new ElfStarXORCompressorAdaLeadAdaTrail()),
-                new ElfStarCompressor(new ElfStarXORCompressor()),
-                new SElfStarCompressor(new SElfXORCompressor()),
+            new BaseCompressor(new ChimpXORCompressor()),
+            new BaseCompressor(new ChimpNXORCompressor(128)),
+            new BaseCompressor(new GorillaXORCompressor()),
+            new ElfCompressor(new ElfXORCompressor()),
+            new ElfPlusCompressor(new ElfPlusXORCompressor()),
+            new ElfStarCompressor(new ElfStarXORCompressorAdaLead()),
+            new ElfStarCompressor(new ElfStarXORCompressorAdaLeadAdaTrail()),
+            new ElfStarCompressor(new ElfStarXORCompressor()),
+            new SElfStarCompressor(new SElfXORCompressor()),
         };
 
         IDecompressor[] decompressors = new IDecompressor[]{
-                new BaseDecompressor(new ChimpXORDecompressor()),
-                new BaseDecompressor(new ChimpNXORDecompressor(128)),
-                new BaseDecompressor(new GorillaXORDecompressor()),
-                new ElfDecompressor(new ElfXORDecompressor()),
-                new ElfPlusDecompressor(new ElfPlusXORDecompressor()),
-                new ElfStarDecompressor(new ElfStarXORDecompressorAdaLead()),
-                new ElfStarDecompressor(new ElfStarXORDecompressorAdaLeadAdaTrail()),
-                new ElfStarDecompressor(new ElfStarXORDecompressor()),
-                new ElfStarDecompressor(new ElfStarXORDecompressor())     // streaming version is the same
+            new BaseDecompressor(new ChimpXORDecompressor()),
+            new BaseDecompressor(new ChimpNXORDecompressor(128)),
+            new BaseDecompressor(new GorillaXORDecompressor()),
+            new ElfDecompressor(new ElfXORDecompressor()),
+            new ElfPlusDecompressor(new ElfPlusXORDecompressor()),
+            new ElfStarDecompressor(new ElfStarXORDecompressorAdaLead()),
+            new ElfStarDecompressor(new ElfStarXORDecompressorAdaLeadAdaTrail()),
+            new ElfStarDecompressor(new ElfStarXORDecompressor()),
+            new ElfStarDecompressor(new ElfStarXORDecompressor())     // streaming version is the same
         };
         boolean firstMethod = true;
         for (int i = 0; i < compressors.length; i++) {
@@ -193,13 +193,13 @@ public class TestCompressor {
         fileNameParamToTotalBits.put(fileNameWindow, 0L);
         fileNameParamToTotalBlock.put(fileNameWindow, 0L);
         ICompressor[] compressors = new ICompressor[]{
-                new ElfStarCompressor(new ElfStarXORCompressor(window), window),
-                new SElfStarCompressor(new SElfXORCompressor(window)),
+            new ElfStarCompressor(new ElfStarXORCompressor(window), window),
+            new SElfStarCompressor(new SElfXORCompressor(window)),
         };
 
         IDecompressor[] decompressors = new IDecompressor[]{
-                new ElfStarDecompressor(new ElfStarXORDecompressor()),
-                new ElfStarDecompressor(new ElfStarXORDecompressor()),     // streaming version is the same
+            new ElfStarDecompressor(new ElfStarXORDecompressor()),
+            new ElfStarDecompressor(new ElfStarXORDecompressor()),     // streaming version is the same
         };
         for (int i = 0; i < compressors.length; i++) {
             ICompressor compressor = compressors[i];
@@ -475,9 +475,11 @@ public class TestCompressor {
         }
     }
 
-    private void writeResult(String
-                                     storeFile, Map<String, Double> fileNameParamMethodToRatio, Map<String, Double> fileNameParamMethodToCTime,
-                             Map<String, Double> fileNameParamMethodToDTime, Map<String, Long> fileNameParamToTotalBlock) {
+    private void writeResult(String storeFile,
+                             Map<String, Double> fileNameParamMethodToRatio,
+                             Map<String, Double> fileNameParamMethodToCTime,
+                             Map<String, Double> fileNameParamMethodToDTime,
+                             Map<String, Long> fileNameParamToTotalBlock) {
         Map<String, List<Double>> methodToRatios = new TreeMap<>();
         Map<String, List<Double>> methodToCTimes = new HashMap<>();
         Map<String, List<Double>> methodToDTimes = new HashMap<>();
@@ -502,7 +504,7 @@ public class TestCompressor {
         }
 
         System.out.println("Average Performance");
-        System.out.println("Method\tParam\tRatio\tCTime\tDTime");
+        System.out.println("Param\tMethod\tRatio\tCTime\tDTime");
         for (String paramMethod : methodToRatios.keySet()) {
             System.out.print(paramMethod + "\t");
             System.out.print(methodToRatios.get(paramMethod).stream().mapToDouble(o -> o).average().orElse(0) + "\t");
