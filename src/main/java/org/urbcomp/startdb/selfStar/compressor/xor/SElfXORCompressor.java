@@ -66,9 +66,10 @@ public class SElfXORCompressor implements IXORCompressor {
 
 
     public SElfXORCompressor(int window) {
+        this.capacity = window;
         out = new OutputBitStream(
                 new byte[(int) (((capacity + 1) * 8 + capacity / 8 + 1) * 1.2)]);
-        this.capacity = window;
+
     }
 
     public SElfXORCompressor() {
