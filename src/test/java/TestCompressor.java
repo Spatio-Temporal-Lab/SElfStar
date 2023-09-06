@@ -612,8 +612,8 @@ public class TestCompressor {
                 throw new IOException("Create directory failed: " + file);
             }
             try (FileWriter writer = new FileWriter(storeFile, true)) {
-//                writer.write("dataset, block, method, ratio, CTime, DTime");
-//                writer.write("\r\n");
+                writer.write("Param, Method, Ratio, CTime, DTime");
+                writer.write("\r\n");
                 // 遍历键，并写入对应的值
                 for (String fileNameParamMethod : fileNameParamMethodToRatio.keySet()) {
                     String fileNameParam = fileNameParamMethod.split(",")[0] + "," + fileNameParamMethod.split(",")[1];
