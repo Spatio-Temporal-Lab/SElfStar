@@ -29,29 +29,29 @@ public class TestCompressor {
     private static final int NO_PARAM = 0;
     private static final String INIT_FILE = "init.csv";     // warm up memory and cpu
     private final String[] fileNames = {
-            INIT_FILE,
-            "Air-pressure.csv",
-            "Air-sensor.csv",
-            "Basel-temp.csv",
-            "Basel-wind.csv",
-            "Bird-migration.csv",
-            "Bitcoin-price.csv",
-            "Blockchain-tr.csv",
-            "City-lat.csv",
-            "City-lon.csv",
-            "City-temp.csv",
-            "Dew-point-temp.csv",
-            "electric_vehicle_charging.csv",
-            "Food-price.csv",
-            "IR-bio-temp.csv",
-            "PM10-dust.csv",
-            "POI-lat.csv",
-            "POI-lon.csv",
-            "SSD-bench.csv",
-            "Stocks-DE.csv",
-            "Stocks-UK.csv",
-            "Stocks-USA.csv",
-            "Wind-Speed.csv"
+        INIT_FILE,
+        "Air-pressure.csv",
+        "Air-sensor.csv",
+        "Basel-temp.csv",
+        "Basel-wind.csv",
+        "Bird-migration.csv",
+        "Bitcoin-price.csv",
+        "Blockchain-tr.csv",
+        "City-lat.csv",
+        "City-lon.csv",
+        "City-temp.csv",
+        "Dew-point-temp.csv",
+        "electric_vehicle_charging.csv",
+        "Food-price.csv",
+        "IR-bio-temp.csv",
+        "PM10-dust.csv",
+        "POI-lat.csv",
+        "POI-lon.csv",
+        "SSD-bench.csv",
+        "Stocks-DE.csv",
+        "Stocks-UK.csv",
+        "Stocks-USA.csv",
+        "Wind-Speed.csv"
     };
 
     private final Map<String, Long> fileNameParamToTotalBits = new HashMap<>();
@@ -132,27 +132,27 @@ public class TestCompressor {
         fileNameParamToTotalBits.put(fileNameParam, 0L);
         fileNameParamToTotalBlock.put(fileNameParam, 0L);
         ICompressor[] compressors = new ICompressor[]{
-                new BaseCompressor(new ChimpXORCompressor()),
-                new BaseCompressor(new ChimpNXORCompressor(128)),
-                new BaseCompressor(new GorillaXORCompressor()),
-                new ElfCompressor(new ElfXORCompressor()),
-                new ElfPlusCompressor(new ElfPlusXORCompressor()),
-                new ElfStarCompressor(new ElfStarXORCompressorAdaLead()),
-                new ElfStarCompressor(new ElfStarXORCompressorAdaLeadAdaTrail()),
-                new ElfStarCompressor(new ElfStarXORCompressor()),
-                new SElfStarCompressor(new SElfXORCompressor()),
+            new BaseCompressor(new ChimpXORCompressor()),
+            new BaseCompressor(new ChimpNXORCompressor(128)),
+            new BaseCompressor(new GorillaXORCompressor()),
+            new ElfCompressor(new ElfXORCompressor()),
+            new ElfPlusCompressor(new ElfPlusXORCompressor()),
+            new ElfStarCompressor(new ElfStarXORCompressorAdaLead()),
+            new ElfStarCompressor(new ElfStarXORCompressorAdaLeadAdaTrail()),
+            new ElfStarCompressor(new ElfStarXORCompressor()),
+            new SElfStarCompressor(new SElfXORCompressor()),
         };
 
         IDecompressor[] decompressors = new IDecompressor[]{
-                new BaseDecompressor(new ChimpXORDecompressor()),
-                new BaseDecompressor(new ChimpNXORDecompressor(128)),
-                new BaseDecompressor(new GorillaXORDecompressor()),
-                new ElfDecompressor(new ElfXORDecompressor()),
-                new ElfPlusDecompressor(new ElfPlusXORDecompressor()),
-                new ElfStarDecompressor(new ElfStarXORDecompressorAdaLead()),
-                new ElfStarDecompressor(new ElfStarXORDecompressorAdaLeadAdaTrail()),
-                new ElfStarDecompressor(new ElfStarXORDecompressor()),
-                new ElfStarDecompressor(new ElfStarXORDecompressor())     // streaming version is the same
+            new BaseDecompressor(new ChimpXORDecompressor()),
+            new BaseDecompressor(new ChimpNXORDecompressor(128)),
+            new BaseDecompressor(new GorillaXORDecompressor()),
+            new ElfDecompressor(new ElfXORDecompressor()),
+            new ElfPlusDecompressor(new ElfPlusXORDecompressor()),
+            new ElfStarDecompressor(new ElfStarXORDecompressorAdaLead()),
+            new ElfStarDecompressor(new ElfStarXORDecompressorAdaLeadAdaTrail()),
+            new ElfStarDecompressor(new ElfStarXORDecompressor()),
+            new ElfStarDecompressor(new ElfStarXORDecompressor())     // streaming version is the same
         };
         boolean firstMethod = true;
         for (int i = 0; i < compressors.length; i++) {
@@ -216,13 +216,13 @@ public class TestCompressor {
         fileNameParamToTotalBits.put(fileNameWindow, 0L);
         fileNameParamToTotalBlock.put(fileNameWindow, 0L);
         ICompressor[] compressors = new ICompressor[]{
-                new ElfStarCompressor(new ElfStarXORCompressor(window), window),
-                new SElfStarCompressor(new SElfXORCompressor(window)),
+            new ElfStarCompressor(new ElfStarXORCompressor(window), window),
+            new SElfStarCompressor(new SElfXORCompressor(window)),
         };
 
         IDecompressor[] decompressors = new IDecompressor[]{
-                new ElfStarDecompressor(new ElfStarXORDecompressor()),
-                new ElfStarDecompressor(new ElfStarXORDecompressor()),     // streaming version is the same
+            new ElfStarDecompressor(new ElfStarXORDecompressor()),
+            new ElfStarDecompressor(new ElfStarXORDecompressor()),     // streaming version is the same
         };
         for (int i = 0; i < compressors.length; i++) {
             ICompressor compressor = compressors[i];
@@ -279,15 +279,15 @@ public class TestCompressor {
     }
 
     private void testBlockCompressor(String fileName, int block) {
-        String fileNameWindow = fileName + "," + block;
-        fileNameParamToTotalBits.put(fileNameWindow, 0L);
-        fileNameParamToTotalBlock.put(fileNameWindow, 0L);
+        String fileNameBlock = fileName + "," + block;
+        fileNameParamToTotalBits.put(fileNameBlock, 0L);
+        fileNameParamToTotalBlock.put(fileNameBlock, 0L);
         ICompressor[] compressors = new ICompressor[]{
-                new ElfStarCompressor(new ElfStarXORCompressor(block), block),
+            new ElfStarCompressor(new ElfStarXORCompressor(block), block),
         };
 
         IDecompressor[] decompressors = new IDecompressor[]{
-                new ElfStarDecompressor(new ElfStarXORDecompressor()),
+            new ElfStarDecompressor(new ElfStarXORDecompressor()),
         };
         for (int i = 0; i < compressors.length; i++) {
             ICompressor compressor = compressors[i];
@@ -300,8 +300,8 @@ public class TestCompressor {
                     if (floatings.size() != block) {
                         break;
                     }
-                    fileNameParamToTotalBits.put(fileNameWindow, fileNameParamToTotalBits.get(fileNameWindow) + floatings.size() * 64L);
-                    fileNameParamToTotalBlock.put(fileNameWindow, fileNameParamToTotalBlock.get(fileNameWindow) + 1L);
+                    fileNameParamToTotalBits.put(fileNameBlock, fileNameParamToTotalBits.get(fileNameBlock) + floatings.size() * 64L);
+                    fileNameParamToTotalBlock.put(fileNameBlock, fileNameParamToTotalBlock.get(fileNameBlock) + 1L);
                     double start = System.nanoTime();
                     floatings.forEach(compressor::addValue);
 
@@ -318,18 +318,18 @@ public class TestCompressor {
                     for (int j = 0; j < floatings.size(); j++) {
                         assertEquals(floatings.get(j), deValues.get(j));
                     }
-                    String fileNameWindowMethod = fileName + "," + block + "," + compressor.getKey();
-                    if (!fileNameParamMethodToCompressedBits.containsKey(fileNameWindowMethod)) {
-                        fileNameParamMethodToCompressedBits.put(fileNameWindowMethod, compressor.getCompressedSizeInBits());
-                        fileNameParamMethodToCompressTime.put(fileNameWindowMethod, compressTime * BLOCK_SIZE / block);
-                        fileNameParamMethodToDecompressTime.put(fileNameWindowMethod, decompressTime * BLOCK_SIZE / block);
+                    String fileNameBlockMethod = fileName + "," + block + "," + compressor.getKey();
+                    if (!fileNameParamMethodToCompressedBits.containsKey(fileNameBlockMethod)) {
+                        fileNameParamMethodToCompressedBits.put(fileNameBlockMethod, compressor.getCompressedSizeInBits());
+                        fileNameParamMethodToCompressTime.put(fileNameBlockMethod, compressTime * BLOCK_SIZE / block);
+                        fileNameParamMethodToDecompressTime.put(fileNameBlockMethod, decompressTime * BLOCK_SIZE / block);
                     } else {
-                        long newSize = fileNameParamMethodToCompressedBits.get(fileNameWindowMethod) + compressor.getCompressedSizeInBits();
-                        double newCTime = fileNameParamMethodToCompressTime.get(fileNameWindowMethod) + compressTime * BLOCK_SIZE / block;
-                        double newDTime = fileNameParamMethodToDecompressTime.get(fileNameWindowMethod) + decompressTime * BLOCK_SIZE / block;
-                        fileNameParamMethodToCompressedBits.put(fileNameWindowMethod, newSize);
-                        fileNameParamMethodToCompressTime.put(fileNameWindowMethod, newCTime);
-                        fileNameParamMethodToDecompressTime.put(fileNameWindowMethod, newDTime);
+                        long newSize = fileNameParamMethodToCompressedBits.get(fileNameBlockMethod) + compressor.getCompressedSizeInBits();
+                        double newCTime = fileNameParamMethodToCompressTime.get(fileNameBlockMethod) + compressTime * BLOCK_SIZE / block;
+                        double newDTime = fileNameParamMethodToDecompressTime.get(fileNameBlockMethod) + decompressTime * BLOCK_SIZE / block;
+                        fileNameParamMethodToCompressedBits.put(fileNameBlockMethod, newSize);
+                        fileNameParamMethodToCompressTime.put(fileNameBlockMethod, newCTime);
+                        fileNameParamMethodToDecompressTime.put(fileNameBlockMethod, newDTime);
                     }
                     compressor.refresh();
                     decompressor.refresh();
