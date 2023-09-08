@@ -117,7 +117,7 @@ public class TestCompressor {
         writeResult(STORE_WINDOW_FILE, fileNameParamMethodToCompressedRatio, fileNameParamMethodToCompressTime, fileNameParamMethodToDecompressTime, fileNameParamToTotalBlock);
     }
 
-    //This test takes about 10 minutes to complete. The concept of window does not apply in batch compression.
+    //This test takes about 10 minutes to complete.
     @Test
     public void testBlockCompressor() {
         for (int block : blockSizes) {
