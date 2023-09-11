@@ -20,7 +20,6 @@ public class ElfPlusDecompressor32 implements IDecompressor32 {
         List<Float> values = new ArrayList<>(1024);
         Float value;
         while ((value = nextValue()) != null) {
-            System.out.println(value);
             values.add(value);
         }
         return values;
@@ -55,6 +54,7 @@ public class ElfPlusDecompressor32 implements IDecompressor32 {
     private Float recoverVByBetaStar() {
         float v;
         Float vPrime = xorDecompressor.readValue();
+        System.out.println(vPrime);
         int sp = Elf32Utils.getSP(Math.abs(vPrime));
         if (lastBetaStar == 0) {
             v = Elf32Utils.get10iN(-sp - 1);

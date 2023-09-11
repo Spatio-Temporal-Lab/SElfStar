@@ -44,7 +44,7 @@ public class ElfStarCompressor32 implements ICompressor32 {
         } else {
             // C1: v is a normal or subnormal
             int[] alphaAndBetaStar = Elf32Utils.getAlphaAndBetaStar(v, lastBetaStar);
-            int e = ( (vInt >> 23)) & 0xff;
+            int e = ((vInt >> 23)) & 0xff;
             int gAlpha = Elf32Utils.getFAlpha(alphaAndBetaStar[0]) + e - 127;
             int eraseBits = 23 - gAlpha;
             int mask = 0xffffffff << eraseBits;

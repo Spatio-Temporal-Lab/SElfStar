@@ -27,28 +27,28 @@ public class TestSingleCompressor {
     private static final int NO_PARAM = 0;
     private static final String INIT_FILE = "init.csv";     // warm up memory and cpu
     private final String[] fileNames = {
-//            INIT_FILE,
-//            "Air-pressure.csv",
-//            "Air-sensor.csv",
-//            "Basel-temp.csv",
-//            "Basel-wind.csv",
-//            "Bird-migration.csv",
-//            "Bitcoin-price.csv",
-//            "Blockchain-tr.csv",
-//            "City-lat.csv",
-//            "City-lon.csv",
-//            "City-temp.csv",
-//            "Dew-point-temp.csv",
-//            "electric_vehicle_charging.csv",
-//            "Food-price.csv",
-//            "IR-bio-temp.csv",
-//            "PM10-dust.csv",
-//            "POI-lat.csv",
-//            "POI-lon.csv",
-//            "SSD-bench.csv",
-//            "Stocks-DE.csv",
-//            "Stocks-UK.csv",
-//            "Stocks-USA.csv",
+            INIT_FILE,
+            "Air-pressure.csv",
+            "Air-sensor.csv",
+            "Basel-temp.csv",
+            "Basel-wind.csv",
+            "Bird-migration.csv",
+            "Bitcoin-price.csv",
+            "Blockchain-tr.csv",
+            "City-lat.csv",
+            "City-lon.csv",
+            "City-temp.csv",
+            "Dew-point-temp.csv",
+            "electric_vehicle_charging.csv",
+            "Food-price.csv",
+            "IR-bio-temp.csv",
+            "PM10-dust.csv",
+            "POI-lat.csv",
+            "POI-lon.csv",
+            "SSD-bench.csv",
+            "Stocks-DE.csv",
+            "Stocks-UK.csv",
+            "Stocks-USA.csv",
             "Wind-Speed.csv"
     };
 
@@ -71,6 +71,7 @@ public class TestSingleCompressor {
     @Test
     public void testAllCompressor() {
         for (String fileName : fileNames) {
+            System.out.println(fileName);
             testFloatingCompressor(fileName);
         }
         fileNameParamMethodToCompressedBits.forEach((fileNameParamMethod, compressedBits) -> {
@@ -127,7 +128,7 @@ public class TestSingleCompressor {
                     }
                     if (firstMethod) {
                         fileNameParamToTotalBits.put(fileNameParam, fileNameParamToTotalBits.get(fileNameParam) + floatings.size() * 32);
-                        fileNameParamToTotalBlock.put(fileNameParam, fileNameParamToTotalBlock.get(fileNameParam) + 1L);
+                        fileNameParamToTotalBlock.put(fileNameParam, fileNameParamToTotalBlock.get(fileNameParam) + 1);
                     }
                     double start = System.nanoTime();
                     floatings.forEach(compressor::addValue);
