@@ -1,14 +1,14 @@
 package org.urbcomp.startdb.selfStar.decompressor32.xor;
 
-import org.urbcomp.startdb.selfStar.decompressor32.xor.IXORDecompressor;
-import org.urbcomp.startdb.selfStar.utils.Elf64Utils;
+import org.urbcomp.startdb.selfStar.utils.Elf32Utils;
 import org.urbcomp.startdb.selfStar.utils.InputBitStream;
 import org.urbcomp.startdb.selfStar.utils.PostOfficeSolver;
+import org.urbcomp.startdb.selfStar.utils.PostOfficeSolver32;
 
 import java.io.IOException;
 import java.util.Arrays;
 
-public class ElfStarXORDecompressor implements IXORDecompressor {
+public class ElfStarXORDecompressor32 implements IXORDecompressor32 {
     private int storedVal = 0;
     private int storedLeadingZeros = Integer.MAX_VALUE;
     private int storedTrailingZeros = Integer.MAX_VALUE;
@@ -25,19 +25,19 @@ public class ElfStarXORDecompressor implements IXORDecompressor {
 
     private int trailingBitsPerValue;
 
-    public ElfStarXORDecompressor() {
+    public ElfStarXORDecompressor32() {
     }
 
     private void initLeadingRepresentation() {
         try {
-            int num = in.readInt(5);
+            int num = in.readInt(4);
             if (num == 0) {
-                num = 32;
+                num = 16;
             }
-            leadingBitsPerValue = PostOfficeSolver.positionLength2Bits[num];
+            leadingBitsPerValue = PostOfficeSolver32.positionLength2Bits[num];
             leadingRepresentation = new int[num];
             for (int i = 0; i < num; i++) {
-                leadingRepresentation[i] = in.readInt(6);
+                leadingRepresentation[i] = in.readInt(5);
             }
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
@@ -46,14 +46,14 @@ public class ElfStarXORDecompressor implements IXORDecompressor {
 
     private void initTrailingRepresentation() {
         try {
-            int num = in.readInt(5);
+            int num = in.readInt(4);
             if (num == 0) {
-                num = 32;
+                num = 16;
             }
             trailingBitsPerValue = PostOfficeSolver.positionLength2Bits[num];
             trailingRepresentation = new int[num];
             for (int i = 0; i < num; i++) {
-                trailingRepresentation[i] = in.readInt(6);
+                trailingRepresentation[i] = in.readInt(5);
             }
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
@@ -107,13 +107,13 @@ public class ElfStarXORDecompressor implements IXORDecompressor {
             initLeadingRepresentation();
             initTrailingRepresentation();
             first = false;
-            int trailingZeros = in.readInt(7);
-            if (trailingZeros < 64) {
-                storedVal = ((in.readInt(63 - trailingZeros) << 1) + 1) << trailingZeros;
+            int trailingZeros = in.readInt(6);
+            if (trailingZeros < 32) {
+                storedVal = ((in.readInt(31 - trailingZeros) << 1) + 1) << trailingZeros;
             } else {
                 storedVal = 0;
             }
-            if (storedVal == Elf64Utils.END_SIGN) {
+            if (storedVal == Elf32Utils.END_SIGN) {
                 endOfStream = true;
             }
         } else {
@@ -127,10 +127,10 @@ public class ElfStarXORDecompressor implements IXORDecompressor {
 
         if (in.readInt(1) == 1) {
             // case 1
-            centerBits = 64 - storedLeadingZeros - storedTrailingZeros;
+            centerBits = 32 - storedLeadingZeros - storedTrailingZeros;
             value = in.readInt(centerBits) << storedTrailingZeros;
             value = storedVal ^ value;
-            if (value == Elf64Utils.END_SIGN) {
+            if (value == Elf32Utils.END_SIGN) {
                 endOfStream = true;
             } else {
                 storedVal = value;
@@ -139,14 +139,14 @@ public class ElfStarXORDecompressor implements IXORDecompressor {
             // case 00
             int leadAndTrail = in.readInt(leadingBitsPerValue + trailingBitsPerValue);
             int lead = leadAndTrail >>> trailingBitsPerValue;
-            int trail = ~(0xffffffff << trailingBitsPerValue) & leadAndTrail;
+            int trail = ~(0xffff << trailingBitsPerValue) & leadAndTrail;  //todo
             storedLeadingZeros = leadingRepresentation[lead];
             storedTrailingZeros = trailingRepresentation[trail];
-            centerBits = 64 - storedLeadingZeros - storedTrailingZeros;
+            centerBits = 32 - storedLeadingZeros - storedTrailingZeros;
 
             value = in.readInt(centerBits) << storedTrailingZeros;
             value = storedVal ^ value;
-            if (value == Elf64Utils.END_SIGN) {
+            if (value == Elf32Utils.END_SIGN) {
                 endOfStream = true;
             } else {
                 storedVal = value;

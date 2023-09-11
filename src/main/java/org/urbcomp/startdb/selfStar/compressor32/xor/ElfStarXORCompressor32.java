@@ -1,14 +1,12 @@
 package org.urbcomp.startdb.selfStar.compressor32.xor;
 
-import org.urbcomp.startdb.selfStar.compressor32.xor.IXORCompressor;
 import org.urbcomp.startdb.selfStar.utils.Elf32Utils;
-import org.urbcomp.startdb.selfStar.utils.Elf64Utils;
 import org.urbcomp.startdb.selfStar.utils.OutputBitStream;
-import org.urbcomp.startdb.selfStar.utils.PostOfficeSolver;
+import org.urbcomp.startdb.selfStar.utils.PostOfficeSolver32;
 
 import java.util.Arrays;
 
-public class ElfStarXORCompressor implements IXORCompressor {
+public class ElfStarXORCompressor32 implements IXORCompressor32 {
     private final int[] leadingRepresentation = new int[32];
     private final int[] leadingRound = new int[32];
     private final int[] trailingRepresentation = new int[32];
@@ -28,12 +26,12 @@ public class ElfStarXORCompressor implements IXORCompressor {
 
     private int capacity = 1000;
 
-    public ElfStarXORCompressor() {
+    public ElfStarXORCompressor32() {
         out = new OutputBitStream(
                 new byte[(int) (((capacity + 1) * 4 + capacity / 4 + 1) * 1.2)]);
     }
 
-    public ElfStarXORCompressor(int window) {
+    public ElfStarXORCompressor32(int window) {
         this.capacity = window;
         out = new OutputBitStream(
                 new byte[(int) (((capacity + 1) * 4 + capacity / 4 + 1) * 1.2)]);
@@ -45,15 +43,15 @@ public class ElfStarXORCompressor implements IXORCompressor {
     }
 
     private int initLeadingRoundAndRepresentation(int[] distribution) {
-        int[] positions = PostOfficeSolver.initRoundAndRepresentation(distribution, leadingRepresentation, leadingRound);
-        leadingBitsPerValue = PostOfficeSolver.positionLength2Bits[positions.length];
-        return PostOfficeSolver.writePositions(positions, out);
+        int[] positions = PostOfficeSolver32.initRoundAndRepresentation(distribution, leadingRepresentation, leadingRound);
+        leadingBitsPerValue = PostOfficeSolver32.positionLength2Bits[positions.length];
+        return PostOfficeSolver32.writePositions(positions, out);
     }
 
     private int initTrailingRoundAndRepresentation(int[] distribution) {
-        int[] positions = PostOfficeSolver.initRoundAndRepresentation(distribution, trailingRepresentation, trailingRound);
-        trailingBitsPerValue = PostOfficeSolver.positionLength2Bits[positions.length];
-        return PostOfficeSolver.writePositions(positions, out);
+        int[] positions = PostOfficeSolver32.initRoundAndRepresentation(distribution, trailingRepresentation, trailingRound);
+        trailingBitsPerValue = PostOfficeSolver32.positionLength2Bits[positions.length];
+        return PostOfficeSolver32.writePositions(positions, out);
     }
 
     /**
@@ -79,9 +77,9 @@ public class ElfStarXORCompressor implements IXORCompressor {
         out.writeInt(trailingZeros, 6);
         if (trailingZeros < 32) {
             out.writeInt(storedVal >>> (trailingZeros + 1), 31 - trailingZeros);
-            return 38 - trailingZeros;
+            return 37 - trailingZeros;
         } else {
-            return 7;
+            return 6;
         }
     }
 

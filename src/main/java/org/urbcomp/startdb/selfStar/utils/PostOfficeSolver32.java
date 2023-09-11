@@ -61,9 +61,9 @@ public class PostOfficeSolver32 {
     }
 
     public static int writePositions(int[] positions, OutputBitStream out) {
-        int thisSize = out.writeInt(positions.length, 5);
+        int thisSize = out.writeInt(positions.length, 4);
         for (int p : positions) {
-            thisSize += out.writeInt(p, 6);
+            thisSize += out.writeInt(p, 5);
         }
         return thisSize;
     }

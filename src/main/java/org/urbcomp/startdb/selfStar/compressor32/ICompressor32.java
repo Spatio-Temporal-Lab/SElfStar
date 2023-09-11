@@ -1,6 +1,6 @@
 package org.urbcomp.startdb.selfStar.compressor32;
 
-public interface ICompressor {
+public interface ICompressor32 {
     void addValue(float v);
 
     byte[] getBytes();

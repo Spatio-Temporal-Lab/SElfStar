@@ -3,7 +3,7 @@ package org.urbcomp.startdb.selfStar.compressor32.xor;
 
 import org.urbcomp.startdb.selfStar.utils.OutputBitStream;
 
-public interface IXORCompressor {
+public interface IXORCompressor32 {
     OutputBitStream getOutputStream();
 
     int addValue(int value);

@@ -1,76 +1,75 @@
 package org.urbcomp.startdb.selfStar.compressor32;
 
-import org.urbcomp.startdb.selfStar.compressor32.ICompressor;
 import org.urbcomp.startdb.selfStar.compressor.xor.IXORCompressor;
-import org.urbcomp.startdb.selfStar.utils.Elf64Utils;
+import org.urbcomp.startdb.selfStar.compressor32.xor.IXORCompressor32;
+import org.urbcomp.startdb.selfStar.utils.Elf32Utils;
 import org.urbcomp.startdb.selfStar.utils.OutputBitStream;
 
 import java.util.Arrays;
 
-public class ElfStarCompressor implements ICompressor {
-    private final IXORCompressor xorCompressor;
+public class ElfStarCompressor32 implements ICompressor32 {
+    private final IXORCompressor32 xorCompressor;
     private final int[] betaStarList;
-    private final long[] vPrimeList;
-    private final int[] leadDistribution = new int[64];
-    private final int[] trailDistribution = new int[64];
+    private final int[] vPrimeList;
+    private final int[] leadDistribution = new int[32];
+    private final int[] trailDistribution = new int[32];
     private OutputBitStream os;
-    private int compressedSizeInBits = 0;
+    private long compressedSizeInBits = 0;
     private int lastBetaStar = Integer.MAX_VALUE;
     private int numberOfValues = 0;
 
-    public ElfStarCompressor(IXORCompressor xorCompressor, int window) {
+    public ElfStarCompressor32(IXORCompressor32 xorCompressor, int window) {
         this.xorCompressor = xorCompressor;
         this.os = xorCompressor.getOutputStream();
         this.betaStarList = new int[window + 1];     // one for the end sign
-        this.vPrimeList = new long[window + 1];      // one for the end sign
+        this.vPrimeList = new int[window + 1];      // one for the end sign
     }
 
-    public ElfStarCompressor(IXORCompressor xorCompressor) {
+    public ElfStarCompressor32(IXORCompressor32 xorCompressor) {
         this.xorCompressor = xorCompressor;
         this.os = xorCompressor.getOutputStream();
         this.betaStarList = new int[1001];     // one for the end sign
-        this.vPrimeList = new long[1001];      // one for the end sign
+        this.vPrimeList = new int[1001];      // one for the end sign
     }
 
     public void addValue(float v) {
-        int vLong = Float.floatToRawIntBits(v);
+        int vInt = Float.floatToRawIntBits(v);
 
         if (v == 0.0 || Float.isInfinite(v)) {
-            vPrimeList[numberOfValues] = vLong;
+            vPrimeList[numberOfValues] = vInt;
             betaStarList[numberOfValues] = Integer.MAX_VALUE;
         } else if (Float.isNaN(v)) {
-            vPrimeList[numberOfValues] = 0xfff8000000000000L & vLong;
+            vPrimeList[numberOfValues] = 0xffc00000 & vInt;
             betaStarList[numberOfValues] = Integer.MAX_VALUE;
         } else {
             // C1: v is a normal or subnormal
-            int[] alphaAndBetaStar = Elf64Utils.getAlphaAndBetaStar(v, lastBetaStar);
-            int e = ((int) (vLong >> 52)) & 0x7ff;
-            int gAlpha = Elf64Utils.getFAlpha(alphaAndBetaStar[0]) + e - 1023;
-            int eraseBits = 52 - gAlpha;
-            long mask = 0xffffffffffffffffL << eraseBits;
-            long delta = (~mask) & vLong;
-            if (delta != 0 && eraseBits > 4) {  // C2
+            int[] alphaAndBetaStar = Elf32Utils.getAlphaAndBetaStar(v, lastBetaStar);
+            int e = ( (vInt >> 23)) & 0xff;
+            int gAlpha = Elf32Utils.getFAlpha(alphaAndBetaStar[0]) + e - 127;
+            int eraseBits = 23 - gAlpha;
+            int mask = 0xffffffff << eraseBits;
+            int delta = (~mask) & vInt;
+            if (delta != 0 && eraseBits > 3) {  // C2
                 if (alphaAndBetaStar[1] != lastBetaStar) {
                     lastBetaStar = alphaAndBetaStar[1];
                 }
                 betaStarList[numberOfValues] = lastBetaStar;
-                vPrimeList[numberOfValues] = mask & vLong;
+                vPrimeList[numberOfValues] = mask & vInt;
             } else {
                 betaStarList[numberOfValues] = Integer.MAX_VALUE;
-                vPrimeList[numberOfValues] = vLong;
+                vPrimeList[numberOfValues] = vInt;
             }
         }
-
         numberOfValues++;
     }
 
     private void calculateDistribution() {
-        long lastValue = vPrimeList[0];
+        int lastValue = vPrimeList[0];
         for (int i = 1; i < numberOfValues; i++) {
-            long xor = lastValue ^ vPrimeList[i];
+            int xor = lastValue ^ vPrimeList[i];
             if (xor != 0) {
-                trailDistribution[Long.numberOfTrailingZeros(xor)]++;
-                leadDistribution[Long.numberOfLeadingZeros(xor)]++;
+                trailDistribution[Integer.numberOfTrailingZeros(xor)]++;
+                leadDistribution[Integer.numberOfLeadingZeros(xor)]++;
                 lastValue = vPrimeList[i];
             }
         }
@@ -85,7 +84,7 @@ public class ElfStarCompressor implements ICompressor {
             } else if (betaStarList[i] == lastBetaStar) {
                 compressedSizeInBits += os.writeBit(false);    // case 0
             } else {
-                compressedSizeInBits += os.writeInt(betaStarList[i] | 0x30, 6);  // case 11, 2 + 4 = 6
+                compressedSizeInBits += os.writeInt(betaStarList[i] | 0x18, 5);  // case 11, 2 + 3 = 5 //todo
                 lastBetaStar = betaStarList[i];
             }
             compressedSizeInBits += xorCompressor.addValue(vPrimeList[i]);
@@ -93,7 +92,7 @@ public class ElfStarCompressor implements ICompressor {
     }
 
     public double getCompressionRatio() {
-        return compressedSizeInBits / (numberOfValues * 64.0);
+        return compressedSizeInBits / (numberOfValues * 32.0);
     }
 
     @Override

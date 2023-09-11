@@ -2,10 +2,10 @@ package org.urbcomp.startdb.selfStar.decompressor32;
 
 import java.util.List;
 
-public interface IDecompressor {
-    Double nextValue();
+public interface IDecompressor32 {
+    Float nextValue();
 
-    List<Double> decompress();
+    List<Float> decompress();
 
     void setBytes(byte[] bs);
 
