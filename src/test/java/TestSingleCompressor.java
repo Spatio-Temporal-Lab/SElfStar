@@ -2,16 +2,11 @@ import org.junit.jupiter.api.Test;
 import org.urbcomp.startdb.selfStar.compressor.*;
 import org.urbcomp.startdb.selfStar.compressor.xor.*;
 import org.urbcomp.startdb.selfStar.compressor32.*;
-import org.urbcomp.startdb.selfStar.compressor32.xor.ElfPlusXORCompressor32;
-import org.urbcomp.startdb.selfStar.compressor32.xor.ElfStarXORCompressor32;
-import org.urbcomp.startdb.selfStar.compressor32.xor.ElfXORCompressor32;
-import org.urbcomp.startdb.selfStar.compressor32.xor.SElfXORCompressor32;
+import org.urbcomp.startdb.selfStar.compressor32.xor.*;
 import org.urbcomp.startdb.selfStar.decompressor.*;
 import org.urbcomp.startdb.selfStar.decompressor.xor.*;
-import org.urbcomp.startdb.selfStar.decompressor32.ElfDecompressor32;
-import org.urbcomp.startdb.selfStar.decompressor32.ElfPlusDecompressor32;
-import org.urbcomp.startdb.selfStar.decompressor32.ElfStarDecompressor32;
-import org.urbcomp.startdb.selfStar.decompressor32.IDecompressor32;
+import org.urbcomp.startdb.selfStar.decompressor32.*;
+import org.urbcomp.startdb.selfStar.decompressor32.xor.ChimpNXORDecompressor32;
 import org.urbcomp.startdb.selfStar.decompressor32.xor.ElfPlusXORDecompressor32;
 import org.urbcomp.startdb.selfStar.decompressor32.xor.ElfStarXORDecompressor32;
 import org.urbcomp.startdb.selfStar.decompressor32.xor.ElfXORDecompressor32;
@@ -37,11 +32,7 @@ public class TestSingleCompressor {
     private final String[] fileNames = {
             INIT_FILE,
             "Air-pressure.csv",
-            "Air-sensor.csv",
-            "Basel-temp.csv",
-            "Basel-wind.csv",
             "Bird-migration.csv",
-            "Bitcoin-price.csv",
             "Blockchain-tr.csv",
             "City-lat.csv",
             "City-lon.csv",
@@ -51,8 +42,6 @@ public class TestSingleCompressor {
             "Food-price.csv",
             "IR-bio-temp.csv",
             "PM10-dust.csv",
-            "POI-lat.csv",
-            "POI-lon.csv",
             "SSD-bench.csv",
             "Stocks-DE.csv",
             "Stocks-UK.csv",
@@ -83,6 +72,10 @@ public class TestSingleCompressor {
             System.out.println(fileName);
             testFloatingCompressor(fileName);
         }
+
+        System.out.println("0" + Elf32Utils.case1);
+        System.out.println("10" + Elf32Utils.case2);
+        System.out.println("11" + Elf32Utils.case3);
         fileNameParamMethodToCompressedBits.forEach((fileNameParamMethod, compressedBits) -> {
             String fileNameParam = fileNameParamMethod.split(",")[0] + "," + fileNameParamMethod.split(",")[1];
             long fileTotalBits = fileNameParamToTotalBits.get(fileNameParam);
@@ -101,7 +94,7 @@ public class TestSingleCompressor {
         fileNameParamToTotalBlock.put(fileNameParam, 0L);
         ICompressor32[] compressors = new ICompressor32[]{
 //                new BaseCompressor(new ChimpXORCompressor()),
-//                new BaseCompressor(new ChimpNXORCompressor(128)),
+                new BaseCompressor32(new ChimpNXORCompressor32(128)),
 //                new BaseCompressor(new GorillaXORCompressor()),
                 new ElfCompressor32(new ElfXORCompressor32()),
                 new ElfPlusCompressor32(new ElfPlusXORCompressor32()),
@@ -113,7 +106,7 @@ public class TestSingleCompressor {
 
         IDecompressor32[] decompressors = new IDecompressor32[]{
 //                new BaseDecompressor(new ChimpXORDecompressor()),
-//                new BaseDecompressor(new ChimpNXORDecompressor(128)),
+                new BaseDecompressor32(new ChimpNXORDecompressor32(128)),
 //                new BaseDecompressor(new GorillaXORDecompressor()),
                 new ElfDecompressor32(new ElfXORDecompressor32()),
                 new ElfPlusDecompressor32(new ElfPlusXORDecompressor32()),
@@ -177,8 +170,6 @@ public class TestSingleCompressor {
             firstMethod = false;
         }
     }
-
-
 
 
     private void writeResult(String storeFile,

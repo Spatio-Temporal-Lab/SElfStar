@@ -63,7 +63,6 @@ public class ElfXORCompressor32 implements IXORCompressor32 {
      */
     public int close() {
         int thisSize = addValue(Elf32Utils.END_SIGN);
-
         out.flush();
         return thisSize;
     }
@@ -111,10 +110,8 @@ public class ElfXORCompressor32 implements IXORCompressor32 {
                     thisSize += 10 + centerBits;
                 }
             }
-
             storedVal = value;
         }
-
         return thisSize;
     }
 
