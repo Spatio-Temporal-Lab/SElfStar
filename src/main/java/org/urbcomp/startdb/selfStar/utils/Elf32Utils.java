@@ -34,6 +34,19 @@ public class Elf32Utils {
         }
     }
 
+    public static int[] getAlphaAndBetaStar(float v) {
+        if (v < 0) {
+            v = -v;
+        }
+        int[] alphaAndBetaStar = new int[2];
+        double log10v = Math.log10(v);
+        int sp = (int) Math.floor(log10v);
+        int beta = getSignificantCount(v, sp);
+        alphaAndBetaStar[0] = beta - sp - 1;
+        alphaAndBetaStar[1] = (v < 1 && sp == log10v) ? 0 : beta;
+        return alphaAndBetaStar;
+    }
+
     public static int[] getAlphaAndBetaStar(float v, int lastBetaStar) {
         if (v < 0) {
             v = -v;

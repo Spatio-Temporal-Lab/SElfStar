@@ -1,20 +1,20 @@
 import org.junit.jupiter.api.Test;
 import org.urbcomp.startdb.selfStar.compressor.*;
 import org.urbcomp.startdb.selfStar.compressor.xor.*;
-import org.urbcomp.startdb.selfStar.compressor32.ElfPlusCompressor32;
-import org.urbcomp.startdb.selfStar.compressor32.ElfStarCompressor32;
-import org.urbcomp.startdb.selfStar.compressor32.ICompressor32;
-import org.urbcomp.startdb.selfStar.compressor32.SElfStarCompressor32;
+import org.urbcomp.startdb.selfStar.compressor32.*;
 import org.urbcomp.startdb.selfStar.compressor32.xor.ElfPlusXORCompressor32;
 import org.urbcomp.startdb.selfStar.compressor32.xor.ElfStarXORCompressor32;
+import org.urbcomp.startdb.selfStar.compressor32.xor.ElfXORCompressor32;
 import org.urbcomp.startdb.selfStar.compressor32.xor.SElfXORCompressor32;
 import org.urbcomp.startdb.selfStar.decompressor.*;
 import org.urbcomp.startdb.selfStar.decompressor.xor.*;
+import org.urbcomp.startdb.selfStar.decompressor32.ElfDecompressor32;
 import org.urbcomp.startdb.selfStar.decompressor32.ElfPlusDecompressor32;
 import org.urbcomp.startdb.selfStar.decompressor32.ElfStarDecompressor32;
 import org.urbcomp.startdb.selfStar.decompressor32.IDecompressor32;
 import org.urbcomp.startdb.selfStar.decompressor32.xor.ElfPlusXORDecompressor32;
 import org.urbcomp.startdb.selfStar.decompressor32.xor.ElfStarXORDecompressor32;
+import org.urbcomp.startdb.selfStar.decompressor32.xor.ElfXORDecompressor32;
 import org.urbcomp.startdb.selfStar.utils.Elf32Utils;
 import org.urbcomp.startdb.selfStar.utils.PostOfficeSolver32;
 
@@ -103,7 +103,7 @@ public class TestSingleCompressor {
 //                new BaseCompressor(new ChimpXORCompressor()),
 //                new BaseCompressor(new ChimpNXORCompressor(128)),
 //                new BaseCompressor(new GorillaXORCompressor()),
-//                new ElfCompressor(new ElfXORCompressor()),
+                new ElfCompressor32(new ElfXORCompressor32()),
                 new ElfPlusCompressor32(new ElfPlusXORCompressor32()),
 //                new ElfStarCompressor(new ElfStarXORCompressorAdaLead()),
 //                new ElfStarCompressor(new ElfStarXORCompressorAdaLeadAdaTrail()),
@@ -115,7 +115,7 @@ public class TestSingleCompressor {
 //                new BaseDecompressor(new ChimpXORDecompressor()),
 //                new BaseDecompressor(new ChimpNXORDecompressor(128)),
 //                new BaseDecompressor(new GorillaXORDecompressor()),
-//                new ElfDecompressor(new ElfXORDecompressor()),
+                new ElfDecompressor32(new ElfXORDecompressor32()),
                 new ElfPlusDecompressor32(new ElfPlusXORDecompressor32()),
 //                new ElfStarDecompressor(new ElfStarXORDecompressorAdaLead()),
 //                new ElfStarDecompressor(new ElfStarXORDecompressorAdaLeadAdaTrail()),
