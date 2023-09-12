@@ -3,12 +3,16 @@ import org.urbcomp.startdb.selfStar.compressor.*;
 import org.urbcomp.startdb.selfStar.compressor.xor.*;
 import org.urbcomp.startdb.selfStar.compressor32.ElfStarCompressor32;
 import org.urbcomp.startdb.selfStar.compressor32.ICompressor32;
+import org.urbcomp.startdb.selfStar.compressor32.SElfStarCompressor32;
 import org.urbcomp.startdb.selfStar.compressor32.xor.ElfStarXORCompressor32;
+import org.urbcomp.startdb.selfStar.compressor32.xor.SElfXORCompressor32;
 import org.urbcomp.startdb.selfStar.decompressor.*;
 import org.urbcomp.startdb.selfStar.decompressor.xor.*;
 import org.urbcomp.startdb.selfStar.decompressor32.ElfStarDecompressor32;
 import org.urbcomp.startdb.selfStar.decompressor32.IDecompressor32;
 import org.urbcomp.startdb.selfStar.decompressor32.xor.ElfStarXORDecompressor32;
+import org.urbcomp.startdb.selfStar.utils.Elf32Utils;
+import org.urbcomp.startdb.selfStar.utils.PostOfficeSolver32;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -49,7 +53,8 @@ public class TestSingleCompressor {
             "Stocks-DE.csv",
             "Stocks-UK.csv",
             "Stocks-USA.csv",
-            "Wind-Speed.csv"
+            "Wind-Speed.csv",
+//            "test.csv"
     };
 
     private final Map<String, Long> fileNameParamToTotalBits = new HashMap<>();
@@ -99,7 +104,7 @@ public class TestSingleCompressor {
 //                new ElfStarCompressor(new ElfStarXORCompressorAdaLead()),
 //                new ElfStarCompressor(new ElfStarXORCompressorAdaLeadAdaTrail()),
                 new ElfStarCompressor32(new ElfStarXORCompressor32()),
-//                new SElfStarCompressor(new SElfXORCompressor()),
+                new SElfStarCompressor32(new SElfXORCompressor32()),
         };
 
         IDecompressor32[] decompressors = new IDecompressor32[]{
@@ -111,7 +116,7 @@ public class TestSingleCompressor {
 //                new ElfStarDecompressor(new ElfStarXORDecompressorAdaLead()),
 //                new ElfStarDecompressor(new ElfStarXORDecompressorAdaLeadAdaTrail()),
                 new ElfStarDecompressor32(new ElfStarXORDecompressor32()),
-//                new ElfStarDecompressor(new ElfStarXORDecompressor())     // streaming version is the same
+                new ElfStarDecompressor32(new ElfStarXORDecompressor32())     // streaming version is the same
         };
         boolean firstMethod = true;
         for (int i = 0; i < compressors.length; i++) {

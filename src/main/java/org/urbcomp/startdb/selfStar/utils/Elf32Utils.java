@@ -95,94 +95,94 @@ public class Elf32Utils {
     }
 
 
-
-private static int[]getSPAnd10iNFlag(float v){
-        int[]spAnd10iNFlag=new int[2];
-        if(v>=1){
-        int i=0;
-        while(i<mapSPGreater1.length-1){
-        if(v<mapSPGreater1[i+1]){
-        spAnd10iNFlag[0]=i;
+    private static int[] getSPAnd10iNFlag(float v) {
+        int[] spAnd10iNFlag = new int[2];
+        if (v >= 1) {
+            int i = 0;
+            while (i < mapSPGreater1.length - 1) {
+                if (v < mapSPGreater1[i + 1]) {
+                    spAnd10iNFlag[0] = i;
+                    return spAnd10iNFlag;
+                }
+                i++;
+            }
+        } else {
+            int i = 1;
+            while (i < mapSPLess1.length) {
+                if (v >= mapSPLess1[i]) {
+                    spAnd10iNFlag[0] = -i;
+                    spAnd10iNFlag[1] = v == mapSPLess1[i] ? 1 : 0;
+                    return spAnd10iNFlag;
+                }
+                i++;
+            }
+        }
+        float log10v = (float) Math.log10(v);
+        spAnd10iNFlag[0] = (int) Math.floor(log10v);
+        spAnd10iNFlag[1] = log10v == log10v ? 1 : 0;
         return spAnd10iNFlag;
-        }
-        i++;
-        }
-        }else{
-        int i=1;
-        while(i<mapSPLess1.length){
-        if(v>=mapSPLess1[i]){
-        spAnd10iNFlag[0]=-i;
-        spAnd10iNFlag[1]=v==mapSPLess1[i]?1:0;
-        return spAnd10iNFlag;
-        }
-        i++;
-        }
-        }
-        float log10v=(float)Math.log10(v);
-        spAnd10iNFlag[0]=(int)Math.floor(log10v);
-        spAnd10iNFlag[1]=log10v==log10v?1:0;
-        return spAnd10iNFlag;
-        }
+    }
 
-public static float roundUp(float v,int alpha){
-        float scale=get10iP(alpha);
-        if(v< 0){
-        return(float)(Math.floor(v*scale)/scale);
-        }else{
-        return(float)(Math.ceil(v*scale)/scale);
+    public static float roundUp(float v, int alpha) {
+        float scale = get10iP(alpha);
+        if (v < 0) {
+            return (float) (Math.floor(v * scale) / scale);
+        } else {
+            return (float) (Math.ceil(v * scale) / scale);
         }
-        }
+    }
 
-public static float get10iN(int i){
-        if(i<=0){
-        throw new IllegalArgumentException("The argument should be greater than 0");
+    public static float get10iN(int i) {
+        if (i <= 0) {
+            throw new IllegalArgumentException("The argument should be greater than 0");
         }
-        if(i>=map10iN.length){
-        return Float.parseFloat("1.0E-"+i);
-        }else{
-        return map10iN[i];
+        if (i >= map10iN.length) {
+            return Float.parseFloat("1.0E-" + i);
+        } else {
+            return map10iN[i];
         }
-        }
+    }
 
-public static float get10iP(int i){
-        if(i<=0){
-        throw new IllegalArgumentException("The argument should be greater than 0");
+    public static float get10iP(int i) {
+        if (i <= 0) {
+            throw new IllegalArgumentException("The argument should be greater than 0");
         }
-        if(i>=map10iP.length){
-        return Float.parseFloat("1.0E"+i);
-        }else{
-        return map10iP[i];
+        if (i >= map10iP.length) {
+            return Float.parseFloat("1.0E" + i);
+        } else {
+            return map10iP[i];
         }
-        }
+    }
 
-public static int getSP(float v){
-        if(v>=1){
-        int i=0;
-        while(i<mapSPGreater1.length-1){
-        if(v<mapSPGreater1[i+1]){
-        return i;
+    public static int getSP(float v) {
+        if (v >= 1) {
+            int i = 0;
+            while (i < mapSPGreater1.length - 1) {
+                if (v < mapSPGreater1[i + 1]) {
+                    return i;
+                }
+                i++;
+            }
+        } else {
+            int i = 1;
+            while (i < mapSPLess1.length) {
+                if (v >= mapSPLess1[i]) {
+                    return -i;
+                }
+                i++;
+            }
         }
-        i++;
-        }
-        }else{
-        int i=1;
-        while(i<mapSPLess1.length){
-        if(v>=mapSPLess1[i]){
-        return-i;
-        }
-        i++;
-        }
-        }
-        return(int)Math.floor(Math.log10(v));
-        }
+        return (int) Math.floor(Math.log10(v));
+    }
 
-public static void main(String[]args){
+    public static void main(String[] args) {
         System.out.println(Integer.toBinaryString(Float.floatToIntBits(0.0034082402f)));
         System.out.println(Integer.toBinaryString(Float.floatToIntBits(0.00340824f)));
         System.out.println(Integer.toBinaryString(Float.floatToIntBits(0.0034082383f)));
         System.out.println(Float.intBitsToFloat(Float.floatToIntBits(0.0034082402f)));
-        System.out.println(getSignificantCount(0.0034082402f,8));
+        System.out.println(getSignificantCount(0.0034082402f, 8));
 
-        System.out.println(getSignificantCount(0.00340824f,6));
-        }
-        }
+        System.out.println(getSignificantCount(0.00340824f, 6));
+    }
+}
+
