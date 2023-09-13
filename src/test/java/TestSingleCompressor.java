@@ -75,6 +75,9 @@ public class TestSingleCompressor {
         for (String fileName : fileNames) {
             System.out.println(fileName);
             testFloatingCompressor(fileName);
+            testXZCompressor(fileName);
+            testZstdCompressor(fileName);
+            testSnappyCompressor(fileName);
         }
 
         System.out.println("0" + Elf32Utils.case1);
@@ -102,8 +105,6 @@ public class TestSingleCompressor {
 //                new BaseCompressor(new GorillaXORCompressor()),
                 new ElfCompressor32(new ElfXORCompressor32()),
                 new ElfPlusCompressor32(new ElfPlusXORCompressor32()),
-//                new ElfStarCompressor(new ElfStarXORCompressorAdaLead()),
-//                new ElfStarCompressor(new ElfStarXORCompressorAdaLeadAdaTrail()),
                 new ElfStarCompressor32(new ElfStarXORCompressor32()),
                 new SElfStarCompressor32(new SElfXORCompressor32()),
         };
@@ -114,8 +115,6 @@ public class TestSingleCompressor {
 //                new BaseDecompressor(new GorillaXORDecompressor()),
                 new ElfDecompressor32(new ElfXORDecompressor32()),
                 new ElfPlusDecompressor32(new ElfPlusXORDecompressor32()),
-//                new ElfStarDecompressor(new ElfStarXORDecompressorAdaLead()),
-//                new ElfStarDecompressor(new ElfStarXORDecompressorAdaLeadAdaTrail()),
                 new ElfStarDecompressor32(new ElfStarXORDecompressor32()),
                 new ElfStarDecompressor32(new ElfStarXORDecompressor32())     // streaming version is the same
         };
@@ -176,19 +175,16 @@ public class TestSingleCompressor {
     }
 
 
-    private void testXZCompressor(String fileName, int block) {
+    private void testXZCompressor(String fileName) {
         long compressorBits;
-        String fileNameParam = fileName + "," + block;
-        if (block == NO_PARAM) {
-            block = BLOCK_SIZE;
-        }
+        String fileNameParam = fileName + "," + NO_PARAM;
         fileNameParamToTotalBits.put(fileNameParam, 0L);
         fileNameParamToTotalBlock.put(fileNameParam, 0L);
-        try (BlockReader br = new BlockReader(fileName, block)) {
-            List<Double> floatings;
-            while ((floatings = br.nextBlock()) != null) {
+        try (BlockReader br = new BlockReader(fileName, BLOCK_SIZE)) {
+            List<Float> floatings;
+            while ((floatings = br.nextSingleBlock()) != null) {
 
-                if (floatings.size() != block) {
+                if (floatings.size() != BLOCK_SIZE) {
                     break;
                 }
                 fileNameParamToTotalBits.put(fileNameParam, fileNameParamToTotalBits.get(fileNameParam) + floatings.size() * 32L);
@@ -209,8 +205,8 @@ public class TestSingleCompressor {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 CompressionOutputStream out = codec.createOutputStream(baos, compressor);
                 ByteBuffer bb = ByteBuffer.allocate(floatings.size() * 8);
-                for (double d : floatings) {
-                    bb.putDouble(d);
+                for (float d : floatings) {
+                    bb.putFloat(d);
                 }
                 byte[] input = bb.array();
                 out.write(input);
@@ -226,7 +222,7 @@ public class TestSingleCompressor {
                 CompressionInputStream in = codec.createInputStream(new ByteArrayInputStream(compressed), decompressor);
                 IOUtils.readFully(in, plain, 0, plain.length);
                 in.close();
-                double[] uncompressed = toDoubleArray(plain);
+                float[] uncompressed = toFloatArray(plain);
                 decodingDuration += System.nanoTime() - start;
 
                 // Decompressed bytes should equal the original
@@ -236,12 +232,12 @@ public class TestSingleCompressor {
                 String fileNameParamMethod = fileNameParam + "," + "Xz";
                 if (!fileNameParamMethodToCompressedBits.containsKey(fileNameParamMethod)) {
                     fileNameParamMethodToCompressedBits.put(fileNameParamMethod, compressorBits);
-                    fileNameParamMethodToCompressTime.put(fileNameParamMethod, encodingDuration / TIME_PRECISION * BLOCK_SIZE / block);
-                    fileNameParamMethodToDecompressTime.put(fileNameParamMethod, decodingDuration / TIME_PRECISION * BLOCK_SIZE / block);
+                    fileNameParamMethodToCompressTime.put(fileNameParamMethod, encodingDuration / TIME_PRECISION);
+                    fileNameParamMethodToDecompressTime.put(fileNameParamMethod, decodingDuration / TIME_PRECISION);
                 } else {
                     long newSize = fileNameParamMethodToCompressedBits.get(fileNameParamMethod) + compressorBits;
-                    double newCTime = fileNameParamMethodToCompressTime.get(fileNameParamMethod) + encodingDuration / TIME_PRECISION * BLOCK_SIZE / block;
-                    double newDTime = fileNameParamMethodToDecompressTime.get(fileNameParamMethod) + decodingDuration / TIME_PRECISION * BLOCK_SIZE / block;
+                    double newCTime = fileNameParamMethodToCompressTime.get(fileNameParamMethod) + encodingDuration / TIME_PRECISION;
+                    double newDTime = fileNameParamMethodToDecompressTime.get(fileNameParamMethod) + decodingDuration / TIME_PRECISION;
                     fileNameParamMethodToCompressedBits.put(fileNameParamMethod, newSize);
                     fileNameParamMethodToCompressTime.put(fileNameParamMethod, newCTime);
                     fileNameParamMethodToDecompressTime.put(fileNameParamMethod, newDTime);
@@ -252,23 +248,20 @@ public class TestSingleCompressor {
         }
     }
 
-    private void testZstdCompressor(String fileName, int block) {
+    private void testZstdCompressor(String fileName) {
         long compressorBits;
-        String fileNameParam = fileName + "," + block;
-        if (block == NO_PARAM) {
-            block = BLOCK_SIZE;
-        }
+        String fileNameParam = fileName + "," + NO_PARAM;
         fileNameParamToTotalBits.put(fileNameParam, 0L);
         fileNameParamToTotalBlock.put(fileNameParam, 0L);
-        try (BlockReader br = new BlockReader(fileName, block)) {
-            List<Double> floatings;
-            while ((floatings = br.nextBlock()) != null) {
+        try (BlockReader br = new BlockReader(fileName, BLOCK_SIZE)) {
+            List<Float> floatings;
+            while ((floatings = br.nextSingleBlock()) != null) {
 
-                if (floatings.size() != block) {
+                if (floatings.size() != BLOCK_SIZE) {
                     break;
                 }
 
-                fileNameParamToTotalBits.put(fileNameParam, fileNameParamToTotalBits.get(fileNameParam) + floatings.size() * 64L);
+                fileNameParamToTotalBits.put(fileNameParam, fileNameParamToTotalBits.get(fileNameParam) + floatings.size() * 32L);
                 fileNameParamToTotalBlock.put(fileNameParam, fileNameParamToTotalBlock.get(fileNameParam) + 1L);
                 double encodingDuration = 0;
                 double decodingDuration = 0;
@@ -286,8 +279,8 @@ public class TestSingleCompressor {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 CompressionOutputStream out = codec.createOutputStream(baos, compressor);
                 ByteBuffer bb = ByteBuffer.allocate(floatings.size() * 8);
-                for (double d : floatings) {
-                    bb.putDouble(d);
+                for (float d : floatings) {
+                    bb.putFloat(d);
                 }
                 byte[] input = bb.array();
                 out.write(input);
@@ -303,7 +296,7 @@ public class TestSingleCompressor {
                 CompressionInputStream in = codec.createInputStream(new ByteArrayInputStream(compressed), decompressor);
                 IOUtils.readFully(in, plain, 0, plain.length);
                 in.close();
-                double[] uncompressed = toDoubleArray(plain);
+                float[] uncompressed = toFloatArray(plain);
                 decodingDuration += System.nanoTime() - start;
                 // Decompressed bytes should equal the original
                 for (int i = 0; i < floatings.size(); i++) {
@@ -312,12 +305,12 @@ public class TestSingleCompressor {
                 String fileNameMethod = fileNameParam + "," + "Zstd";
                 if (!fileNameParamMethodToCompressedBits.containsKey(fileNameMethod)) {
                     fileNameParamMethodToCompressedBits.put(fileNameMethod, compressorBits);
-                    fileNameParamMethodToCompressTime.put(fileNameMethod, encodingDuration / TIME_PRECISION * BLOCK_SIZE / block);
-                    fileNameParamMethodToDecompressTime.put(fileNameMethod, decodingDuration / TIME_PRECISION * BLOCK_SIZE / block);
+                    fileNameParamMethodToCompressTime.put(fileNameMethod, encodingDuration / TIME_PRECISION);
+                    fileNameParamMethodToDecompressTime.put(fileNameMethod, decodingDuration / TIME_PRECISION);
                 } else {
                     long newSize = fileNameParamMethodToCompressedBits.get(fileNameMethod) + compressorBits;
-                    double newCTime = fileNameParamMethodToCompressTime.get(fileNameMethod) + encodingDuration / TIME_PRECISION * BLOCK_SIZE / block;
-                    double newDTime = fileNameParamMethodToDecompressTime.get(fileNameMethod) + decodingDuration / TIME_PRECISION * BLOCK_SIZE / block;
+                    double newCTime = fileNameParamMethodToCompressTime.get(fileNameMethod) + encodingDuration / TIME_PRECISION;
+                    double newDTime = fileNameParamMethodToDecompressTime.get(fileNameMethod) + decodingDuration / TIME_PRECISION;
                     fileNameParamMethodToCompressedBits.put(fileNameMethod, newSize);
                     fileNameParamMethodToCompressTime.put(fileNameMethod, newCTime);
                     fileNameParamMethodToDecompressTime.put(fileNameMethod, newDTime);
@@ -328,22 +321,19 @@ public class TestSingleCompressor {
         }
     }
 
-    private void testSnappyCompressor(String fileName, int block) {
+    private void testSnappyCompressor(String fileName) {
         long compressorBits;
-        String fileNameParam = fileName + "," + block;
-        if (block == NO_PARAM) {
-            block = BLOCK_SIZE;
-        }
+        String fileNameParam = fileName + "," + NO_PARAM;
         fileNameParamToTotalBits.put(fileNameParam, 0L);
         fileNameParamToTotalBlock.put(fileNameParam, 0L);
-        try (BlockReader br = new BlockReader(fileName, block)) {
-            List<Double> floatings;
-            while ((floatings = br.nextBlock()) != null) {
-                if (floatings.size() != block) {
+        try (BlockReader br = new BlockReader(fileName, BLOCK_SIZE)) {
+            List<Float> floatings;
+            while ((floatings = br.nextSingleBlock()) != null) {
+                if (floatings.size() != BLOCK_SIZE) {
                     break;
                 }
 
-                fileNameParamToTotalBits.put(fileNameParam, fileNameParamToTotalBits.get(fileNameParam) + floatings.size() * 64L);
+                fileNameParamToTotalBits.put(fileNameParam, fileNameParamToTotalBits.get(fileNameParam) + floatings.size() * 32L);
                 fileNameParamToTotalBlock.put(fileNameParam, fileNameParamToTotalBlock.get(fileNameParam) + 1L);
                 double encodingDuration = 0;
                 double decodingDuration = 0;
@@ -361,8 +351,8 @@ public class TestSingleCompressor {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 CompressionOutputStream out = codec.createOutputStream(baos, compressor);
                 ByteBuffer bb = ByteBuffer.allocate(floatings.size() * 8);
-                for (double d : floatings) {
-                    bb.putDouble(d);
+                for (float d : floatings) {
+                    bb.putFloat(d);
                 }
                 byte[] input = bb.array();
                 out.write(input);
@@ -377,7 +367,7 @@ public class TestSingleCompressor {
                 CompressionInputStream in = codec.createInputStream(new ByteArrayInputStream(compressed), decompressor);
                 IOUtils.readFully(in, plain, 0, plain.length);
                 in.close();
-                double[] uncompressed = toDoubleArray(plain);
+                float[] uncompressed = toFloatArray(plain);
                 decodingDuration += System.nanoTime() - start;
 
                 // Decompressed bytes should equal the original
@@ -389,12 +379,12 @@ public class TestSingleCompressor {
                 String fileNameParamMethod = fileNameParam + "," + "Snappy";
                 if (!fileNameParamMethodToCompressedBits.containsKey(fileNameParamMethod)) {
                     fileNameParamMethodToCompressedBits.put(fileNameParamMethod, compressorBits);
-                    fileNameParamMethodToCompressTime.put(fileNameParamMethod, encodingDuration / TIME_PRECISION * BLOCK_SIZE / block);
-                    fileNameParamMethodToDecompressTime.put(fileNameParamMethod, decodingDuration / TIME_PRECISION * BLOCK_SIZE / block);
+                    fileNameParamMethodToCompressTime.put(fileNameParamMethod, encodingDuration / TIME_PRECISION);
+                    fileNameParamMethodToDecompressTime.put(fileNameParamMethod, decodingDuration / TIME_PRECISION);
                 } else {
                     long newSize = fileNameParamMethodToCompressedBits.get(fileNameParamMethod) + compressorBits;
-                    double newCTime = fileNameParamMethodToCompressTime.get(fileNameParamMethod) + encodingDuration / TIME_PRECISION * BLOCK_SIZE / block;
-                    double newDTime = fileNameParamMethodToDecompressTime.get(fileNameParamMethod) + decodingDuration / TIME_PRECISION * BLOCK_SIZE / block;
+                    double newCTime = fileNameParamMethodToCompressTime.get(fileNameParamMethod) + encodingDuration / TIME_PRECISION;
+                    double newDTime = fileNameParamMethodToDecompressTime.get(fileNameParamMethod) + decodingDuration / TIME_PRECISION;
                     fileNameParamMethodToCompressedBits.put(fileNameParamMethod, newSize);
                     fileNameParamMethodToCompressTime.put(fileNameParamMethod, newCTime);
                     fileNameParamMethodToDecompressTime.put(fileNameParamMethod, newDTime);
@@ -468,6 +458,15 @@ public class TestSingleCompressor {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public static float[] toFloatArray(byte[] byteArray) {
+        int times = Float.SIZE / Byte.SIZE;
+        float[] floats = new float[byteArray.length / times];
+        for (int i = 0; i < floats.length; i++) {
+            floats[i] = ByteBuffer.wrap(byteArray, i * times, times).getFloat();
+        }
+        return floats;
     }
 
 }
