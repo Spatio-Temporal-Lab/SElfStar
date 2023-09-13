@@ -1,3 +1,12 @@
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.CommonConfigurationKeys;
+import org.apache.hadoop.hbase.HBaseConfiguration;
+import org.apache.hadoop.hbase.io.compress.xerial.SnappyCodec;
+import org.apache.hadoop.hbase.io.compress.xz.LzmaCodec;
+import org.apache.hadoop.hbase.io.compress.zstd.ZstdCodec;
+import org.apache.hadoop.io.IOUtils;
+import org.apache.hadoop.io.compress.CompressionInputStream;
+import org.apache.hadoop.io.compress.CompressionOutputStream;
 import org.junit.jupiter.api.Test;
 import org.urbcomp.startdb.selfStar.compressor.*;
 import org.urbcomp.startdb.selfStar.compressor.xor.*;
@@ -6,16 +15,11 @@ import org.urbcomp.startdb.selfStar.compressor32.xor.*;
 import org.urbcomp.startdb.selfStar.decompressor.*;
 import org.urbcomp.startdb.selfStar.decompressor.xor.*;
 import org.urbcomp.startdb.selfStar.decompressor32.*;
-import org.urbcomp.startdb.selfStar.decompressor32.xor.ChimpNXORDecompressor32;
-import org.urbcomp.startdb.selfStar.decompressor32.xor.ElfPlusXORDecompressor32;
-import org.urbcomp.startdb.selfStar.decompressor32.xor.ElfStarXORDecompressor32;
-import org.urbcomp.startdb.selfStar.decompressor32.xor.ElfXORDecompressor32;
+import org.urbcomp.startdb.selfStar.decompressor32.xor.*;
 import org.urbcomp.startdb.selfStar.utils.Elf32Utils;
 import org.urbcomp.startdb.selfStar.utils.PostOfficeSolver32;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.nio.ByteBuffer;
 import java.util.*;
 
@@ -93,7 +97,7 @@ public class TestSingleCompressor {
         fileNameParamToTotalBits.put(fileNameParam, 0L);
         fileNameParamToTotalBlock.put(fileNameParam, 0L);
         ICompressor32[] compressors = new ICompressor32[]{
-//                new BaseCompressor(new ChimpXORCompressor()),
+                new BaseCompressor32(new ChimpXORCompressor32()),
                 new BaseCompressor32(new ChimpNXORCompressor32(128)),
 //                new BaseCompressor(new GorillaXORCompressor()),
                 new ElfCompressor32(new ElfXORCompressor32()),
@@ -105,7 +109,7 @@ public class TestSingleCompressor {
         };
 
         IDecompressor32[] decompressors = new IDecompressor32[]{
-//                new BaseDecompressor(new ChimpXORDecompressor()),
+                new BaseDecompressor32(new ChimpXORDecompressor32()),
                 new BaseDecompressor32(new ChimpNXORDecompressor32(128)),
 //                new BaseDecompressor(new GorillaXORDecompressor()),
                 new ElfDecompressor32(new ElfXORDecompressor32()),
@@ -129,7 +133,7 @@ public class TestSingleCompressor {
                         break;
                     }
                     if (firstMethod) {
-                        fileNameParamToTotalBits.put(fileNameParam, fileNameParamToTotalBits.get(fileNameParam) + floatings.size() * 32);
+                        fileNameParamToTotalBits.put(fileNameParam, fileNameParamToTotalBits.get(fileNameParam) + floatings.size() * 32L);
                         fileNameParamToTotalBlock.put(fileNameParam, fileNameParamToTotalBlock.get(fileNameParam) + 1);
                     }
                     double start = System.nanoTime();
@@ -168,6 +172,236 @@ public class TestSingleCompressor {
                 throw new RuntimeException(fileName, e);
             }
             firstMethod = false;
+        }
+    }
+
+
+    private void testXZCompressor(String fileName, int block) {
+        long compressorBits;
+        String fileNameParam = fileName + "," + block;
+        if (block == NO_PARAM) {
+            block = BLOCK_SIZE;
+        }
+        fileNameParamToTotalBits.put(fileNameParam, 0L);
+        fileNameParamToTotalBlock.put(fileNameParam, 0L);
+        try (BlockReader br = new BlockReader(fileName, block)) {
+            List<Double> floatings;
+            while ((floatings = br.nextBlock()) != null) {
+
+                if (floatings.size() != block) {
+                    break;
+                }
+                fileNameParamToTotalBits.put(fileNameParam, fileNameParamToTotalBits.get(fileNameParam) + floatings.size() * 32L);
+                fileNameParamToTotalBlock.put(fileNameParam, fileNameParamToTotalBlock.get(fileNameParam) + 1L);
+                double encodingDuration = 0;
+                double decodingDuration = 0;
+
+                Configuration conf = new Configuration();
+                // LZMA levels range from 1 to 9.
+                // Level 9 might take several minutes to complete. 3 is our default. 1 will be fast.
+                conf.setInt(LzmaCodec.LZMA_LEVEL_KEY, 3);
+                LzmaCodec codec = new LzmaCodec();
+                codec.setConf(conf);
+
+                // Compress
+                long start = System.nanoTime();
+                org.apache.hadoop.io.compress.Compressor compressor = codec.createCompressor();
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                CompressionOutputStream out = codec.createOutputStream(baos, compressor);
+                ByteBuffer bb = ByteBuffer.allocate(floatings.size() * 8);
+                for (double d : floatings) {
+                    bb.putDouble(d);
+                }
+                byte[] input = bb.array();
+                out.write(input);
+                out.close();
+                encodingDuration += System.nanoTime() - start;
+
+                final byte[] compressed = baos.toByteArray();
+                compressorBits = compressed.length * 8L;
+
+                final byte[] plain = new byte[input.length];
+                org.apache.hadoop.io.compress.Decompressor decompressor = codec.createDecompressor();
+                start = System.nanoTime();
+                CompressionInputStream in = codec.createInputStream(new ByteArrayInputStream(compressed), decompressor);
+                IOUtils.readFully(in, plain, 0, plain.length);
+                in.close();
+                double[] uncompressed = toDoubleArray(plain);
+                decodingDuration += System.nanoTime() - start;
+
+                // Decompressed bytes should equal the original
+                for (int i = 0; i < floatings.size(); i++) {
+                    assertEquals(floatings.get(i), uncompressed[i], "Value did not match");
+                }
+                String fileNameParamMethod = fileNameParam + "," + "Xz";
+                if (!fileNameParamMethodToCompressedBits.containsKey(fileNameParamMethod)) {
+                    fileNameParamMethodToCompressedBits.put(fileNameParamMethod, compressorBits);
+                    fileNameParamMethodToCompressTime.put(fileNameParamMethod, encodingDuration / TIME_PRECISION * BLOCK_SIZE / block);
+                    fileNameParamMethodToDecompressTime.put(fileNameParamMethod, decodingDuration / TIME_PRECISION * BLOCK_SIZE / block);
+                } else {
+                    long newSize = fileNameParamMethodToCompressedBits.get(fileNameParamMethod) + compressorBits;
+                    double newCTime = fileNameParamMethodToCompressTime.get(fileNameParamMethod) + encodingDuration / TIME_PRECISION * BLOCK_SIZE / block;
+                    double newDTime = fileNameParamMethodToDecompressTime.get(fileNameParamMethod) + decodingDuration / TIME_PRECISION * BLOCK_SIZE / block;
+                    fileNameParamMethodToCompressedBits.put(fileNameParamMethod, newSize);
+                    fileNameParamMethodToCompressTime.put(fileNameParamMethod, newCTime);
+                    fileNameParamMethodToDecompressTime.put(fileNameParamMethod, newDTime);
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(fileName, e);
+        }
+    }
+
+    private void testZstdCompressor(String fileName, int block) {
+        long compressorBits;
+        String fileNameParam = fileName + "," + block;
+        if (block == NO_PARAM) {
+            block = BLOCK_SIZE;
+        }
+        fileNameParamToTotalBits.put(fileNameParam, 0L);
+        fileNameParamToTotalBlock.put(fileNameParam, 0L);
+        try (BlockReader br = new BlockReader(fileName, block)) {
+            List<Double> floatings;
+            while ((floatings = br.nextBlock()) != null) {
+
+                if (floatings.size() != block) {
+                    break;
+                }
+
+                fileNameParamToTotalBits.put(fileNameParam, fileNameParamToTotalBits.get(fileNameParam) + floatings.size() * 64L);
+                fileNameParamToTotalBlock.put(fileNameParam, fileNameParamToTotalBlock.get(fileNameParam) + 1L);
+                double encodingDuration = 0;
+                double decodingDuration = 0;
+
+                Configuration conf = HBaseConfiguration.create();
+                // LZMA levels range from 1 to 9.
+                // Level 9 might take several minutes to complete. 3 is our default. 1 will be fast.
+                conf.setInt(CommonConfigurationKeys.IO_COMPRESSION_CODEC_ZSTD_LEVEL_KEY, 3);
+                ZstdCodec codec = new ZstdCodec();
+                codec.setConf(conf);
+
+                // Compress
+                long start = System.nanoTime();
+                org.apache.hadoop.io.compress.Compressor compressor = codec.createCompressor();
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                CompressionOutputStream out = codec.createOutputStream(baos, compressor);
+                ByteBuffer bb = ByteBuffer.allocate(floatings.size() * 8);
+                for (double d : floatings) {
+                    bb.putDouble(d);
+                }
+                byte[] input = bb.array();
+                out.write(input);
+                out.close();
+                encodingDuration += System.nanoTime() - start;
+
+                final byte[] compressed = baos.toByteArray();
+                compressorBits = compressed.length * 8L;
+
+                final byte[] plain = new byte[input.length];
+                org.apache.hadoop.io.compress.Decompressor decompressor = codec.createDecompressor();
+                start = System.nanoTime();
+                CompressionInputStream in = codec.createInputStream(new ByteArrayInputStream(compressed), decompressor);
+                IOUtils.readFully(in, plain, 0, plain.length);
+                in.close();
+                double[] uncompressed = toDoubleArray(plain);
+                decodingDuration += System.nanoTime() - start;
+                // Decompressed bytes should equal the original
+                for (int i = 0; i < floatings.size(); i++) {
+                    assertEquals(floatings.get(i), uncompressed[i], "Value did not match");
+                }
+                String fileNameMethod = fileNameParam + "," + "Zstd";
+                if (!fileNameParamMethodToCompressedBits.containsKey(fileNameMethod)) {
+                    fileNameParamMethodToCompressedBits.put(fileNameMethod, compressorBits);
+                    fileNameParamMethodToCompressTime.put(fileNameMethod, encodingDuration / TIME_PRECISION * BLOCK_SIZE / block);
+                    fileNameParamMethodToDecompressTime.put(fileNameMethod, decodingDuration / TIME_PRECISION * BLOCK_SIZE / block);
+                } else {
+                    long newSize = fileNameParamMethodToCompressedBits.get(fileNameMethod) + compressorBits;
+                    double newCTime = fileNameParamMethodToCompressTime.get(fileNameMethod) + encodingDuration / TIME_PRECISION * BLOCK_SIZE / block;
+                    double newDTime = fileNameParamMethodToDecompressTime.get(fileNameMethod) + decodingDuration / TIME_PRECISION * BLOCK_SIZE / block;
+                    fileNameParamMethodToCompressedBits.put(fileNameMethod, newSize);
+                    fileNameParamMethodToCompressTime.put(fileNameMethod, newCTime);
+                    fileNameParamMethodToDecompressTime.put(fileNameMethod, newDTime);
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(fileName, e);
+        }
+    }
+
+    private void testSnappyCompressor(String fileName, int block) {
+        long compressorBits;
+        String fileNameParam = fileName + "," + block;
+        if (block == NO_PARAM) {
+            block = BLOCK_SIZE;
+        }
+        fileNameParamToTotalBits.put(fileNameParam, 0L);
+        fileNameParamToTotalBlock.put(fileNameParam, 0L);
+        try (BlockReader br = new BlockReader(fileName, block)) {
+            List<Double> floatings;
+            while ((floatings = br.nextBlock()) != null) {
+                if (floatings.size() != block) {
+                    break;
+                }
+
+                fileNameParamToTotalBits.put(fileNameParam, fileNameParamToTotalBits.get(fileNameParam) + floatings.size() * 64L);
+                fileNameParamToTotalBlock.put(fileNameParam, fileNameParamToTotalBlock.get(fileNameParam) + 1L);
+                double encodingDuration = 0;
+                double decodingDuration = 0;
+
+                Configuration conf = HBaseConfiguration.create();
+                // LZMA levels range from 1 to 9.
+                // Level 9 might take several minutes to complete. 3 is our default. 1 will be fast.
+                conf.setInt(CommonConfigurationKeys.IO_COMPRESSION_CODEC_ZSTD_LEVEL_KEY, 3);
+                SnappyCodec codec = new SnappyCodec();
+                codec.setConf(conf);
+
+                // Compress
+                long start = System.nanoTime();
+                org.apache.hadoop.io.compress.Compressor compressor = codec.createCompressor();
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                CompressionOutputStream out = codec.createOutputStream(baos, compressor);
+                ByteBuffer bb = ByteBuffer.allocate(floatings.size() * 8);
+                for (double d : floatings) {
+                    bb.putDouble(d);
+                }
+                byte[] input = bb.array();
+                out.write(input);
+                out.close();
+                encodingDuration += System.nanoTime() - start;
+                final byte[] compressed = baos.toByteArray();
+                compressorBits = compressed.length * 8L;
+
+                final byte[] plain = new byte[input.length];
+                org.apache.hadoop.io.compress.Decompressor decompressor = codec.createDecompressor();
+                start = System.nanoTime();
+                CompressionInputStream in = codec.createInputStream(new ByteArrayInputStream(compressed), decompressor);
+                IOUtils.readFully(in, plain, 0, plain.length);
+                in.close();
+                double[] uncompressed = toDoubleArray(plain);
+                decodingDuration += System.nanoTime() - start;
+
+                // Decompressed bytes should equal the original
+                for (int i = 0; i < floatings.size(); i++) {
+                    assertEquals(floatings.get(i), uncompressed[i], "Value did not match");
+                }
+
+                System.gc();
+                String fileNameParamMethod = fileNameParam + "," + "Snappy";
+                if (!fileNameParamMethodToCompressedBits.containsKey(fileNameParamMethod)) {
+                    fileNameParamMethodToCompressedBits.put(fileNameParamMethod, compressorBits);
+                    fileNameParamMethodToCompressTime.put(fileNameParamMethod, encodingDuration / TIME_PRECISION * BLOCK_SIZE / block);
+                    fileNameParamMethodToDecompressTime.put(fileNameParamMethod, decodingDuration / TIME_PRECISION * BLOCK_SIZE / block);
+                } else {
+                    long newSize = fileNameParamMethodToCompressedBits.get(fileNameParamMethod) + compressorBits;
+                    double newCTime = fileNameParamMethodToCompressTime.get(fileNameParamMethod) + encodingDuration / TIME_PRECISION * BLOCK_SIZE / block;
+                    double newDTime = fileNameParamMethodToDecompressTime.get(fileNameParamMethod) + decodingDuration / TIME_PRECISION * BLOCK_SIZE / block;
+                    fileNameParamMethodToCompressedBits.put(fileNameParamMethod, newSize);
+                    fileNameParamMethodToCompressTime.put(fileNameParamMethod, newCTime);
+                    fileNameParamMethodToDecompressTime.put(fileNameParamMethod, newDTime);
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(fileName, e);
         }
     }
 

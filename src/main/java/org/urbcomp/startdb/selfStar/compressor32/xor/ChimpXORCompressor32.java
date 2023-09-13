@@ -1,6 +1,7 @@
 package org.urbcomp.startdb.selfStar.compressor32.xor;
 
 import org.urbcomp.startdb.selfStar.compressor.xor.IXORCompressor;
+import org.urbcomp.startdb.selfStar.utils.Elf32Utils;
 import org.urbcomp.startdb.selfStar.utils.Elf64Utils;
 import org.urbcomp.startdb.selfStar.utils.OutputBitStream;
 
@@ -10,9 +11,9 @@ import org.urbcomp.startdb.selfStar.utils.OutputBitStream;
  *
  * @author Panagiotis Liakos
  */
-public class ChimpXORCompressor32 implements IXORCompressor {
+public class ChimpXORCompressor32 implements IXORCompressor32 {
 
-    public final static int THRESHOLD = 6;
+    public final static int THRESHOLD = 5;
     public final static short[] leadingRepresentation = {0, 0, 0, 0, 0, 0, 0, 0,
             1, 1, 1, 1, 2, 2, 2, 2,
             3, 3, 4, 4, 5, 5, 6, 6,
@@ -33,14 +34,14 @@ public class ChimpXORCompressor32 implements IXORCompressor {
     };
     private final int capacity = 1000;
     private int storedLeadingZeros = Integer.MAX_VALUE;
-    private long storedVal = 0;
+    private int storedVal = 0;
     private boolean first = true;
     private OutputBitStream out;
 
     // We should have access to the series?
     public ChimpXORCompressor32() {
         out = new OutputBitStream(
-                new byte[(int) (((capacity + 1) * 8 + capacity / 8 + 1) * 1.2)]);
+                new byte[(int) (((capacity + 1) * 4 + capacity / 4 + 1) * 1.2)]);
     }
 
     public OutputBitStream getOutputStream() {
@@ -48,11 +49,11 @@ public class ChimpXORCompressor32 implements IXORCompressor {
     }
 
     /**
-     * Adds a new long value to the series. Note, values must be inserted in order.
+     * Adds a new int value to the series. Note, values must be inserted in order.
      *
      * @param value next floating point value in the series
      */
-    public int addValue(long value) {
+    public int addValue(int value) {
         if (first) {
             return writeFirst(value);
         } else {
@@ -61,11 +62,11 @@ public class ChimpXORCompressor32 implements IXORCompressor {
     }
 
 
-    private int writeFirst(long value) {
+    private int writeFirst(int value) {
         first = false;
         storedVal = value;
-        out.writeLong(storedVal, 64);
-        return 64;
+        out.writeInt(storedVal, 32);
+        return 32;
     }
 
     /**
@@ -73,15 +74,15 @@ public class ChimpXORCompressor32 implements IXORCompressor {
      */
     @Override
     public int close() {
-        int thisSize = addValue(Elf64Utils.END_SIGN);
+        int thisSize = addValue(Elf32Utils.END_SIGN);
         out.writeBit(false);
         out.flush();
         return thisSize;
     }
 
-    private int compressValue(long value) {
+    private int compressValue(int value) {
         int thisSize = 0;
-        long xor = storedVal ^ value;
+        int xor = storedVal ^ value;
         if (xor == 0) {
             // Write 0
             out.writeBit(false);
@@ -89,31 +90,31 @@ public class ChimpXORCompressor32 implements IXORCompressor {
             thisSize += 2;
             storedLeadingZeros = 65;
         } else {
-            int leadingZeros = leadingRound[Long.numberOfLeadingZeros(xor)];
-            int trailingZeros = Long.numberOfTrailingZeros(xor);
+            int leadingZeros = leadingRound[Integer.numberOfLeadingZeros(xor)];
+            int trailingZeros = Integer.numberOfTrailingZeros(xor);
 
             if (trailingZeros > THRESHOLD) {
-                int significantBits = 64 - leadingZeros - trailingZeros;
+                int significantBits = 32 - leadingZeros - trailingZeros;
                 out.writeBit(false);
                 out.writeBit(true);
                 out.writeInt(leadingRepresentation[leadingZeros], 3);
-                out.writeInt(significantBits, 6);
-                out.writeLong(xor >>> trailingZeros, significantBits); // Store the meaningful bits of XOR
-                thisSize += 11 + significantBits;
-                storedLeadingZeros = 65;
+                out.writeInt(significantBits, 5);
+                out.writeInt(xor >>> trailingZeros, significantBits); // Store the meaningful bits of XOR
+                thisSize += 10 + significantBits;
+                storedLeadingZeros = 33;
             } else if (leadingZeros == storedLeadingZeros) {
                 out.writeBit(true);
                 out.writeBit(false);
-                int significantBits = 64 - leadingZeros;
-                out.writeLong(xor, significantBits);
+                int significantBits = 32 - leadingZeros;
+                out.writeInt(xor, significantBits);
                 thisSize += 2 + significantBits;
             } else {
                 storedLeadingZeros = leadingZeros;
-                int significantBits = 64 - leadingZeros;
+                int significantBits = 32 - leadingZeros;
                 out.writeBit(true);
                 out.writeBit(true);
                 out.writeInt(leadingRepresentation[leadingZeros], 3);
-                out.writeLong(xor, significantBits);
+                out.writeInt(xor, significantBits);
                 thisSize += 5 + significantBits;
             }
         }
@@ -128,7 +129,7 @@ public class ChimpXORCompressor32 implements IXORCompressor {
     @Override
     public void refresh() {
         out = new OutputBitStream(
-                new byte[(int) (((capacity + 1) * 8 + capacity / 8 + 1) * 1.2)]);
+                new byte[(int) (((capacity + 1) * 4 + capacity / 4 + 1) * 1.2)]);
         storedLeadingZeros = Integer.MAX_VALUE;
         storedVal = 0;
         first = true;
