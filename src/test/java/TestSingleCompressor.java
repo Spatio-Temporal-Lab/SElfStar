@@ -8,16 +8,10 @@ import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.io.compress.CompressionInputStream;
 import org.apache.hadoop.io.compress.CompressionOutputStream;
 import org.junit.jupiter.api.Test;
-import org.urbcomp.startdb.selfStar.compressor.*;
-import org.urbcomp.startdb.selfStar.compressor.xor.*;
 import org.urbcomp.startdb.selfStar.compressor32.*;
 import org.urbcomp.startdb.selfStar.compressor32.xor.*;
-import org.urbcomp.startdb.selfStar.decompressor.*;
-import org.urbcomp.startdb.selfStar.decompressor.xor.*;
 import org.urbcomp.startdb.selfStar.decompressor32.*;
 import org.urbcomp.startdb.selfStar.decompressor32.xor.*;
-import org.urbcomp.startdb.selfStar.utils.Elf32Utils;
-import org.urbcomp.startdb.selfStar.utils.PostOfficeSolver32;
 
 import java.io.*;
 import java.nio.ByteBuffer;
@@ -51,7 +45,6 @@ public class TestSingleCompressor {
             "Stocks-UK.csv",
             "Stocks-USA.csv",
             "Wind-Speed.csv",
-//            "test.csv"
     };
 
     private final Map<String, Long> fileNameParamToTotalBits = new HashMap<>();
@@ -60,15 +53,6 @@ public class TestSingleCompressor {
     private final Map<String, Double> fileNameParamMethodToCompressTime = new HashMap<>();
     private final Map<String, Double> fileNameParamMethodToDecompressTime = new HashMap<>();
     private final Map<String, Double> fileNameParamMethodToCompressedRatio = new TreeMap<>();// use TreeMap to keep the order
-
-    private static double[] toDoubleArray(byte[] byteArray) {
-        int times = Double.SIZE / Byte.SIZE;
-        double[] doubles = new double[byteArray.length / times];
-        for (int i = 0; i < doubles.length; i++) {
-            doubles[i] = ByteBuffer.wrap(byteArray, i * times, times).getDouble();
-        }
-        return doubles;
-    }
 
     @Test
     public void testAllCompressor() {
