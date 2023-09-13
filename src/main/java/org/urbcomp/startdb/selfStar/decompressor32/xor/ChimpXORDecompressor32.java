@@ -1,6 +1,5 @@
 package org.urbcomp.startdb.selfStar.decompressor32.xor;
 
-import org.urbcomp.startdb.selfStar.decompressor.xor.IXORDecompressor;
 import org.urbcomp.startdb.selfStar.utils.Elf32Utils;
 import org.urbcomp.startdb.selfStar.utils.InputBitStream;
 

@@ -23,7 +23,7 @@ public class PostOfficeSolver32 {
         int[] postNonZerosCount = new int[distribution.length];  // 当前后面的非零个数（不包括当前）
         int[] totalCountAndNonZerosCount = calTotalCountAndNonZerosCounts(distribution, preNonZerosCount, postNonZerosCount);
 
-        int maxZ = Math.min(positionLength2Bits[totalCountAndNonZerosCount[1]], 4); // 最多用4个bit来表示//todo
+        int maxZ = Math.min(positionLength2Bits[totalCountAndNonZerosCount[1]], 4); // 最多用4个bit来表示
 
         int totalCost = Integer.MAX_VALUE;
         int[] positions = {};

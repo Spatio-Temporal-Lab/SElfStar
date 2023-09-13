@@ -80,9 +80,6 @@ public class TestSingleCompressor {
             testSnappyCompressor(fileName);
         }
 
-        System.out.println("0" + Elf32Utils.case1);
-        System.out.println("10" + Elf32Utils.case2);
-        System.out.println("11" + Elf32Utils.case3);
         fileNameParamMethodToCompressedBits.forEach((fileNameParamMethod, compressedBits) -> {
             String fileNameParam = fileNameParamMethod.split(",")[0] + "," + fileNameParamMethod.split(",")[1];
             long fileTotalBits = fileNameParamToTotalBits.get(fileNameParam);
@@ -102,7 +99,7 @@ public class TestSingleCompressor {
         ICompressor32[] compressors = new ICompressor32[]{
                 new BaseCompressor32(new ChimpXORCompressor32()),
                 new BaseCompressor32(new ChimpNXORCompressor32(128)),
-//                new BaseCompressor(new GorillaXORCompressor()),
+                new BaseCompressor32(new GorillaXORCompressor32()),
                 new ElfCompressor32(new ElfXORCompressor32()),
                 new ElfPlusCompressor32(new ElfPlusXORCompressor32()),
                 new ElfStarCompressor32(new ElfStarXORCompressor32()),
@@ -112,7 +109,7 @@ public class TestSingleCompressor {
         IDecompressor32[] decompressors = new IDecompressor32[]{
                 new BaseDecompressor32(new ChimpXORDecompressor32()),
                 new BaseDecompressor32(new ChimpNXORDecompressor32(128)),
-//                new BaseDecompressor(new GorillaXORDecompressor()),
+                new BaseDecompressor32(new GorillaXORDecompressor32()),
                 new ElfDecompressor32(new ElfXORDecompressor32()),
                 new ElfPlusDecompressor32(new ElfPlusXORDecompressor32()),
                 new ElfStarDecompressor32(new ElfStarXORDecompressor32()),

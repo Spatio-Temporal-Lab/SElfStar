@@ -1,6 +1,5 @@
 package org.urbcomp.startdb.selfStar.compressor32;
 
-import org.urbcomp.startdb.selfStar.compressor.xor.IXORCompressor;
 import org.urbcomp.startdb.selfStar.compressor32.xor.IXORCompressor32;
 import org.urbcomp.startdb.selfStar.utils.Elf32Utils;
 import org.urbcomp.startdb.selfStar.utils.OutputBitStream;
@@ -84,7 +83,7 @@ public class ElfStarCompressor32 implements ICompressor32 {
             } else if (betaStarList[i] == lastBetaStar) {
                 compressedSizeInBits += os.writeBit(false);    // case 0
             } else {
-                compressedSizeInBits += os.writeInt(betaStarList[i] | 0x18, 5);  // case 11, 2 + 3 = 5 //todo
+                compressedSizeInBits += os.writeInt(betaStarList[i] | 0x18, 5);  // case 11, 2 + 3 = 5
                 lastBetaStar = betaStarList[i];
             }
             compressedSizeInBits += xorCompressor.addValue(vPrimeList[i]);

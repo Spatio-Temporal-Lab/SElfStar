@@ -2,7 +2,6 @@ package org.urbcomp.startdb.selfStar.decompressor32.xor;
 
 import org.urbcomp.startdb.selfStar.utils.Elf32Utils;
 import org.urbcomp.startdb.selfStar.utils.InputBitStream;
-import org.urbcomp.startdb.selfStar.utils.PostOfficeSolver;
 import org.urbcomp.startdb.selfStar.utils.PostOfficeSolver32;
 
 import java.io.IOException;
@@ -50,7 +49,7 @@ public class ElfStarXORDecompressor32 implements IXORDecompressor32 {
             if (num == 0) {
                 num = 16;
             }
-            trailingBitsPerValue = PostOfficeSolver.positionLength2Bits[num];
+            trailingBitsPerValue = PostOfficeSolver32.positionLength2Bits[num];
             trailingRepresentation = new int[num];
             for (int i = 0; i < num; i++) {
                 trailingRepresentation[i] = in.readInt(5);
@@ -139,7 +138,7 @@ public class ElfStarXORDecompressor32 implements IXORDecompressor32 {
             // case 00
             int leadAndTrail = in.readInt(leadingBitsPerValue + trailingBitsPerValue);
             int lead = leadAndTrail >>> trailingBitsPerValue;
-            int trail = ~(0xffff << trailingBitsPerValue) & leadAndTrail;  //todo
+            int trail = ~(0xffff << trailingBitsPerValue) & leadAndTrail;
             storedLeadingZeros = leadingRepresentation[lead];
             storedTrailingZeros = trailingRepresentation[trail];
             centerBits = 32 - storedLeadingZeros - storedTrailingZeros;

@@ -1,7 +1,5 @@
 package org.urbcomp.startdb.selfStar.decompressor32;
 
-import org.urbcomp.startdb.selfStar.decompressor.IDecompressor;
-import org.urbcomp.startdb.selfStar.decompressor.xor.IXORDecompressor;
 import org.urbcomp.startdb.selfStar.decompressor32.xor.IXORDecompressor32;
 
 import java.util.ArrayList;

@@ -51,16 +51,13 @@ public class ElfPlusCompressor32 implements ICompressor32 {
             if (delta != 0 && eraseBits > 3) {  // C2
                 if (alphaAndBetaStar[1] == lastBetaStar) {
                     compressedSizeInBits += os.writeBit(false);    // case 0
-                    Elf32Utils.case1++;
                 } else {
                     compressedSizeInBits += os.writeInt(alphaAndBetaStar[1] | 0x18, 5);  // case 11, 2 + 3 = 5
-                    Elf32Utils.case3++;
                     lastBetaStar = alphaAndBetaStar[1];
                 }
                 vPrimeInt = mask & vInt;
             } else {
                 compressedSizeInBits += os.writeInt(2, 2); // case 10
-                Elf32Utils.case2++;
                 vPrimeInt = vInt;
             }
         }

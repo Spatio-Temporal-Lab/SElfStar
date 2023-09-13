@@ -195,19 +195,5 @@ public class Elf32Utils {
         }
         return (int) Math.floor(Math.log10(v));
     }
-
-    public static int case1 = 0;
-    public static int case2 = 0;
-    public static int case3 = 0;
-
-    public static void main(String[] args) {
-        System.out.println(Integer.toBinaryString(Float.floatToIntBits(0.0034082402f)));
-        System.out.println(Integer.toBinaryString(Float.floatToIntBits(0.00340824f)));
-        System.out.println(Integer.toBinaryString(Float.floatToIntBits(0.0034082383f)));
-        System.out.println(Float.intBitsToFloat(Float.floatToIntBits(0.0034082402f)));
-        System.out.println(getSignificantCount(0.0034082402f, 8));
-
-        System.out.println(getSignificantCount(0.00340824f, 6));
-    }
 }
 
