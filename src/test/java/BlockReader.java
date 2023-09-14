@@ -38,6 +38,32 @@ public class BlockReader implements Closeable {
         return floatings;
     }
 
+
+    public List<Float> nextSingleBlock() throws IOException {
+        if (end) {
+            return null;
+        }
+        List<Float> floatings = new ArrayList<>(blockSize);
+        int i = 0;
+        String line;
+        while (i < blockSize && (line = br.readLine()) != null) {
+            if (line.startsWith("#") || line.equals("")) {
+                continue;
+            }
+            i++;
+            floatings.add(Float.parseFloat(line));
+
+        }
+        if (i < blockSize) {
+            end = true;
+        }
+        if (floatings.isEmpty()) {
+            return null;
+        }
+
+        return floatings;
+    }
+
     @Override
     public void close() throws IOException {
         br.close();
