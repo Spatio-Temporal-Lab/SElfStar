@@ -55,7 +55,6 @@ public class TestSingleCompressor {
     @Test
     public void testAllCompressor() {
         for (String fileName : fileNames) {
-            System.out.println(fileName);
             testFloatingCompressor(fileName);
             testXZCompressor(fileName);
             testZstdCompressor(fileName);
