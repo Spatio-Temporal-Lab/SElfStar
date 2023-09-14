@@ -8,10 +8,10 @@ import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.io.compress.CompressionInputStream;
 import org.apache.hadoop.io.compress.CompressionOutputStream;
 import org.junit.jupiter.api.Test;
-import org.urbcomp.startdb.selfStar.compressor32.*;
-import org.urbcomp.startdb.selfStar.compressor32.xor.*;
-import org.urbcomp.startdb.selfStar.decompressor32.*;
-import org.urbcomp.startdb.selfStar.decompressor32.xor.*;
+import org.urbcomp.startdb.selfstar.compressor32.*;
+import org.urbcomp.startdb.selfstar.compressor32.xor.*;
+import org.urbcomp.startdb.selfstar.decompressor32.*;
+import org.urbcomp.startdb.selfstar.decompressor32.xor.*;
 
 import java.io.*;
 import java.nio.ByteBuffer;
