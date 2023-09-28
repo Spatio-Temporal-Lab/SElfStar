@@ -32,9 +32,11 @@ public class SElfStarCompressor implements ICompressor {
         if (v == 0.0 || Double.isInfinite(v)) {
             compressedSizeInBits += os.writeInt(2, 2); // case 10
             vPrimeLong = vLong;
+            Elf64Utils.betaStar10++;
         } else if (Double.isNaN(v)) {
             compressedSizeInBits += os.writeInt(2, 2); // case 10
             vPrimeLong = 0xfff8000000000000L & vLong;
+            Elf64Utils.betaStar10++;
         } else {
             // C1: v is a normal or subnormal
             int[] alphaAndBetaStar = Elf64Utils.getAlphaAndBetaStar(v, lastBetaStar);
@@ -46,14 +48,26 @@ public class SElfStarCompressor implements ICompressor {
             if (delta != 0 && eraseBits > 4) {  // C2
                 if (alphaAndBetaStar[1] == lastBetaStar) {
                     compressedSizeInBits += os.writeBit(false);    // case 0
+                    Elf64Utils.betaStar0++;
+                    if (lastBetaStar != Integer.MAX_VALUE)
+                        Elf64Utils.deltaBeta[16]++;
                 } else {
+                    if (lastBetaStar != Integer.MAX_VALUE)
+                        Elf64Utils.deltaBeta[alphaAndBetaStar[1] - lastBetaStar + 16]++;
                     compressedSizeInBits += os.writeInt(alphaAndBetaStar[1] | 0x30, 6);  // case 11, 2 + 4 = 6
                     lastBetaStar = alphaAndBetaStar[1];
+                    Elf64Utils.betaStar11++;
                 }
                 vPrimeLong = mask & vLong;
             } else {
                 compressedSizeInBits += os.writeInt(2, 2); // case 10
                 vPrimeLong = vLong;
+                if (delta == 0) {
+                    Elf64Utils.betaStar11Delta0++;
+                } else {
+                    Elf64Utils.betaStarLong++;
+                }
+                Elf64Utils.betaStar10++;
             }
         }
         compressedSizeInBits += xorCompressor.addValue(vPrimeLong);
