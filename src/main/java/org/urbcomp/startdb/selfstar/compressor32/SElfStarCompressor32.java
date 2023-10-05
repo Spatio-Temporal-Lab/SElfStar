@@ -19,6 +19,10 @@ public class SElfStarCompressor32 implements ICompressor32 {
 
     private double storeCompressionRatio = 0;
 
+    private static final int STATES = 18;
+
+    private int[] frequencies = new int[STATES];
+
     public SElfStarCompressor32(IXORCompressor32 xorCompressor) {
         this.xorCompressor = xorCompressor;
         os = xorCompressor.getOutputStream();

@@ -1,6 +1,7 @@
 package org.urbcomp.startdb.selfstar.utils.Huffman;
 
 import javafx.util.Pair;
+import org.urbcomp.startdb.selfstar.utils.OutputBitStream;
 
 import java.util.*;
 
@@ -9,9 +10,9 @@ public class HuffmanEncode {
     public static void main(String[] args) {
 //        int[] value = new int[]{-16, -15, -14, -13, -12, -11, -10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
 //        int[] f = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 851, 2046, 2209, 5752, 34949, 245614, 245331, 35085, 5692, 2262, 2031, 848, 1, 1, 0, 0, 0, 0, 0, 0, 0};
-        int[] value = new int[]{1, 2, 3, 4, 5};
+        int[] values = new int[]{1, 2, 3, 4, 5};
         int[] f = new int[]{10, 3, 2, 0, 6};
-        HuffmanEncoder.buildHuffmanTreeAndConToHashMap(value, f);
+        HuffmanEncoder.buildHuffmanTreeAndConToHashMap(values, f);
         Node node = HuffmanEncoder.hashMapToTree();
         System.out.println(node.right.left.left.left.data);
     }
@@ -19,9 +20,9 @@ public class HuffmanEncode {
 }
 
 class HuffmanEncoder {
-
     // Map value -> <code, length>
-    private static final HashMap<Integer, Pair<Long, Long>> huffmanCodes = new HashMap<>();
+    private static final HashMap<Integer, Pair<Long, Integer>> huffmanCodes = new HashMap<>();
+    public static int[] values = new int[]{1, 2, 3, 4, 5};
 
     public static void buildHuffmanTreeAndConToHashMap(int[] values, int[] frequencies) {
         PriorityQueue<Node> nodePriorityQueue = new PriorityQueue<>();
@@ -44,7 +45,7 @@ class HuffmanEncoder {
         generateHuffmanCodes(nodePriorityQueue.peek(), 0, 0);
     }
 
-    private static void generateHuffmanCodes(Node root, long code, long length) {
+    private static void generateHuffmanCodes(Node root, long code, int length) {
         if (root != null) {
             if (root.data != -Integer.MAX_VALUE) {
                 huffmanCodes.put(root.data, new Pair<>(code, length));
@@ -52,6 +53,15 @@ class HuffmanEncoder {
             generateHuffmanCodes(root.left, code << 1, length + 1);
             generateHuffmanCodes(root.right, (code << 1) | 1, length + 1);
         }
+    }
+
+    public static int writeHuffmanCodes(HashMap<Integer, Pair<Long, Integer>> huffmanCodes, OutputBitStream out) {
+        int thisSize = 0;
+        for (int value : values) {
+            thisSize += out.writeLong(huffmanCodes.get(value).getValue(), 5);
+            thisSize += out.writeLong(huffmanCodes.get(value).getKey(), huffmanCodes.get(value).getValue());
+        }
+        return thisSize;
     }
 
     public static String compress(int[] values) {
@@ -65,10 +75,10 @@ class HuffmanEncoder {
     public static Node hashMapToTree() {
         Node root = new Node(-Integer.MAX_VALUE, 0);
         Node curNode = root;
-        for (Map.Entry<Integer, Pair<Long, Long>> valueToCodeAndLen : huffmanCodes.entrySet()) {
+        for (Map.Entry<Integer, Pair<Long, Integer>> valueToCodeAndLen : huffmanCodes.entrySet()) {
             int value = valueToCodeAndLen.getKey();
             long code = valueToCodeAndLen.getValue().getKey();
-            long length = valueToCodeAndLen.getValue().getValue();
+            int length = valueToCodeAndLen.getValue().getValue();
             long signal;
             while (length != 0) {
                 signal = (code >> (length - 1)) & 1;
