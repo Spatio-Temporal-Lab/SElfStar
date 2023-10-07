@@ -5,6 +5,7 @@ import org.urbcomp.startdb.selfstar.utils.OutputBitStream;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.PriorityQueue;
 
 public class HuffmanEncode {
@@ -33,7 +34,7 @@ public class HuffmanEncode {
         while (nodePriorityQueue.size() > 1) {
             Node left = nodePriorityQueue.poll();
             Node right = nodePriorityQueue.poll();
-            Node newNode = new Node(-Integer.MAX_VALUE, left.frequency + right.frequency);
+            Node newNode = new Node(-Integer.MAX_VALUE, left.frequency + Objects.requireNonNull(right).frequency);
             newNode.left = left;
             newNode.right = right;
             nodePriorityQueue.add(newNode);
