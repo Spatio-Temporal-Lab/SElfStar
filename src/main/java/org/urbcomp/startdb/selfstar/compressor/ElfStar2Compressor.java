@@ -1,6 +1,5 @@
 package org.urbcomp.startdb.selfstar.compressor;
 
-import it.unimi.dsi.compression.HuffmanCodec;
 import javafx.util.Pair;
 import org.urbcomp.startdb.selfstar.compressor.xor.IXORCompressor;
 import org.urbcomp.startdb.selfstar.utils.Elf64Utils;
@@ -10,7 +9,7 @@ import org.urbcomp.startdb.selfstar.utils.OutputBitStream;
 import java.util.Arrays;
 import java.util.HashMap;
 
-public class ElfStarPlusCompressor implements ICompressor {
+public class ElfStar2Compressor implements ICompressor {
     private final IXORCompressor xorCompressor;
     private final int[] betaStarList;
     private final long[] vPrimeList;
@@ -21,22 +20,20 @@ public class ElfStarPlusCompressor implements ICompressor {
     private int lastBetaStar = Integer.MAX_VALUE;
     private int numberOfValues = 0;
 
-    private static final int STATES = 19;
-
-    private int[] frequency = new int[STATES];
+    private static final int STATES_NUM = 18;
+    private static final int[] states = new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17};
 
     private HashMap<Integer, Pair<Long, Integer>> huffmanCode = new HashMap<>();
+    private final int[] frequency = new int[STATES_NUM];
 
-    private static final int[] state = new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18};
-
-    public ElfStarPlusCompressor(IXORCompressor xorCompressor, int window) {
+    public ElfStar2Compressor(IXORCompressor xorCompressor, int window) {
         this.xorCompressor = xorCompressor;
         this.os = xorCompressor.getOutputStream();
         this.betaStarList = new int[window + 1];     // one for the end sign
         this.vPrimeList = new long[window + 1];      // one for the end sign
     }
 
-    public ElfStarPlusCompressor(IXORCompressor xorCompressor) {
+    public ElfStar2Compressor(IXORCompressor xorCompressor) {
         this.xorCompressor = xorCompressor;
         this.os = xorCompressor.getOutputStream();
         this.betaStarList = new int[1001];     // one for the end sign
@@ -90,14 +87,14 @@ public class ElfStarPlusCompressor implements ICompressor {
     }
 
     private void compress() {
-        HuffmanEncode huffmanEncode = new HuffmanEncode(state, frequency);
+        HuffmanEncode huffmanEncode = new HuffmanEncode(states, frequency);
         huffmanCode = huffmanEncode.getHuffmanCodes();
         compressedSizeInBits += huffmanEncode.writeHuffmanCodes(os);
         xorCompressor.setDistribution(leadDistribution, trailDistribution);
         lastBetaStar = Integer.MAX_VALUE;
         for (int i = 0; i < numberOfValues; i++) {
             if (betaStarList[i] == Integer.MAX_VALUE) {
-                compressedSizeInBits += os.writeLong(huffmanCode.get(17).getKey(), huffmanCode.get(17).getValue()); // case 10
+                compressedSizeInBits += os.writeLong(huffmanCode.get(17).getKey(), huffmanCode.get(17).getValue()); // not erase
             } else {
                 compressedSizeInBits += os.writeLong(huffmanCode.get(betaStarList[i]).getKey(), huffmanCode.get(betaStarList[i]).getValue());  // case 11, 2 + 4 = 6
                 lastBetaStar = betaStarList[i];
@@ -124,7 +121,7 @@ public class ElfStarPlusCompressor implements ICompressor {
         calculateDistribution();
         compress();
         // we write one more bit here, for marking an end of the stream.
-        compressedSizeInBits += os.writeInt(2, 2);  // case 10
+        compressedSizeInBits += os.writeLong(huffmanCode.get(17).getKey(), huffmanCode.get(17).getValue()); // not erase
         compressedSizeInBits += xorCompressor.close();
     }
 
@@ -138,6 +135,7 @@ public class ElfStarPlusCompressor implements ICompressor {
         lastBetaStar = Integer.MAX_VALUE;
         numberOfValues = 0;
         os = xorCompressor.getOutputStream();
+        huffmanCode.clear();
         Arrays.fill(leadDistribution, 0);
         Arrays.fill(trailDistribution, 0);
     }

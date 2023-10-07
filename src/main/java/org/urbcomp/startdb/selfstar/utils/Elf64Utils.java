@@ -32,13 +32,6 @@ public class Elf64Utils {
         }
     }
 
-    public static int betaStar0;
-
-    public static int betaStar11;
-    public static int betaStar10;
-    public static int betaStar11Delta0;
-    public static int betaStarLong;
-
     public static int[] getAlphaAndBetaStar(double v) {
         if (v < 0) {
             v = -v;
@@ -198,23 +191,12 @@ public class Elf64Utils {
         return spAnd10iNFlag;
     }
 
-    public static int[] deltaBeta = new int[32];
-    public static int[] betaStar = new int[32];
-
     public static int zEncode(int n) {
         return ((n << 1) ^ (n >> 31)) - 1;
     }
 
     public static int zDecode(int n) {
         return ((n + 1) >>> 1) ^ -((n + 1) & 1);
-    }
-
-    public static void main(String[] args) {
-        System.out.println(zEncode(-1));  //1   0
-        System.out.println(zEncode(-2));//3     2
-        System.out.println(zEncode(1));//2      1
-        System.out.println(zEncode(2));//4      3
-
     }
 
 }

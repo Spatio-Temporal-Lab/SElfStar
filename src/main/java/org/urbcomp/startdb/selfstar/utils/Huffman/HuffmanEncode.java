@@ -3,29 +3,18 @@ package org.urbcomp.startdb.selfstar.utils.Huffman;
 import javafx.util.Pair;
 import org.urbcomp.startdb.selfstar.utils.OutputBitStream;
 
-import java.util.*;
-
-//public class HuffmanEncode {
-//
-//    public static void main(String[] args) {
-////        int[] value = new int[]{-16, -15, -14, -13, -12, -11, -10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
-////        int[] f = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 851, 2046, 2209, 5752, 34949, 245614, 245331, 35085, 5692, 2262, 2031, 848, 1, 1, 0, 0, 0, 0, 0, 0, 0};
-//        int[] values = new int[]{1, 2, 3, 4, 5};
-//        int[] f = new int[]{10, 3, 2, 0, 6};
-//        HuffmanEncoder.buildHuffmanTreeAndConToHashMap(values, f);
-//        Node node = HuffmanEncoder.hashMapToTree();
-//        System.out.println(node.right.left.left.left.data);
-//    }
-//
-//}
+import java.util.HashMap;
+import java.util.Map;
+import java.util.PriorityQueue;
 
 public class HuffmanEncode {
     // Map value -> <code, length>
     private static final HashMap<Integer, Pair<Long, Integer>> huffmanCodes = new HashMap<>();
-    public static int[] values = new int[]{1, 2, 3, 4, 5};
+    private final int[] values;
 
-    public HuffmanEncode(int[] values, int[] frequencies){
-        buildHuffmanTreeAndConToHashMap(values,frequencies);
+    public HuffmanEncode(int[] values, int[] frequencies) {
+        this.values = values;
+        buildHuffmanTreeAndConToHashMap(values, frequencies);
     }
 
     public HashMap<Integer, Pair<Long, Integer>> getHuffmanCodes(){
@@ -49,7 +38,6 @@ public class HuffmanEncode {
             newNode.right = right;
             nodePriorityQueue.add(newNode);
         }
-
         generateHuffmanCodes(nodePriorityQueue.peek(), 0, 0);
     }
 
@@ -63,24 +51,7 @@ public class HuffmanEncode {
         }
     }
 
-    public int writeHuffmanCodes(OutputBitStream out) {
-        int thisSize = 0;
-        for (int value : values) {
-            thisSize += out.writeLong(huffmanCodes.get(value).getValue(), 5);
-            thisSize += out.writeLong(huffmanCodes.get(value).getKey(), huffmanCodes.get(value).getValue());
-        }
-        return thisSize;
-    }
-
-    public static String compress(int[] values) {
-        StringBuilder compressedData = new StringBuilder();
-        for (int value : values) {
-            compressedData.append(huffmanCodes.get(value));
-        }
-        return compressedData.toString();
-    }
-
-    public static Node hashMapToTree() {
+    public static Node hashMapToTree(HashMap<Integer, Pair<Long, Integer>> huffmanCodes) {
         Node root = new Node(-Integer.MAX_VALUE, 0);
         Node curNode = root;
         for (Map.Entry<Integer, Pair<Long, Integer>> valueToCodeAndLen : huffmanCodes.entrySet()) {
@@ -109,26 +80,12 @@ public class HuffmanEncode {
         return root;
     }
 
-    public static int[] decompress(String compressedData, Node root) {
-        List<Integer> decompressedData = new ArrayList<>();
-        Node current = root;
-        for (char bit : compressedData.toCharArray()) {
-            if (bit == '0') {
-                current = current.left;
-            } else if (bit == '1') {
-                current = current.right;
-            }
-            if (current.data != -1) {
-                decompressedData.add(current.data);
-                current = root;
-            }
+    public int writeHuffmanCodes(OutputBitStream out) {
+        int thisSize = 0;
+        for (int value : values) {
+            thisSize += out.writeInt(huffmanCodes.get(value).getValue(), 5);
+            thisSize += out.writeLong(huffmanCodes.get(value).getKey(), huffmanCodes.get(value).getValue());
         }
-
-        // Convert the List<Integer> to int[]
-        int[] result = new int[decompressedData.size()];
-        for (int i = 0; i < decompressedData.size(); i++) {
-            result[i] = decompressedData.get(i);
-        }
-        return result;
+        return thisSize;
     }
 }
