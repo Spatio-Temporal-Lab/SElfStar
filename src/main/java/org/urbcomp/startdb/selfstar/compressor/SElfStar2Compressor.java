@@ -6,7 +6,7 @@ import org.urbcomp.startdb.selfstar.utils.OutputBitStream;
 
 import java.util.Arrays;
 
-public class SElfStarPlusCompressor implements ICompressor {
+public class SElfStar2Compressor implements ICompressor {
     private final IXORCompressor xorCompressor;
     private final int[] betaStarDistribution = new int[32];
     private OutputBitStream os;
@@ -15,7 +15,7 @@ public class SElfStarPlusCompressor implements ICompressor {
     private int numberOfValues = 0;
     private double storeCompressionRatio = 0;
 
-    public SElfStarPlusCompressor(IXORCompressor xorCompressor) {
+    public SElfStar2Compressor(IXORCompressor xorCompressor) {
         this.xorCompressor = xorCompressor;
         os = xorCompressor.getOutputStream();
     }
@@ -28,11 +28,9 @@ public class SElfStarPlusCompressor implements ICompressor {
         if (v == 0.0 || Double.isInfinite(v)) {
             compressedSizeInBits += os.writeInt(2, 2); // case 10
             vPrimeLong = vLong;
-            Elf64Utils.betaStar10++;
         } else if (Double.isNaN(v)) {
             compressedSizeInBits += os.writeInt(2, 2); // case 10
             vPrimeLong = 0xfff8000000000000L & vLong;
-            Elf64Utils.betaStar10++;
         } else {
             // C1: v is a normal or subnormal
             int[] alphaAndBetaStar = Elf64Utils.getAlphaAndBetaStar(v, lastBetaStar);
