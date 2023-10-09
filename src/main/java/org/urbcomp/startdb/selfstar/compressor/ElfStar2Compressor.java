@@ -91,13 +91,11 @@ public class ElfStar2Compressor implements ICompressor {
         huffmanCode = huffmanEncode.getHuffmanCodes();
         compressedSizeInBits += huffmanEncode.writeHuffmanCodes(os);
         xorCompressor.setDistribution(leadDistribution, trailDistribution);
-        lastBetaStar = Integer.MAX_VALUE;
         for (int i = 0; i < numberOfValues; i++) {
             if (betaStarList[i] == Integer.MAX_VALUE) {
                 compressedSizeInBits += os.writeLong(huffmanCode.get(17).getKey(), huffmanCode.get(17).getValue()); // not erase
             } else {
                 compressedSizeInBits += os.writeLong(huffmanCode.get(betaStarList[i]).getKey(), huffmanCode.get(betaStarList[i]).getValue());  // case 11, 2 + 4 = 6
-                lastBetaStar = betaStarList[i];
             }
             compressedSizeInBits += xorCompressor.addValue(vPrimeList[i]);
         }
@@ -136,6 +134,7 @@ public class ElfStar2Compressor implements ICompressor {
         numberOfValues = 0;
         os = xorCompressor.getOutputStream();
         huffmanCode.clear();
+        Arrays.fill(frequency, 0);
         Arrays.fill(leadDistribution, 0);
         Arrays.fill(trailDistribution, 0);
     }
