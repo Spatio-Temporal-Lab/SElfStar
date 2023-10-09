@@ -8,7 +8,10 @@ import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.io.compress.CompressionInputStream;
 import org.apache.hadoop.io.compress.CompressionOutputStream;
 import org.junit.jupiter.api.Test;
-import org.urbcomp.startdb.selfstar.compressor.*;
+import org.urbcomp.startdb.selfstar.compressor.ElfPlusCompressor;
+import org.urbcomp.startdb.selfstar.compressor.ElfStarCompressor;
+import org.urbcomp.startdb.selfstar.compressor.ICompressor;
+import org.urbcomp.startdb.selfstar.compressor.SElfStarCompressor;
 import org.urbcomp.startdb.selfstar.compressor.xor.ElfPlusXORCompressor;
 import org.urbcomp.startdb.selfstar.compressor.xor.ElfStarXORCompressor;
 import org.urbcomp.startdb.selfstar.compressor.xor.SElfXORCompressor;
@@ -165,10 +168,9 @@ public class TestCompressor {
                 new ElfPlusCompressor(new ElfPlusXORCompressor()),
 //                new ElfStarCompressor(new ElfStarXORCompressorAdaLead()),
 //                new ElfStarCompressor(new ElfStarXORCompressorAdaLeadAdaTrail()),
-                new ElfStarCompressor(new ElfStarXORCompressor()),
+//                new ElfStarCompressor(new ElfStarXORCompressor()),
 //                new SElfStarCompressor(new SElfXORCompressor()),
-                new ElfStar2Compressor(new ElfStarXORCompressor()),
-                new ElfStar2DeltaCompressor(new ElfStarXORCompressor())
+//                new ElfStar2Compressor(new ElfStarXORCompressor()),
         };
 
         IDecompressor[] decompressors = new IDecompressor[]{
@@ -204,17 +206,17 @@ public class TestCompressor {
                     floatings.forEach(compressor::addValue);
                     compressor.close();
                     compressTime += (System.nanoTime() - start) / TIME_PRECISION;
-//                    IDecompressor decompressor = decompressors[i];
-//                    decompressor.setBytes(compressor.getBytes());
-//
-//                    start = System.nanoTime();
-//                    List<Double> deValues = decompressor.decompress();
+                    IDecompressor decompressor = decompressors[i];
+                    decompressor.setBytes(compressor.getBytes());
+
+                    start = System.nanoTime();
+                    List<Double> deValues = decompressor.decompress();
                     decompressTime = (System.nanoTime() - start) / TIME_PRECISION;
-//
-//                    assertEquals(deValues.size(), floatings.size());
-//                    for (int j = 0; j < floatings.size(); j++) {
-//                        assertEquals(floatings.get(j), deValues.get(j));
-//                    }
+
+                    assertEquals(deValues.size(), floatings.size());
+                    for (int j = 0; j < floatings.size(); j++) {
+                        assertEquals(floatings.get(j), deValues.get(j));
+                    }
                     String fileNameParamMethod = fileName + "," + NO_PARAM + "," + compressor.getKey();
                     if (!fileNameParamMethodToCompressedBits.containsKey(fileNameParamMethod)) {
                         fileNameParamMethodToCompressedBits.put(fileNameParamMethod, compressor.getCompressedSizeInBits());
@@ -229,7 +231,7 @@ public class TestCompressor {
                         fileNameParamMethodToDecompressTime.put(fileNameParamMethod, newDTime);
                     }
                     compressor.refresh();
-//                    decompressor.refresh();
+                    decompressor.refresh();
 
                 }
             } catch (Exception e) {
