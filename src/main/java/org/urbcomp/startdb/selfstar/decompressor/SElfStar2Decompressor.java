@@ -1,20 +1,32 @@
 package org.urbcomp.startdb.selfstar.decompressor;
 
+import javafx.util.Pair;
 import org.urbcomp.startdb.selfstar.decompressor.xor.IXORDecompressor;
 import org.urbcomp.startdb.selfstar.utils.Elf64Utils;
+import org.urbcomp.startdb.selfstar.utils.Huffman.HuffmanEncode;
+import org.urbcomp.startdb.selfstar.utils.Huffman.Node;
 import org.urbcomp.startdb.selfstar.utils.InputBitStream;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 // all ElfStar (batch and stream) share the same decompressor
-public class SElfStarPlusDecompressor implements IDecompressor {
+public class SElfStar2Decompressor implements IDecompressor {
 
     private final IXORDecompressor xorDecompressor;
     private int lastBetaStar = Integer.MAX_VALUE;
 
-    public SElfStarPlusDecompressor(IXORDecompressor xorDecompressor) {
+    private static final int STATES_NUM = 18;
+    private static final int[] states = new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17};
+    private final int[] frequency = new int[STATES_NUM];
+    private boolean isFirst = true;
+    private HashMap<Integer, Pair<Long, Integer>> huffmanCode = new HashMap<>();
+    private Node root;
+
+    public SElfStar2Decompressor(IXORDecompressor xorDecompressor) {
         this.xorDecompressor = xorDecompressor;
     }
 
@@ -24,6 +36,10 @@ public class SElfStarPlusDecompressor implements IDecompressor {
         while ((value = nextValue()) != null) {
             values.add(value);
         }
+        HuffmanEncode huffmanEncode = new HuffmanEncode(states, frequency);
+        huffmanCode = huffmanEncode.getHuffmanCodes();
+        root = HuffmanEncode.hashMapToTree(huffmanCode);
+        Arrays.fill(frequency, 0);
         return values;
     }
 
@@ -31,6 +47,7 @@ public class SElfStarPlusDecompressor implements IDecompressor {
     public void refresh() {
         lastBetaStar = Integer.MAX_VALUE;
         xorDecompressor.refresh();
+        isFirst = false;
     }
 
     @Override
@@ -40,19 +57,51 @@ public class SElfStarPlusDecompressor implements IDecompressor {
 
     @Override
     public Double nextValue() {
+        if (isFirst) {
+            return nextValueFirst();
+        } else {
+            return nextValueHuffman();
+        }
+    }
+
+
+    public Double nextValueFirst() {
         Double v;
         if (readInt(1) == 0) {
             v = recoverVByBetaStar();               // case 0
+            frequency[lastBetaStar]++;
         } else if (readInt(1) == 0) {
             v = xorDecompressor.readValue();        // case 10
+            frequency[STATES_NUM - 1]++;
         } else {
-            if (readInt(1) == 1) {
-                lastBetaStar = readInt(4);          // case 111
-            } else {
-                lastBetaStar = lastBetaStar + Elf64Utils.zDecode(readInt(2));
-            }
-
+            lastBetaStar = readInt(4);          // case 11
             v = recoverVByBetaStar();
+            frequency[lastBetaStar]++;
+        }
+        return v;
+    }
+
+    public Double nextValueHuffman() {
+        Double v;
+        Node current = root;
+        while (true) {
+            if (readInt(1) == 0) {
+                current = current.left;
+            } else {
+                current = current.right;
+            }
+            if (current.data != -Integer.MAX_VALUE) {
+                if (current.data != STATES_NUM - 1) {
+                    lastBetaStar = current.data;
+                    v = recoverVByBetaStar();
+
+                    frequency[lastBetaStar]++;
+                } else {
+                    v = xorDecompressor.readValue();
+                    frequency[STATES_NUM - 1]++;
+                }
+                break;
+            }
         }
         return v;
     }
