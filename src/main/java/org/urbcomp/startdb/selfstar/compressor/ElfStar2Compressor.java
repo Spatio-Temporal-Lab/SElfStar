@@ -70,7 +70,6 @@ public class ElfStar2Compressor implements ICompressor {
                 frequency[17]++;
             }
         }
-
         numberOfValues++;
     }
 

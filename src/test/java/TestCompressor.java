@@ -8,16 +8,11 @@ import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.io.compress.CompressionInputStream;
 import org.apache.hadoop.io.compress.CompressionOutputStream;
 import org.junit.jupiter.api.Test;
-import org.urbcomp.startdb.selfstar.compressor.ElfPlusCompressor;
-import org.urbcomp.startdb.selfstar.compressor.ElfStarCompressor;
-import org.urbcomp.startdb.selfstar.compressor.ICompressor;
-import org.urbcomp.startdb.selfstar.compressor.SElfStarCompressor;
+import org.urbcomp.startdb.selfstar.compressor.*;
 import org.urbcomp.startdb.selfstar.compressor.xor.ElfPlusXORCompressor;
 import org.urbcomp.startdb.selfstar.compressor.xor.ElfStarXORCompressor;
 import org.urbcomp.startdb.selfstar.compressor.xor.SElfXORCompressor;
-import org.urbcomp.startdb.selfstar.decompressor.ElfPlusDecompressor;
-import org.urbcomp.startdb.selfstar.decompressor.ElfStarDecompressor;
-import org.urbcomp.startdb.selfstar.decompressor.IDecompressor;
+import org.urbcomp.startdb.selfstar.decompressor.*;
 import org.urbcomp.startdb.selfstar.decompressor.xor.ElfPlusXORDecompressor;
 import org.urbcomp.startdb.selfstar.decompressor.xor.ElfStarXORDecompressor;
 
@@ -169,8 +164,9 @@ public class TestCompressor {
 //                new ElfStarCompressor(new ElfStarXORCompressorAdaLead()),
 //                new ElfStarCompressor(new ElfStarXORCompressorAdaLeadAdaTrail()),
 //                new ElfStarCompressor(new ElfStarXORCompressor()),
-//                new SElfStarCompressor(new SElfXORCompressor()),
-//                new ElfStar2Compressor(new ElfStarXORCompressor()),
+                new SElfStarCompressor(new SElfXORCompressor()),
+                new ElfStar2Compressor(new ElfStarXORCompressor()),
+                new SElfStar2Compressor(new SElfXORCompressor())
         };
 
         IDecompressor[] decompressors = new IDecompressor[]{
@@ -182,8 +178,9 @@ public class TestCompressor {
 //                new ElfStarDecompressor(new ElfStarXORDecompressorAdaLead()),
 //                new ElfStarDecompressor(new ElfStarXORDecompressorAdaLeadAdaTrail()),
 //                new ElfStarDecompressor(new ElfStarXORDecompressor()),
-//                new ElfStarDecompressor(new ElfStarXORDecompressor()),     // streaming version is the same
-//                new ElfStar2Decompressor(new ElfStarXORDecompressor())
+                new ElfStarDecompressor(new ElfStarXORDecompressor()),     // streaming version is the same
+                new ElfStar2Decompressor(new ElfStarXORDecompressor()),
+                new SElfStar2Decompressor(new ElfStarXORDecompressor())
         };
         boolean firstMethod = true;
         for (int i = 0; i < compressors.length; i++) {
@@ -212,7 +209,7 @@ public class TestCompressor {
                     start = System.nanoTime();
                     List<Double> deValues = decompressor.decompress();
                     decompressTime = (System.nanoTime() - start) / TIME_PRECISION;
-
+//
                     assertEquals(deValues.size(), floatings.size());
                     for (int j = 0; j < floatings.size(); j++) {
                         assertEquals(floatings.get(j), deValues.get(j));
