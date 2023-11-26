@@ -1,3 +1,5 @@
+import com.github.Tranway.buff.BuffCompressor32;
+import com.github.Tranway.buff.BuffDecompressor32;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.CommonConfigurationKeys;
 import org.apache.hadoop.hbase.HBaseConfiguration;
@@ -20,7 +22,7 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestSingleCompressor {
-    private static final String STORE_FILE = "src/test/resources/result/result32.csv";
+    private static final String STORE_FILE = "src/test/resources/result/result32Buff.csv";
     private static final double TIME_PRECISION = 1000.0;
     private static final int BLOCK_SIZE = 1000;
     private static final int NO_PARAM = 0;
@@ -55,10 +57,11 @@ public class TestSingleCompressor {
     @Test
     public void testAllCompressor() {
         for (String fileName : fileNames) {
-            testFloatingCompressor(fileName);
-            testXZCompressor(fileName);
-            testZstdCompressor(fileName);
-            testSnappyCompressor(fileName);
+//            testFloatingCompressor(fileName);
+            testBuffCompressor(fileName);
+//            testXZCompressor(fileName);
+//            testZstdCompressor(fileName);
+//            testSnappyCompressor(fileName);
         }
 
         fileNameParamMethodToCompressedBits.forEach((fileNameParamMethod, compressedBits) -> {
@@ -149,6 +152,65 @@ public class TestSingleCompressor {
                 throw new RuntimeException(fileName, e);
             }
             firstMethod = false;
+        }
+    }
+
+
+    private void testBuffCompressor(String fileName) {
+        long compressorBits;
+        String fileNameParam = fileName + "," + NO_PARAM;
+        fileNameParamToTotalBits.put(fileNameParam, 0L);
+        fileNameParamToTotalBlock.put(fileNameParam, 0L);
+        try (BlockReader br = new BlockReader(fileName, BLOCK_SIZE)) {
+            List<Float> floatings;
+            while ((floatings = br.nextSingleBlock()) != null) {
+
+                if (floatings.size() != BLOCK_SIZE) {
+                    break;
+                }
+                float[] values = new float[floatings.size()];
+                for (int i = 0; i < floatings.size(); i++) {
+                    values[i] = floatings.get(i);
+                }
+                fileNameParamToTotalBits.put(fileNameParam, fileNameParamToTotalBits.get(fileNameParam) + floatings.size() * 64L);
+                fileNameParamToTotalBlock.put(fileNameParam, fileNameParamToTotalBlock.get(fileNameParam) + 1L);
+                double encodingDuration = 0;
+                double decodingDuration = 0;
+                BuffCompressor32 compressor = new BuffCompressor32();
+                // Compress
+                long start = System.nanoTime();
+                compressor.compress(values);
+                encodingDuration += System.nanoTime() - start;
+                compressorBits = compressor.getSize();
+
+                byte[] result = compressor.getOut();
+                BuffDecompressor32 decompressor = new BuffDecompressor32(result);
+
+                start = System.nanoTime();
+
+                float[] uncompressed = decompressor.decompress();
+                decodingDuration += System.nanoTime() - start;
+
+                // Decompressed bytes should equal the original
+                for (int i = 0; i < floatings.size(); i++) {
+                    assertEquals(floatings.get(i), uncompressed[i], "Value did not match");
+                }
+                String fileNameParamMethod = fileNameParam + "," + "Buff32";
+                if (!fileNameParamMethodToCompressedBits.containsKey(fileNameParamMethod)) {
+                    fileNameParamMethodToCompressedBits.put(fileNameParamMethod, compressorBits);
+                    fileNameParamMethodToCompressTime.put(fileNameParamMethod, encodingDuration / TIME_PRECISION);
+                    fileNameParamMethodToDecompressTime.put(fileNameParamMethod, decodingDuration / TIME_PRECISION);
+                } else {
+                    long newSize = fileNameParamMethodToCompressedBits.get(fileNameParamMethod) + compressorBits;
+                    double newCTime = fileNameParamMethodToCompressTime.get(fileNameParamMethod) + encodingDuration / TIME_PRECISION;
+                    double newDTime = fileNameParamMethodToDecompressTime.get(fileNameParamMethod) + decodingDuration / TIME_PRECISION;
+                    fileNameParamMethodToCompressedBits.put(fileNameParamMethod, newSize);
+                    fileNameParamMethodToCompressTime.put(fileNameParamMethod, newCTime);
+                    fileNameParamMethodToDecompressTime.put(fileNameParamMethod, newDTime);
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(fileName, e);
         }
     }
 
