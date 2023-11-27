@@ -2,12 +2,7 @@ package com.github.Cwida.alp;
 
 import org.urbcomp.startdb.selfstar.utils.OutputBitStream;
 
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.AbstractMap;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Vector;
+import java.util.*;
 
 public class ALPrdCompression {
     static final byte EXACT_TYPE_BITSIZE = Double.SIZE;
@@ -26,10 +21,10 @@ public class ALPrdCompression {
         return estimatedSize;
     }
 
-    public static double buildLeftPartsDictionary(Vector<Long> values, byte rightBw, byte leftBw,
+    public static double buildLeftPartsDictionary(List<Long> values, byte rightBw, byte leftBw,
                                                   boolean persistDict, ALPrdCompressionState state) {
         Map<Long, Integer> leftPartsHash = new HashMap<>();
-        Vector<Map.Entry<Integer, Long>> leftPartsSortedRepetitions = new Vector<>();   // <出现次数，左值>
+        List<Map.Entry<Integer, Long>> leftPartsSortedRepetitions = new ArrayList<>();   // <出现次数，左值>
 
         // Building a hash for all the left parts and how many times they appear
         for (Long value : values) {
@@ -72,7 +67,7 @@ public class ALPrdCompression {
         return estimatedSize;
     }
 
-    public static double findBestDictionary(Vector<Long> values, ALPrdCompressionState state) {
+    public static double findBestDictionary(List<Long> values, ALPrdCompressionState state) {
         int lBw = ALPrdConstants.DICTIONARY_BW;
         int rBw = EXACT_TYPE_BITSIZE;
         double bestDictSize = Integer.MAX_VALUE;
@@ -93,7 +88,11 @@ public class ALPrdCompression {
         return bestEstimatedSize;
     }
 
-    public void compress(Vector<Long> in, int nValues, ALPrdCompressionState state) {
+    public int getSize() {
+        return size;
+    }
+
+    public void compress(List<Long> in, int nValues, ALPrdCompressionState state) {
         long[] rightParts = new long[ALPrdConstants.ALP_VECTOR_SIZE];
         short[] leftParts = new short[ALPrdConstants.ALP_VECTOR_SIZE];
 
@@ -126,7 +125,7 @@ public class ALPrdCompression {
             }
         }
 
-        size += out.writeBit(true);
+        size += out.writeBit(false);
         size += out.writeInt(nValues, 32);
         size += out.writeInt(state.rightBw, 8);
         for (int i = 0; i < nValues; i++) {
@@ -155,20 +154,20 @@ public class ALPrdCompression {
             exceptionsPositions 异常值位置      short[exceptionsCount]
          */
 
-        // 以下为模拟调用ALPrdDecompression,仅供测试使用
-        ALPrdDecompression ALPrdDe = new ALPrdDecompression(leftParts, rightParts, state.leftPartsDict, nValues, state.exceptionsCount, state.exceptions, state.exceptionsPositions, state.rightBw);
-        double[] out = ALPrdDe.decompress();
-
-        String csvFile = "D:\\Code\\ALP\\src\\main\\java\\RDout.csv"; // 输出文件名
-
-        try (FileWriter writer = new FileWriter(csvFile, true)) {
-            for (double value : out) {
-                writer.append(String.valueOf(value)).append("\n"); // 写入每个值并在行尾添加换行符
-            }
-            System.out.println("CSV file was written successfully.");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+//        // 以下为模拟调用ALPrdDecompression,仅供测试使用
+//        ALPrdDecompression ALPrdDe = new ALPrdDecompression(leftParts, rightParts, state.leftPartsDict, nValues, state.exceptionsCount, state.exceptions, state.exceptionsPositions, state.rightBw);
+//        double[] out = ALPrdDe.decompress();
+//
+//        String csvFile = "D:\\Code\\ALP\\src\\main\\java\\RDout.csv"; // 输出文件名
+//
+//        try (FileWriter writer = new FileWriter(csvFile, true)) {
+//            for (double value : out) {
+//                writer.append(String.valueOf(value)).append("\n"); // 写入每个值并在行尾添加换行符
+//            }
+//            System.out.println("CSV file was written successfully.");
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
     }
 
     /**
@@ -176,8 +175,8 @@ public class ALPrdCompression {
      *
      * @param row 单行数据
      */
-    public void entry(Vector<Double> row) {
-        Vector<Long> rowLong = new Vector<>();
+    public void entry(List<Double> row) {
+        List<Long> rowLong = new ArrayList<>();
         for (double db : row) {
             rowLong.add(Double.doubleToLongBits(db));
         }

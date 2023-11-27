@@ -1,3 +1,5 @@
+import com.github.Cwida.alp.ALPCompression;
+import com.github.Cwida.alp.ALPDecompression;
 import com.github.Tranway.buff.BuffCompressor;
 import com.github.Tranway.buff.BuffDecompressor;
 import org.apache.hadoop.conf.Configuration;
@@ -31,7 +33,7 @@ public class TestCompressor {
     private static final int NO_PARAM = 0;
     private static final String INIT_FILE = "init.csv";     // warm up memory and cpu
     private final String[] fileNames = {
-            INIT_FILE,
+//            INIT_FILE,
             "Air-pressure.csv",
             "Air-sensor.csv",
             "Basel-temp.csv",
@@ -74,13 +76,112 @@ public class TestCompressor {
         return doubles;
     }
 
+    private void testALPCompressor(String fileName, int block) {
+        long compressorBits;
+        String fileNameParam = fileName + "," + block;
+        if (block == NO_PARAM) {
+            block = BLOCK_SIZE;
+        }
+        fileNameParamToTotalBits.put(fileNameParam, 0L);
+        fileNameParamToTotalBlock.put(fileNameParam, 0L);
+        try (BlockReader br = new BlockReader(fileName, block)) {
+            List<List<Double>> floatingsList = new ArrayList<>();
+            List<Double> floatings;
+            while ((floatings = br.nextBlock()) != null) {
+                if (floatings.size() != block) {
+                    break;
+                }
+                floatingsList.add(floatings);
+            }
+            ALPCompression compressor = new ALPCompression();
+            compressor.entry(floatingsList);
+//            compressor.close();
+
+            byte[] result = compressor.getOut();
+
+            ALPDecompression decompressor = new ALPDecompression(result);
+
+            List<double[]> deValue = decompressor.entry();
+
+            for (int i = 0; i < floatingsList.size(); i++) {
+                for (int j = 0; j < floatingsList.get(i).size(); j++) {
+                    assertEquals(floatingsList.get(i).get(j), deValue.get(i)[j], "Value did not match");
+                }
+            }
+//
+//            if (floatings.size() != block) {
+//                break;
+//            }
+//            fileNameParamToTotalBits.put(fileNameParam, fileNameParamToTotalBits.get(fileNameParam) + floatings.size() * 64L);
+//            fileNameParamToTotalBlock.put(fileNameParam, fileNameParamToTotalBlock.get(fileNameParam) + 1L);
+//            double encodingDuration = 0;
+//            double decodingDuration = 0;
+//
+//            Configuration conf = new Configuration();
+//            // LZMA levels range from 1 to 9.
+//            // Level 9 might take several minutes to complete. 3 is our default. 1 will be fast.
+//            conf.setInt(LzmaCodec.LZMA_LEVEL_KEY, 3);
+//            LzmaCodec codec = new LzmaCodec();
+//            codec.setConf(conf);
+//
+//            // Compress
+//            long start = System.nanoTime();
+//            org.apache.hadoop.io.compress.Compressor compressor = codec.createCompressor();
+//            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+//            CompressionOutputStream out = codec.createOutputStream(baos, compressor);
+//            ByteBuffer bb = ByteBuffer.allocate(floatings.size() * 8);
+//            for (double d : floatings) {
+//                bb.putDouble(d);
+//            }
+//            byte[] input = bb.array();
+//            out.write(input);
+//            out.close();
+//            encodingDuration += System.nanoTime() - start;
+//
+//            final byte[] compressed = baos.toByteArray();
+//            compressorBits = compressed.length * 8L;
+//
+//            final byte[] plain = new byte[input.length];
+//            org.apache.hadoop.io.compress.Decompressor decompressor = codec.createDecompressor();
+//            start = System.nanoTime();
+//            CompressionInputStream in = codec.createInputStream(new ByteArrayInputStream(compressed), decompressor);
+//            IOUtils.readFully(in, plain, 0, plain.length);
+//            in.close();
+//            double[] uncompressed = toDoubleArray(plain);
+//            decodingDuration += System.nanoTime() - start;
+//
+//            // Decompressed bytes should equal the original
+//            for (int i = 0; i < floatings.size(); i++) {
+//                assertEquals(floatings.get(i), uncompressed[i], "Value did not match");
+//            }
+//            String fileNameParamMethod = fileNameParam + "," + "Xz";
+//            if (!fileNameParamMethodToCompressedBits.containsKey(fileNameParamMethod)) {
+//                fileNameParamMethodToCompressedBits.put(fileNameParamMethod, compressorBits);
+//                fileNameParamMethodToCompressTime.put(fileNameParamMethod, encodingDuration / TIME_PRECISION * BLOCK_SIZE / block);
+//                fileNameParamMethodToDecompressTime.put(fileNameParamMethod, decodingDuration / TIME_PRECISION * BLOCK_SIZE / block);
+//            } else {
+//                long newSize = fileNameParamMethodToCompressedBits.get(fileNameParamMethod) + compressorBits;
+//                double newCTime = fileNameParamMethodToCompressTime.get(fileNameParamMethod) + encodingDuration / TIME_PRECISION * BLOCK_SIZE / block;
+//                double newDTime = fileNameParamMethodToDecompressTime.get(fileNameParamMethod) + decodingDuration / TIME_PRECISION * BLOCK_SIZE / block;
+//                fileNameParamMethodToCompressedBits.put(fileNameParamMethod, newSize);
+//                fileNameParamMethodToCompressTime.put(fileNameParamMethod, newCTime);
+//                fileNameParamMethodToDecompressTime.put(fileNameParamMethod, newDTime);
+//            }
+
+        } catch (Exception e) {
+            throw new RuntimeException(fileName, e);
+        }
+    }
+
+
     @Test
     public void testAllCompressor() {
         for (String fileName : fileNames) {
+            testALPCompressor(fileName, NO_PARAM);
 //            testXZCompressor(fileName, NO_PARAM);
 //            testZstdCompressor(fileName, NO_PARAM);
 //            testSnappyCompressor(fileName, NO_PARAM);
-            testBuffCompressor(fileName, NO_PARAM);
+//            testBuffCompressor(fileName, NO_PARAM);
 //            testFloatingCompressor(fileName);
         }
         fileNameParamMethodToCompressedBits.forEach((fileNameParamMethod, compressedBits) -> {
@@ -89,7 +190,7 @@ public class TestCompressor {
             fileNameParamMethodToCompressedRatio.put(fileNameParamMethod, (compressedBits * 1.0) / fileTotalBits);
         });
         System.out.println("Test All Compressor");
-        writeResult(STORE_FILE, fileNameParamMethodToCompressedRatio, fileNameParamMethodToCompressTime, fileNameParamMethodToDecompressTime, fileNameParamToTotalBlock);
+//        writeResult(STORE_FILE, fileNameParamMethodToCompressedRatio, fileNameParamMethodToCompressTime, fileNameParamMethodToDecompressTime, fileNameParamToTotalBlock);
         System.gc();
     }
 

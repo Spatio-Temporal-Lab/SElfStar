@@ -7,46 +7,40 @@ import java.io.IOException;
 public class ALPrdDecompression {
     private int nValues;
     private byte rightBW;
-    private short[] leftEncoded;
+    private final InputBitStream in;
     private long[] rightEncoded;
-    private short[] leftPartsDict;
-    private short exceptionsCount;
-    private short[] exceptions;
-    private short[] exceptionsPositions;
-    private InputBitStream in;
+    private int[] leftEncoded;
+    private int[] leftPartsDict;
+    private int exceptionsCount;
+    private int[] exceptions;
+    private int[] exceptionsPositions;
 
     public ALPrdDecompression(InputBitStream in) {
         this.in = in;
     }
 
-    public ALPrdDecompression(short[] leftEncoded, long[] rightEncoded, short[] leftPartsDict, int valuesCount, short exceptionsCount, short[] exceptions, short[] exceptionsPositions, byte rightBitWidth) {
-        // 仅供测试使用
-        this.leftEncoded = leftEncoded;
-        this.rightEncoded = rightEncoded;
-        this.leftPartsDict = leftPartsDict;
-        this.nValues = valuesCount;
-        this.exceptionsCount = exceptionsCount;
-        this.exceptions = exceptions;
-        this.exceptionsPositions = exceptionsPositions;
-        this.rightBW = rightBitWidth;
-    }
-
     public void deserialize() {
         try {
+            //少读一个零或者压缩时多写一个零
             nValues = in.readInt(32);
             rightBW = (byte) in.readInt(8);
+            leftEncoded = new int[nValues];
+            rightEncoded = new long[nValues];
             for (int i = 0; i < nValues; i++) {
-                leftEncoded[i] = (short) in.readLong(ALPrdConstants.DICTIONARY_BW);
+                leftEncoded[i] = in.readInt(ALPrdConstants.DICTIONARY_BW);
                 rightEncoded[i] = in.readLong(rightBW);
             }
             int leftBW = 64 - rightBW;
+            leftPartsDict = new int[ALPrdConstants.DICTIONARY_SIZE];
             for (int i = 0; i < ALPrdConstants.DICTIONARY_SIZE; i++) {
-                leftPartsDict[i] = (short) in.readLong(leftBW);
+                leftPartsDict[i] = in.readInt(leftBW);
             }
-            exceptionsCount = (short) in.readInt(16);
+            exceptionsCount = in.readInt(16);
+            exceptions = new int[exceptionsCount];
+            exceptionsPositions = new int[exceptionsCount];
             for (int i = 0; i < exceptionsCount; i++) {
-                exceptions[i] = (short) in.readLong(leftBW);
-                exceptionsPositions[i] = (short) in.readLong(16);
+                exceptions[i] = in.readInt(leftBW);
+                exceptionsPositions[i] = in.readInt(16);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -65,14 +59,12 @@ public class ALPrdDecompression {
     }
 
     public double[] decompress() {
-        deserialize();
-
         long[] outputLong = new long[nValues];
         double[] output = new double[nValues];
 
         // Decoding 拼接
         for (int i = 0; i < nValues; i++) {
-            short left = leftPartsDict[leftEncoded[i]];
+            int left = leftPartsDict[leftEncoded[i]];
             long right = rightEncoded[i];
             outputLong[i] = ((long) left << rightBW) | right;
         }
@@ -80,7 +72,7 @@ public class ALPrdDecompression {
         // Exceptions Patching (exceptions only occur in left parts) 处理异常值【字典外的值】
         for (int i = 0; i < exceptionsCount; i++) {
             long right = rightEncoded[exceptionsPositions[i]];
-            short left = exceptions[i];
+            int left = exceptions[i];
             outputLong[exceptionsPositions[i]] = (((long) left << rightBW) | right);
         }
 

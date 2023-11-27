@@ -1,6 +1,8 @@
 package com.github.Cwida.alp;
 
-import java.util.Vector;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ALPCompressionState {
     public byte vectorExponent;
@@ -11,7 +13,7 @@ public class ALPCompressionState {
     public long[] encodedIntegers = new long[ALPConstants.ALP_VECTOR_SIZE];
     public double[] exceptions = new double[ALPConstants.ALP_VECTOR_SIZE];
     public short[] exceptionsPositions = new short[ALPConstants.ALP_VECTOR_SIZE];
-    public Vector<ALPCombination> bestKCombinations = new Vector<>();
+    public List<ALPCombination> bestKCombinations = new ArrayList<>();
 
     public boolean useALP = true;
 

@@ -3,6 +3,8 @@ package com.github.Cwida.alp;
 import org.urbcomp.startdb.selfstar.utils.InputBitStream;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ALPDecompression {
     private static final double[] FRAC_ARR = {
@@ -115,14 +117,19 @@ public class ALPDecompression {
         return output;
     }
 
-    public double[] entry() throws IOException {
-        if (in.readBit() == 1) {
-            deserialize();
-            return decompress();
-        } else {
-            ALPrdDe.deserialize();
-            return ALPrdDe.decompress();
+    public List<double[]> entry() throws IOException {
+        List<double[]> result = new ArrayList<>();
+        int rowGroupSize = in.readInt(8);
+        for (int i = 0; i < rowGroupSize; i++) {
+            int useALPrd = in.readBit();
+            if (useALPrd == 1) {
+                deserialize();
+                result.add(decompress());
+            } else {
+                ALPrdDe.deserialize();
+                result.add(ALPrdDe.decompress());
+            }
         }
-
+        return result;
     }
 }
