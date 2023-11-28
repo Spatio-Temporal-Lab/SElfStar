@@ -35,12 +35,12 @@ public class TestCompressor {
     private final String[] fileNames = {
 //            INIT_FILE,
             "Air-pressure.csv",
-            "Air-sensor.csv",
-            "Basel-temp.csv",
-            "Basel-wind.csv",
-            "Bird-migration.csv",
-            "Bitcoin-price.csv",
-            "Blockchain-tr.csv",
+//            "Air-sensor.csv",
+//            "Basel-temp.csv",
+//            "Basel-wind.csv",
+//            "Bird-migration.csv",
+//            "Bitcoin-price.csv",
+//            "Blockchain-tr.csv",
             "City-lat.csv",
             "City-lon.csv",
             "City-temp.csv",
@@ -77,6 +77,7 @@ public class TestCompressor {
     }
 
     private void testALPCompressor(String fileName, int block) {
+        System.out.println(fileName);
         long compressorBits;
         String fileNameParam = fileName + "," + block;
         if (block == NO_PARAM) {

@@ -30,35 +30,22 @@ public class ALPDecompression {
             0.0000000000000000001,
             0.00000000000000000001
     };
-    private ALPrdDecompression ALPrdDe;
+    private final ALPrdDecompression ALPrdDe;
     private long[] encodedValue;
     private double[] output;
     private int count;
     private byte vectorFactor;
     private byte vectorExponent;
-    private short exceptionsCount;
+    private final InputBitStream in;
     private double[] exceptions;
-    private short[] exceptionsPositions;
+    private int exceptionsCount;
     private long frameOfReference;
-    private short bitWidth;
-    private InputBitStream in;
+    private int[] exceptionsPositions;
+    private int bitWidth;
 
     public ALPDecompression(byte[] bs) {
         in = new InputBitStream(bs);
         this.ALPrdDe = new ALPrdDecompression(in);
-    }
-
-    public ALPDecompression(byte e, byte f, short bitWidth, long frameOfReference, int count, long[] encodedValue, short exceptionsCount, double[] exceptions, short[] exceptionsPositions) {
-        // 仅供测试使用
-        this.vectorExponent = e;
-        this.vectorFactor = f;
-        this.bitWidth = bitWidth;
-        this.frameOfReference = frameOfReference;
-        this.count = count;
-        this.encodedValue = encodedValue;
-        this.exceptionsCount = exceptionsCount;
-        this.exceptions = exceptions;
-        this.exceptionsPositions = exceptionsPositions;
     }
 
     public void deserialize() {
@@ -76,16 +63,19 @@ public class ALPDecompression {
         try {
             vectorExponent = (byte) in.readInt(8);
             vectorFactor = (byte) in.readInt(8);
-            bitWidth = (short) in.readInt(16);
+            bitWidth = in.readInt(16);
             frameOfReference = in.readLong(64);
             count = in.readInt(32);
+            encodedValue = new long[count];
             for (int i = 0; i < count; i++) {
                 encodedValue[i] = in.readLong(bitWidth);
             }
-            exceptionsCount = (short) in.readInt(16);
+            exceptionsCount = in.readInt(16);
+            exceptions = new double[exceptionsCount];
+            exceptionsPositions = new int[exceptionsCount];
             for (int i = 0; i < exceptionsCount; i++) {
-                exceptions[i] = Double.doubleToRawLongBits(in.readLong(64));
-                exceptionsPositions[i] = (short) in.readLong(16);
+                exceptions[i] = Double.longBitsToDouble(in.readLong(64));
+                exceptionsPositions[i] = in.readInt(16);
             }
         } catch (IOException e) {
             e.printStackTrace();
