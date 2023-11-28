@@ -1,5 +1,6 @@
 package com.github.Cwida.alp;
 
+import org.apache.jena.base.Sys;
 import org.urbcomp.startdb.selfstar.utils.OutputBitStream;
 
 import java.io.BufferedReader;
@@ -63,7 +64,11 @@ public class ALPCompression {
     static ALPCompressionState state = new ALPCompressionState();
     private final OutputBitStream out;
     ALPrdCompression aLPrd;
-    private int size;
+    private long size;
+
+    public long getSize(){
+        return size;
+    }
 
     public ALPCompression() {
 
@@ -145,7 +150,7 @@ public class ALPCompression {
         for (int i = 0; i < nValues; i++) {
             double decodedValue = tmpDecodedValues.get(i);
             double actualValue = inputVector.get(i);
-            boolean isException = (decodedValue != actualValue);
+            boolean isException = (decodedValue != actualValue) || Double.doubleToRawLongBits(actualValue)==-9223372036854775808L;  // 将-0.00归为异常值
             if (isException)
                 exceptionsPositions.add((short) i);
         }

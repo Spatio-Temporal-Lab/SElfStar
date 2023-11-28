@@ -8,9 +8,9 @@ public class ALPrdCompression {
     static final byte EXACT_TYPE_BITSIZE = Double.SIZE;
     static ALPrdCompressionState state = new ALPrdCompressionState();
     private final OutputBitStream out;
-    private int size;
+    private long size;
 
-    public ALPrdCompression(OutputBitStream out, int size) {
+    public ALPrdCompression(OutputBitStream out, long size) {
         this.out = out;
         this.size = size;
     }
@@ -88,7 +88,7 @@ public class ALPrdCompression {
         return bestEstimatedSize;
     }
 
-    public int getSize() {
+    public long getSize() {
         return size;
     }
 
