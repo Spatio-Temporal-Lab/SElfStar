@@ -282,8 +282,9 @@ public class ALPCompression {
             // use ALPrd
             for (List<Double> row : rowGroup) {  // 逐行处理
                 aLPrd.entry(row);
-                size += aLPrd.getSize();
             }
+
+            size += aLPrd.getSize();
         } else {
             // use ALP
             for (List<Double> row : rowGroup) {  // 逐行处理

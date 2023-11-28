@@ -140,7 +140,6 @@ public class ALPrdCompression {
             size += out.writeInt(state.exceptions[i], state.leftBw);
             size += out.writeInt(state.exceptionsPositions[i], 16);
         }
-
         /*
         TODO: bit pack
             useALP=0            不使用ALP压缩   bit

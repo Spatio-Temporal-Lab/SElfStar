@@ -34,27 +34,27 @@ public class TestCompressor {
     private static final String INIT_FILE = "init.csv";     // warm up memory and cpu
     private final String[] fileNames = {
 //            INIT_FILE,
-            "Air-pressure.csv",
+            "Air-pressure.csv",//self*
             "Air-sensor.csv",
-            "Basel-temp.csv",
-            "Basel-wind.csv",
-            "Bird-migration.csv",
-            "Bitcoin-price.csv",
-            "Blockchain-tr.csv",
+            "Basel-temp.csv",//self*
+            "Basel-wind.csv",//self*
+            "Bird-migration.csv",//elf*
+            "Bitcoin-price.csv",//self*
+            "Blockchain-tr.csv",//self*
             "City-lat.csv",
             "City-lon.csv",
             "City-temp.csv",
             "Dew-point-temp.csv",
             "electric_vehicle_charging.csv",
-            "Food-price.csv",
-            "IR-bio-temp.csv",
-            "PM10-dust.csv",
+            "Food-price.csv",//self*
+            "IR-bio-temp.csv",//elf*
+            "PM10-dust.csv",//self*
             "POI-lat.csv",
             "POI-lon.csv",
-            "SSD-bench.csv",
-            "Stocks-DE.csv",
-            "Stocks-UK.csv",
-            "Stocks-USA.csv",
+            "SSD-bench.csv",//self*
+            "Stocks-DE.csv",//self*
+            "Stocks-UK.csv",//self*
+            "Stocks-USA.csv",//self*
             "Wind-Speed.csv"
     };
 
@@ -109,6 +109,7 @@ public class TestCompressor {
                     assertEquals(floatingsList.get(i).get(j), deValue.get(i)[j], "Value did not match");
                 }
             }
+            System.out.println(compressor.getSize() / (floatingsList.size() * 64.0 * 1000));
 //
 //            if (floatings.size() != block) {
 //                break;
