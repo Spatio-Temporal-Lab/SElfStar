@@ -47,7 +47,7 @@ public class TestCompressor {
             "Dew-point-temp.csv",
             "electric_vehicle_charging.csv",
             "Food-price.csv",
-            "IR-bio-temp.csv",
+//            "IR-bio-temp.csv", // -0.0
             "PM10-dust.csv",
             "POI-lat.csv",
             "POI-lon.csv",

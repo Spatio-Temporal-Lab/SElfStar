@@ -153,7 +153,7 @@ public class ALPCompression {
         // Finding first non exception value
         long aNonExceptionValue = 0;
         for (int i = 0; i < nValues; i++) {
-            if (i != exceptionsPositions.get(i)) {
+            if (exceptionsPositions.isEmpty() || i != exceptionsPositions.get(i)) {
                 aNonExceptionValue = state.encodedIntegers[i];
                 break;
             }
@@ -288,6 +288,7 @@ public class ALPCompression {
                 compress(row, ALPConstants.ALP_VECTOR_SIZE, state);
             }
         }
+        out.flush();
     }
 
     // 第一级采样

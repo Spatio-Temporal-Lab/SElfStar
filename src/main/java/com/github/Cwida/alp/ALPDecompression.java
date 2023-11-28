@@ -79,12 +79,15 @@ public class ALPDecompression {
             bitWidth = (short) in.readInt(16);
             frameOfReference = in.readLong(64);
             count = in.readInt(32);
+            encodedValue = new long[count];
             for (int i = 0; i < count; i++) {
                 encodedValue[i] = in.readLong(bitWidth);
             }
             exceptionsCount = (short) in.readInt(16);
+            exceptions = new double[exceptionsCount];
+            exceptionsPositions = new short[exceptionsCount];
             for (int i = 0; i < exceptionsCount; i++) {
-                exceptions[i] = Double.doubleToRawLongBits(in.readLong(64));
+                exceptions[i] = Double.longBitsToDouble(in.readLong(64));
                 exceptionsPositions[i] = (short) in.readLong(16);
             }
         } catch (IOException e) {
@@ -121,8 +124,8 @@ public class ALPDecompression {
         List<double[]> result = new ArrayList<>();
         int rowGroupSize = in.readInt(8);
         for (int i = 0; i < rowGroupSize; i++) {
-            int useALPrd = in.readBit();
-            if (useALPrd == 1) {
+            int useALP = in.readBit();
+            if (useALP == 1) {
                 deserialize();
                 result.add(decompress());
             } else {

@@ -129,16 +129,16 @@ public class ALPrdCompression {
         size += out.writeInt(nValues, 32);
         size += out.writeInt(state.rightBw, 8);
         for (int i = 0; i < nValues; i++) {
-            size += out.writeLong(leftParts[i], ALPrdConstants.DICTIONARY_BW);
+            size += out.writeInt(leftParts[i], ALPrdConstants.DICTIONARY_BW);
             size += out.writeLong(rightParts[i], state.rightBw);
         }
         for (int i = 0; i < ALPrdConstants.DICTIONARY_SIZE; i++) {
-            size += out.writeLong(state.leftPartsDict[i], state.leftBw);
+            size += out.writeInt(state.leftPartsDict[i], state.leftBw);
         }
-        size += out.writeLong(exceptionsCount, 16);
+        size += out.writeInt(exceptionsCount, 16);
         for (int i = 0; i < exceptionsCount; i++) {
-            size += out.writeLong(state.exceptions[i], state.leftBw);
-            size += out.writeLong(state.exceptionsPositions[i], 16);
+            size += out.writeInt(state.exceptions[i], state.leftBw);
+            size += out.writeInt(state.exceptionsPositions[i], 16);
         }
 
         /*
