@@ -34,7 +34,7 @@ public class TestCompressor {
     private static final int NO_PARAM = 0;
     private static final String INIT_FILE = "init.csv";     // warm up memory and cpu
     private final String[] fileNames = {
-            INIT_FILE,
+//            INIT_FILE,
             "Air-pressure.csv",
             "Air-sensor.csv",
             "Bird-migration.csv",
@@ -415,32 +415,78 @@ public class TestCompressor {
         double encodingDuration = 0;
         double decodingDuration = 0;
         try (BlockReader br = new BlockReader(fileName, block)) {
+            List<List<List<Double>>> RowGroups = new ArrayList<>();
             List<List<Double>> floatingsList = new ArrayList<>();
-            List<Double> floatings;
-            while ((floatings = br.nextBlock()) != null) {
-                if (floatings.size() != block) {
+            List<Double> floatings = new ArrayList<>();
+            List<Double> tmpFloatings;
+            int RGsize = 100;
+            int nValues = 1000; // 注意修改此处
+            while ((tmpFloatings = br.nextBlock()) != null) {
+                if (tmpFloatings.size() != block) {
                     break;
                 }
-                floatingsList.add(floatings);
-                fileNameParamToTotalBits.put(fileNameParam, fileNameParamToTotalBits.get(fileNameParam) + floatings.size() * 64L);
+                if (tmpFloatings.size() < nValues){
+                    floatings.addAll(tmpFloatings);
+                    if (floatings.size() == nValues){
+                        floatingsList.add(new ArrayList<>(floatings)); // 注意使用拷贝
+                        fileNameParamToTotalBits.put(fileNameParam, fileNameParamToTotalBits.get(fileNameParam) + floatings.size() * 64L);
+                        floatings.clear();
+                        if (floatingsList.size()==RGsize){
+                            RowGroups.add(new ArrayList<>(floatingsList));
+                            floatingsList.clear();
+                        }
+                    }
+                } else if (tmpFloatings.size() == nValues) {
+                    floatingsList.add(new ArrayList<>(tmpFloatings));
+                    fileNameParamToTotalBits.put(fileNameParam, fileNameParamToTotalBits.get(fileNameParam) + tmpFloatings.size() * 64L);
+                    if (floatingsList.size()==RGsize){
+                        RowGroups.add(new ArrayList<>(floatingsList));
+                        floatingsList.clear();
+                    }
+                }else{
+                    int readIdx=0;
+                    for(;tmpFloatings.size() - readIdx >= nValues;readIdx += nValues){
+                        floatings = tmpFloatings.subList(readIdx,readIdx+nValues);
+                        floatingsList.add(new ArrayList<>(floatings));
+                        fileNameParamToTotalBits.put(fileNameParam, fileNameParamToTotalBits.get(fileNameParam) + floatings.size() * 64L);
+                        if (floatingsList.size()==RGsize){
+                            RowGroups.add(new ArrayList<>(floatingsList));
+                            floatingsList.clear();
+                        }
+                    }
+                }
                 fileNameParamToTotalBlock.put(fileNameParam, fileNameParamToTotalBlock.get(fileNameParam) + 1L);
+            }
+            if (!floatingsList.isEmpty()){
+                RowGroups.add(floatingsList);
             }
 
             long start = System.nanoTime();
             ALPCompression compressor = new ALPCompression();
-            compressor.entry(floatingsList);
+            for (List<List<Double>> rowGroup : RowGroups){
+                compressor.entry(rowGroup);
+                compressor.reset();
+            }
+            compressor.flush();
             encodingDuration += System.nanoTime() - start;
 
             byte[] result = compressor.getOut();
 
             start = System.nanoTime();
             ALPDecompression decompressor = new ALPDecompression(result);
-            List<double[]> deValue = decompressor.entry();
+
+            List<List<double[]>> deValues = new ArrayList<>();
+            for (int i=0;i<RowGroups.size();i++){
+                List<double[]> deValue = decompressor.entry();
+                deValues.add(deValue);
+            }
             decodingDuration += System.nanoTime() - start;
 
-            for (int i = 0; i < floatingsList.size(); i++) {
-                for (int j = 0; j < floatingsList.get(i).size(); j++) {
-                    assertEquals(floatingsList.get(i).get(j), deValue.get(i)[j], "Value did not match");
+            for (int RGidx = 0;RGidx<RowGroups.size();RGidx++) {
+                for (int i = 0; i < RowGroups.get(RGidx).size(); i++) {
+                    for (int j = 0; j < RowGroups.get(RGidx).get(i).size(); j++) {
+                        assertEquals(RowGroups.get(RGidx).get(i).get(j), deValues.get(RGidx).get(i)[j], "Value did not match");
+                    }
                 }
             }
             compressorBits = compressor.getSize();

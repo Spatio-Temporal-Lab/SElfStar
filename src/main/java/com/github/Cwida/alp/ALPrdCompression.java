@@ -10,6 +10,10 @@ public class ALPrdCompression {
     private final OutputBitStream out;
     private long size;
 
+    public void reset(){
+        state.reset();
+    }
+
     public ALPrdCompression(OutputBitStream out, long size) {
         this.out = out;
         this.size = size;

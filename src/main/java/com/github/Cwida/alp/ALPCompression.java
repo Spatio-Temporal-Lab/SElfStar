@@ -66,6 +66,11 @@ public class ALPCompression {
     ALPrdCompression aLPrd;
     private long size;
 
+    public void reset(){
+        state.reset();
+        aLPrd.reset();
+    }
+
     public long getSize(){
         return size;
     }
@@ -112,7 +117,7 @@ public class ALPCompression {
             double value = Double.parseDouble(line.trim());
             currentVector.add(value);
 
-            if (currentVector.size() == 1000) {
+            if (currentVector.size() == ALPConstants.ALP_VECTOR_SIZE) {
                 data.add(currentVector);
                 currentVector = new ArrayList<>();
             }
@@ -158,7 +163,7 @@ public class ALPCompression {
         // Finding first non exception value
         long aNonExceptionValue = 0;
         for (int i = 0; i < nValues; i++) {
-            if (exceptionsPositions.isEmpty() || i != exceptionsPositions.get(i)) {
+            if (i == exceptionsPositions.size() || i != exceptionsPositions.get(i)) {
                 aNonExceptionValue = state.encodedIntegers[i];
                 break;
             }
@@ -264,6 +269,10 @@ public class ALPCompression {
         }
     }
 
+    public void flush() {
+        out.flush();
+    }
+
     /**
      * ALP & ALPrd 算法压缩入口
      *
@@ -294,7 +303,7 @@ public class ALPCompression {
                 compress(row, ALPConstants.ALP_VECTOR_SIZE, state);
             }
         }
-        out.flush();
+//        out.flush();
     }
 
     // 第一级采样
