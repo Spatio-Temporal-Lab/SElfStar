@@ -38,7 +38,7 @@ public class ChimpNXORCompressor implements IXORCompressor {
     private final int[] indices;
     private final int flagOneSize;
     private final int flagZeroSize;
-    private final int capacity = 1000;
+    private int capacity = 1000;
     private int storedLeadingZeros = Integer.MAX_VALUE;
     private boolean first = true;
     private OutputBitStream out;
@@ -47,6 +47,21 @@ public class ChimpNXORCompressor implements IXORCompressor {
 
     // We should have access to the series?
     public ChimpNXORCompressor(int previousValues) {
+//        out = output;
+        out = new OutputBitStream(
+                new byte[(int) (((capacity + 1) * 8 + capacity / 8 + 1) * 1.2)]);
+        this.previousValues = previousValues;
+        int previousValuesLog2 = (int) (Math.log(previousValues) / Math.log(2));
+        this.threshold = 6 + previousValuesLog2;
+        this.setLsb = (int) Math.pow(2, threshold + 1) - 1;
+        this.indices = new int[(int) Math.pow(2, threshold + 1)];
+        this.storedValues = new long[previousValues];
+        this.flagZeroSize = previousValuesLog2 + 2;
+        this.flagOneSize = previousValuesLog2 + 11;
+    }
+
+    public ChimpNXORCompressor(int previousValues, int block) {
+        capacity = block;
 //        out = output;
         out = new OutputBitStream(
                 new byte[(int) (((capacity + 1) * 8 + capacity / 8 + 1) * 1.2)]);

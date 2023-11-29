@@ -30,7 +30,7 @@ public class ALPDecompression {
             0.0000000000000000001,
             0.00000000000000000001
     };
-    private ALPrdDecompression ALPrdDe;
+    private final ALPrdDecompression ALPrdDe;
     private long[] encodedValue;
     private double[] output;
     private int count;
@@ -41,24 +41,11 @@ public class ALPDecompression {
     private short[] exceptionsPositions;
     private long frameOfReference;
     private short bitWidth;
-    private InputBitStream in;
+    private final InputBitStream in;
 
     public ALPDecompression(byte[] bs) {
         in = new InputBitStream(bs);
         this.ALPrdDe = new ALPrdDecompression(in);
-    }
-
-    public ALPDecompression(byte e, byte f, short bitWidth, long frameOfReference, int count, long[] encodedValue, short exceptionsCount, double[] exceptions, short[] exceptionsPositions) {
-        // 仅供测试使用
-        this.vectorExponent = e;
-        this.vectorFactor = f;
-        this.bitWidth = bitWidth;
-        this.frameOfReference = frameOfReference;
-        this.count = count;
-        this.encodedValue = encodedValue;
-        this.exceptionsCount = exceptionsCount;
-        this.exceptions = exceptions;
-        this.exceptionsPositions = exceptionsPositions;
     }
 
     public void deserialize() {
