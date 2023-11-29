@@ -1,6 +1,6 @@
 package org.urbcomp.startdb.selfstar.utils;
 
-public class PostOfficeSolverWOF {
+public class PostOfficeSolverWOZ {
     // 2^index
     public static final int[] pow2z = {1, 2, 4, 8, 16, 32};
 
@@ -37,8 +37,8 @@ public class PostOfficeSolverWOF {
             if (presentCost >= totalCost) {
                 break;
             }
-            int num = PostOfficeSolverWOF.pow2z[z];     // 邮局的总数量
-            PostOfficeResult por = PostOfficeSolverWOF.buildPostOffice(
+            int num = PostOfficeSolverWOZ.pow2z[z];     // 邮局的总数量
+            PostOfficeResult por = PostOfficeSolverWOZ.buildPostOffice(
                     distribution, num, totalCountAndNonZerosCount[1], preNonZerosCount, postNonZerosCount);
             int tempTotalCost = por.getAppCost() + presentCost;
             if (tempTotalCost < totalCost) {
@@ -165,12 +165,6 @@ public class PostOfficeSolverWOF {
         for (int i = num - 1; i < arr.length; i++) {
             if (num - 1 == 0 && i > 0) {
                 break;
-            }
-            if (arr[i] == 0 && i > 0) {
-                continue;
-            }
-            if (preNonZerosCount[i] < num) {
-                continue;
             }
             int sum = dp[i][num - 1];
             for (int j = i + 1; j < arr.length; j++) {
