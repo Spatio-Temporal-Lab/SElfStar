@@ -6,7 +6,7 @@ import java.util.*;
 
 public class ALPrdCompression32 {
     static final byte EXACT_TYPE_BITSIZE = Float.SIZE;
-    static ALPrdCompressionState state = new ALPrdCompressionState();
+    static ALPrdCompressionState32 state;
     private final OutputBitStream out;
     private long size;
 
@@ -19,6 +19,13 @@ public class ALPrdCompression32 {
         this.size = size;
     }
 
+    public ALPrdCompression32(OutputBitStream out, long size, int vectorSize) {
+        this.out = out;
+        this.size = size;
+        ALPrdConstants.setVectorSize(vectorSize);
+        state = new ALPrdCompressionState32(vectorSize);
+    }
+
     public static double estimateCompressionSize(byte rightBw, byte leftBw, short exceptionsCount, long sampleCount) {
         double exceptionsSize = exceptionsCount * ((ALPrdConstants.EXCEPTION_POSITION_SIZE + ALPrdConstants.EXCEPTION_SIZE) * 8);
         double estimatedSize = rightBw + leftBw + (exceptionsSize / sampleCount);
@@ -26,7 +33,7 @@ public class ALPrdCompression32 {
     }
 
     public static double buildLeftPartsDictionary(List<Integer> values, byte rightBw, byte leftBw,
-                                                  boolean persistDict, ALPrdCompressionState state) {
+                                                  boolean persistDict, ALPrdCompressionState32 state) {
         Map<Integer, Integer> leftPartsHash = new HashMap<>();
         List<Map.Entry<Integer, Integer>> leftPartsSortedRepetitions = new ArrayList<>();   // <出现次数，左值>
 
@@ -71,7 +78,7 @@ public class ALPrdCompression32 {
         return estimatedSize;
     }
 
-    public static double findBestDictionary(List<Integer> values, ALPrdCompressionState state) {
+    public static double findBestDictionary(List<Integer> values, ALPrdCompressionState32 state) {
         int lBw = ALPrdConstants.DICTIONARY_BW;
         int rBw = EXACT_TYPE_BITSIZE;
         double bestDictSize = Integer.MAX_VALUE;
@@ -96,7 +103,7 @@ public class ALPrdCompression32 {
         return size;
     }
 
-    public void compress(List<Integer> in, int nValues, ALPrdCompressionState state) {
+    public void compress(List<Integer> in, int nValues, ALPrdCompressionState32 state) {
         int[] rightParts = new int[ALPrdConstants.ALP_VECTOR_SIZE];
         short[] leftParts = new short[ALPrdConstants.ALP_VECTOR_SIZE];
 

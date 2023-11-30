@@ -34,11 +34,10 @@ public class ALPCompression32 {
             0.000000001F,
             0.0000000001F
     };
-    static ALPCompressionState32 state = new ALPCompressionState32();
+    static ALPCompressionState32 state;
     private final OutputBitStream out;
     ALPrdCompression32 aLPrd;
     private long size;
-    public int ALP_VECTOR_SIZE = 1000; // 每个向量所含的值的数量
 
     public void reset(){
         state.reset();
@@ -54,6 +53,16 @@ public class ALPCompression32 {
                 new byte[7000000]);
         this.aLPrd = new ALPrdCompression32(out, size);
         size = 0;
+        state = new ALPCompressionState32();
+    }
+
+    public ALPCompression32(int vectorSize) {
+        this.out = new OutputBitStream(
+                new byte[7000000]);
+        this.aLPrd = new ALPrdCompression32(out, size, vectorSize);
+        size = 0;
+        ALPConstants.selfAdaption(vectorSize);
+        state = new ALPCompressionState32(vectorSize);
     }
 
     /**
@@ -240,9 +249,9 @@ public class ALPCompression32 {
             // use ALP
             for (List<Float> row : rowGroup) {  // 逐行处理
                 // 第二级采样，获取最佳组合
-                findBestFactorAndExponent(row, ALP_VECTOR_SIZE, state);
+                findBestFactorAndExponent(row, ALPConstants.ALP_VECTOR_SIZE, state);
                 // 压缩处理
-                compress(row, ALP_VECTOR_SIZE, state);
+                compress(row, ALPConstants.ALP_VECTOR_SIZE, state);
             }
         }
 //        out.flush();

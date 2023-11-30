@@ -58,11 +58,10 @@ public class ALPCompression {
             0.0000000000000000001,
             0.00000000000000000001
     };
-    static ALPCompressionState state = new ALPCompressionState();
+    static ALPCompressionState state;
     private final OutputBitStream out;
     ALPrdCompression aLPrd;
     private long size;
-    public int ALP_VECTOR_SIZE = 1000; // 每个向量所含的值的数量
 
     public void reset(){
         state.reset();
@@ -79,6 +78,7 @@ public class ALPCompression {
                 new byte[7000000]);
         this.aLPrd = new ALPrdCompression(out, size);
         size = 0;
+        state = new ALPCompressionState();
     }
 
     public ALPCompression(int vectorSize) {
@@ -86,7 +86,8 @@ public class ALPCompression {
                 new byte[7000000]);
         this.aLPrd = new ALPrdCompression(out, size, vectorSize);
         size = 0;
-        ALP_VECTOR_SIZE = vectorSize;
+        ALPConstants.selfAdaption(vectorSize);
+        state = new ALPCompressionState(vectorSize);
     }
 
     /**
@@ -263,8 +264,8 @@ public class ALPCompression {
         findTopKCombinations(vectorsSampled);
         size += out.writeLong(rowGroup.size(), 8);
         if (!state.useALP) {
-            System.out.println("alprd");
             // use ALPrd
+//            System.out.println("alprd");
             for (List<Double> row : rowGroup) {  // 逐行处理
                 aLPrd.entry(row);
             }
@@ -272,12 +273,12 @@ public class ALPCompression {
             size += aLPrd.getSize();
         } else {
             // use ALP
-            System.out.println("alp");
+//            System.out.println("alp");
             for (List<Double> row : rowGroup) {  // 逐行处理
                 // 第二级采样，获取最佳组合
-                findBestFactorAndExponent(row, ALP_VECTOR_SIZE, state);
+                findBestFactorAndExponent(row, ALPConstants.ALP_VECTOR_SIZE, state);
                 // 压缩处理
-                compress(row, ALP_VECTOR_SIZE, state);
+                compress(row, ALPConstants.ALP_VECTOR_SIZE, state);
             }
         }
 //        out.flush();

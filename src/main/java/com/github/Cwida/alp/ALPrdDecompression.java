@@ -70,7 +70,6 @@ public class ALPrdDecompression {
 
         // Exceptions Patching (exceptions only occur in left parts) 处理异常值【字典外的值】
 
-        // 我猜测这里可能有点小问题
 
         for (int i = 0; i < exceptionsCount; i++) {
             long right = rightEncoded[exceptionsPositions[i]];

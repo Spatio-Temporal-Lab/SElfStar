@@ -6,10 +6,9 @@ import java.util.*;
 
 public class ALPrdCompression {
     static final byte EXACT_TYPE_BITSIZE = Double.SIZE;
-    static ALPrdCompressionState state = new ALPrdCompressionState();
+    static ALPrdCompressionState state;
     private final OutputBitStream out;
     private long size;
-    public int ALP_VECTOR_SIZE = 1000;
 
     public void reset() {
         state.reset();
@@ -23,7 +22,8 @@ public class ALPrdCompression {
     public ALPrdCompression(OutputBitStream out, long size, int vectorSize) {
         this.out = out;
         this.size = size;
-        ALP_VECTOR_SIZE = vectorSize;
+        ALPrdConstants.setVectorSize(vectorSize);
+        state = new ALPrdCompressionState(vectorSize);
     }
 
     public static double estimateCompressionSize(byte rightBw, byte leftBw, short exceptionsCount, long sampleCount) {

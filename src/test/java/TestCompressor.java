@@ -418,43 +418,17 @@ public class TestCompressor {
         try (BlockReader br = new BlockReader(fileName, block)) {
             List<List<List<Double>>> RowGroups = new ArrayList<>();
             List<List<Double>> floatingsList = new ArrayList<>();
-            List<Double> floatings = new ArrayList<>();
-            List<Double> tmpFloatings;
+            List<Double> floatings ;
             int RGsize = 100;
-            int nValues = block; // 注意修改此处
-            while ((tmpFloatings = br.nextBlock()) != null) {
-                if (tmpFloatings.size() != block) {
+            while ((floatings = br.nextBlock()) != null) {
+                if (floatings.size() != block) {
                     break;
                 }
-                if (tmpFloatings.size() < nValues){
-                    floatings.addAll(tmpFloatings);
-                    if (floatings.size() == nValues){
-                        floatingsList.add(new ArrayList<>(floatings)); // 注意使用拷贝
-                        fileNameParamToTotalBits.put(fileNameParam, fileNameParamToTotalBits.get(fileNameParam) + floatings.size() * 64L);
-                        floatings.clear();
-                        if (floatingsList.size()==RGsize){
-                            RowGroups.add(new ArrayList<>(floatingsList));
-                            floatingsList.clear();
-                        }
-                    }
-                } else if (tmpFloatings.size() == nValues) {
-                    floatingsList.add(new ArrayList<>(tmpFloatings));
-                    fileNameParamToTotalBits.put(fileNameParam, fileNameParamToTotalBits.get(fileNameParam) + tmpFloatings.size() * 64L);
-                    if (floatingsList.size()==RGsize){
-                        RowGroups.add(new ArrayList<>(floatingsList));
-                        floatingsList.clear();
-                    }
-                }else{
-                    int readIdx=0;
-                    for(;tmpFloatings.size() - readIdx >= nValues;readIdx += nValues){
-                        floatings = tmpFloatings.subList(readIdx,readIdx+nValues);
-                        floatingsList.add(new ArrayList<>(floatings));
-                        fileNameParamToTotalBits.put(fileNameParam, fileNameParamToTotalBits.get(fileNameParam) + floatings.size() * 64L);
-                        if (floatingsList.size()==RGsize){
-                            RowGroups.add(new ArrayList<>(floatingsList));
-                            floatingsList.clear();
-                        }
-                    }
+                floatingsList.add(new ArrayList<>(floatings));
+                fileNameParamToTotalBits.put(fileNameParam, fileNameParamToTotalBits.get(fileNameParam) + floatings.size() * 64L);
+                if (floatingsList.size()==RGsize){
+                    RowGroups.add(new ArrayList<>(floatingsList));
+                    floatingsList.clear();
                 }
                 fileNameParamToTotalBlock.put(fileNameParam, fileNameParamToTotalBlock.get(fileNameParam) + 1L);
             }

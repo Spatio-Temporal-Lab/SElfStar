@@ -10,9 +10,9 @@ public class ALPCompressionState {
     public short exceptionsCount;
     public short bitWidth;
     public long frameOfReference;
-    public long[] encodedIntegers = new long[1000];
-    public double[] exceptions = new double[1000];
-    public short[] exceptionsPositions = new short[1000];
+    public long[] encodedIntegers;
+    public double[] exceptions;
+    public short[] exceptionsPositions;
     public List<ALPCombination> bestKCombinations = new ArrayList<>();
 
     public boolean useALP = true;
