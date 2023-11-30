@@ -120,9 +120,6 @@ public class PostOfficeSolverWOG {
         pre[0][0] = -1;                     // 让dp[0][0]最小时，第-1个邮局所在的位置信息为-1
 
         for (int i = 1; i < arr.length; i++) {
-            if (arr[i] == 0) {
-                continue;
-            }
             for (int j = Math.max(1, num + i - arr.length); j <= i && j < num; j++) {
                 // arr.length - i < num - j，表示i后面的居民数（arr.length - i）不足以构建剩下的num - j个邮局
                 if (i > 1 && j == 1) {
@@ -132,9 +129,6 @@ public class PostOfficeSolverWOG {
                     }
                     pre[i][j] = 0;
                 } else {
-                    if (preNonZerosCount[i] < j + 1 || postNonZerosCount[i] < num - 1 - j) {
-                        continue;
-                    }
                     int appCost = Integer.MAX_VALUE;
                     int preK = 0;
                     for (int k = j - 1; k <= i - 1; k++) {

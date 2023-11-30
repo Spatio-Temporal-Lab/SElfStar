@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestCompressor {
 
-    private static final String STORE_FILE = "src/test/resources/result/resultALP.csv";
+    private static final String STORE_FILE = "src/test/resources/result/resultVLDB.csv";
     private static final String STORE_PRUNING_FILE = "src/test/resources/result/resultPruning.csv";
     private static final String STORE_WINDOW_FILE = "src/test/resources/result/resultWindow.csv";
     private static final String STORE_BLOCK_FILE = "src/test/resources/result/resultBlockVLDB.csv";
@@ -85,7 +85,7 @@ public class TestCompressor {
 //            testXZCompressor(fileName, NO_PARAM);
 //            testZstdCompressor(fileName, NO_PARAM);
 //            testSnappyCompressor(fileName, NO_PARAM);
-            testBuffCompressor(fileName, NO_PARAM);
+//            testBuffCompressor(fileName, NO_PARAM);
 //            testFloatingCompressor(fileName);
         }
         fileNameParamMethodToCompressedBits.forEach((fileNameParamMethod, compressedBits) -> {
@@ -162,6 +162,7 @@ public class TestCompressor {
                         new ElfDecompressor(new ElfXORDecompressor()),
                         new ElfStarDecompressor(new ElfStarXORDecompressor()),
                 };
+                testALPCompressor(fileName, block);
 //                testBuffCompressor(fileName, block);
 //                testParamCompressor(fileName, block, compressors, deco11mpressors);
 //                testZstdCompressor(fileName, block);
@@ -420,7 +421,7 @@ public class TestCompressor {
             List<Double> floatings = new ArrayList<>();
             List<Double> tmpFloatings;
             int RGsize = 100;
-            int nValues = 1000; // 注意修改此处
+            int nValues = block; // 注意修改此处
             while ((tmpFloatings = br.nextBlock()) != null) {
                 if (tmpFloatings.size() != block) {
                     break;
@@ -462,7 +463,7 @@ public class TestCompressor {
             }
 
             long start = System.nanoTime();
-            ALPCompression compressor = new ALPCompression();
+            ALPCompression compressor = new ALPCompression(block);
             for (List<List<Double>> rowGroup : RowGroups){
                 compressor.entry(rowGroup);
                 compressor.reset();
@@ -841,7 +842,7 @@ public class TestCompressor {
                 throw new IOException("Create directory failed: " + file);
             }
             try (FileWriter writer = new FileWriter(storeFile, true)) {
-                writer.write("Param, Method, Ratio, CTime, DTime");
+                writer.write("Dataset,Param, Method, Ratio, CTime, DTime");
                 writer.write("\r\n");
                 // 遍历键，并写入对应的值
                 for (String fileNameParamMethod : fileNameParamMethodToRatio.keySet()) {

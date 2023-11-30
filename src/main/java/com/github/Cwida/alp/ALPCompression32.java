@@ -1,10 +1,7 @@
 package com.github.Cwida.alp;
 
-import org.apache.jena.base.Sys;
 import org.urbcomp.startdb.selfstar.utils.OutputBitStream;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 
@@ -41,6 +38,7 @@ public class ALPCompression32 {
     private final OutputBitStream out;
     ALPrdCompression32 aLPrd;
     private long size;
+    public int ALP_VECTOR_SIZE = 1000; // 每个向量所含的值的数量
 
     public void reset(){
         state.reset();
@@ -52,7 +50,6 @@ public class ALPCompression32 {
     }
 
     public ALPCompression32() {
-
         this.out = new OutputBitStream(
                 new byte[7000000]);
         this.aLPrd = new ALPrdCompression32(out, size);
@@ -71,37 +68,6 @@ public class ALPCompression32 {
         return (long) n;
     }
 
-    public static void main(String[] args) {
-        String filePath = "D:\\workplace\\github\\SElfStar\\src\\main\\resources\\floating\\Air-pressure.csv";
-        try {
-            List<List<Float>> csvData = readCSV(filePath);
-            ALPCompression32 ALP = new ALPCompression32();
-            ALP.entry(csvData);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    // 仅测试使用
-    public static List<List<Float>> readCSV(String filePath) throws IOException {
-        List<List<Float>> data = new ArrayList<>();
-        List<Float> currentVector = new ArrayList<>();
-        BufferedReader br = new BufferedReader(new FileReader(filePath));
-
-        String line;
-        while ((line = br.readLine()) != null) {
-            float value = Float.parseFloat(line.trim());
-            currentVector.add(value);
-
-            if (currentVector.size() == ALPConstants.ALP_VECTOR_SIZE) {
-                data.add(currentVector);
-                currentVector = new ArrayList<>();
-            }
-        }
-        br.close();
-
-        return data;
-    }
 
     public void compress(List<Float> inputVector, int nValues, ALPCompressionState32 state) {
         if (state.bestKCombinations.size() > 1) {
@@ -274,9 +240,9 @@ public class ALPCompression32 {
             // use ALP
             for (List<Float> row : rowGroup) {  // 逐行处理
                 // 第二级采样，获取最佳组合
-                findBestFactorAndExponent(row, ALPConstants.ALP_VECTOR_SIZE, state);
+                findBestFactorAndExponent(row, ALP_VECTOR_SIZE, state);
                 // 压缩处理
-                compress(row, ALPConstants.ALP_VECTOR_SIZE, state);
+                compress(row, ALP_VECTOR_SIZE, state);
             }
         }
 //        out.flush();

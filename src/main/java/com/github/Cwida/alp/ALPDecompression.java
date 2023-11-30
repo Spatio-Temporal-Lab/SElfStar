@@ -113,9 +113,11 @@ public class ALPDecompression {
         for (int i = 0; i < rowGroupSize; i++) {
             int useALP = in.readBit();
             if (useALP == 1) {
+                System.out.println("ALP");
                 deserialize();
                 result.add(decompress());
             } else {
+                System.out.println("ALPrd");
                 ALPrdDe.deserialize();
                 result.add(ALPrdDe.decompress());
             }

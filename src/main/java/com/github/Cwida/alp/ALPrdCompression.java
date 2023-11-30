@@ -9,14 +9,21 @@ public class ALPrdCompression {
     static ALPrdCompressionState state = new ALPrdCompressionState();
     private final OutputBitStream out;
     private long size;
+    public int ALP_VECTOR_SIZE = 1000;
 
-    public void reset(){
+    public void reset() {
         state.reset();
     }
 
     public ALPrdCompression(OutputBitStream out, long size) {
         this.out = out;
         this.size = size;
+    }
+
+    public ALPrdCompression(OutputBitStream out, long size, int vectorSize) {
+        this.out = out;
+        this.size = size;
+        ALP_VECTOR_SIZE = vectorSize;
     }
 
     public static double estimateCompressionSize(byte rightBw, byte leftBw, short exceptionsCount, long sampleCount) {

@@ -1,10 +1,7 @@
 package com.github.Cwida.alp;
 
-import org.apache.jena.base.Sys;
 import org.urbcomp.startdb.selfstar.utils.OutputBitStream;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 
@@ -65,6 +62,7 @@ public class ALPCompression {
     private final OutputBitStream out;
     ALPrdCompression aLPrd;
     private long size;
+    public int ALP_VECTOR_SIZE = 1000; // 每个向量所含的值的数量
 
     public void reset(){
         state.reset();
@@ -83,6 +81,14 @@ public class ALPCompression {
         size = 0;
     }
 
+    public ALPCompression(int vectorSize) {
+        this.out = new OutputBitStream(
+                new byte[7000000]);
+        this.aLPrd = new ALPrdCompression(out, size, vectorSize);
+        size = 0;
+        ALP_VECTOR_SIZE = vectorSize;
+    }
+
     /**
      * 用于将double转为long，来自文章中的fast rounding部分
      *
@@ -95,37 +101,6 @@ public class ALPCompression {
         return (long) n;
     }
 
-    public static void main(String[] args) {
-        String filePath = "D:\\workplace\\github\\SElfStar\\src\\main\\resources\\floating\\Air-pressure.csv";
-        try {
-            List<List<Double>> csvData = readCSV(filePath);
-            ALPCompression ALP = new ALPCompression();
-            ALP.entry(csvData);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    // 仅测试使用
-    public static List<List<Double>> readCSV(String filePath) throws IOException {
-        List<List<Double>> data = new ArrayList<>();
-        List<Double> currentVector = new ArrayList<>();
-        BufferedReader br = new BufferedReader(new FileReader(filePath));
-
-        String line;
-        while ((line = br.readLine()) != null) {
-            double value = Double.parseDouble(line.trim());
-            currentVector.add(value);
-
-            if (currentVector.size() == ALPConstants.ALP_VECTOR_SIZE) {
-                data.add(currentVector);
-                currentVector = new ArrayList<>();
-            }
-        }
-        br.close();
-
-        return data;
-    }
 
     public void compress(List<Double> inputVector, int nValues, ALPCompressionState state) {
         if (state.bestKCombinations.size() > 1) {
@@ -288,6 +263,7 @@ public class ALPCompression {
         findTopKCombinations(vectorsSampled);
         size += out.writeLong(rowGroup.size(), 8);
         if (!state.useALP) {
+            System.out.println("alprd");
             // use ALPrd
             for (List<Double> row : rowGroup) {  // 逐行处理
                 aLPrd.entry(row);
@@ -296,11 +272,12 @@ public class ALPCompression {
             size += aLPrd.getSize();
         } else {
             // use ALP
+            System.out.println("alp");
             for (List<Double> row : rowGroup) {  // 逐行处理
                 // 第二级采样，获取最佳组合
-                findBestFactorAndExponent(row, ALPConstants.ALP_VECTOR_SIZE, state);
+                findBestFactorAndExponent(row, ALP_VECTOR_SIZE, state);
                 // 压缩处理
-                compress(row, ALPConstants.ALP_VECTOR_SIZE, state);
+                compress(row, ALP_VECTOR_SIZE, state);
             }
         }
 //        out.flush();

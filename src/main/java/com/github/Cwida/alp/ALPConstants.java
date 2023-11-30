@@ -1,7 +1,7 @@
 package com.github.Cwida.alp;
 
 public class ALPConstants {
-    public static final int ALP_VECTOR_SIZE = 1000; // 每个向量所含的值的数量
+
     public static final int RG_SAMPLES = 8; // 每行组采样的向量数
     public static final short SAMPLES_PER_VECTOR = 32;  // 每向量采样的浮点数数量
     public static final byte EXCEPTION_POSITION_SIZE = Short.SIZE;// / Byte.SIZE;

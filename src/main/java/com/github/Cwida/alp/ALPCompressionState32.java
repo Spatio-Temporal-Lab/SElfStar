@@ -10,9 +10,9 @@ public class ALPCompressionState32 {
     public short exceptionsCount;
     public short bitWidth;
     public long frameOfReference;
-    public long[] encodedIntegers = new long[ALPConstants.ALP_VECTOR_SIZE];
-    public float[] exceptions = new float[ALPConstants.ALP_VECTOR_SIZE];
-    public short[] exceptionsPositions = new short[ALPConstants.ALP_VECTOR_SIZE];
+    public long[] encodedIntegers;
+    public float[] exceptions;
+    public short[] exceptionsPositions;
     public List<ALPCombination> bestKCombinations = new ArrayList<>();
 
     public boolean useALP = true;
@@ -22,6 +22,16 @@ public class ALPCompressionState32 {
         this.vectorFactor = 0;
         this.exceptionsCount = 0;
         this.bitWidth = 0;
+    }
+
+    public ALPCompressionState32(int vectorSize) {
+        this.vectorExponent = 0;
+        this.vectorFactor = 0;
+        this.exceptionsCount = 0;
+        this.bitWidth = 0;
+        this.encodedIntegers = new long[vectorSize];
+        this.exceptions = new float[vectorSize];
+        this.exceptionsPositions = new short[vectorSize];
     }
 
     public void reset() {
