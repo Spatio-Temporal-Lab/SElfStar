@@ -156,8 +156,20 @@ public class BuffDecompressor {
 
             // get the origin value
             double db = Double.longBitsToDouble(bits);
+
+            /* Here we use BigDecimal (although it works slowly) to ensure that the double can be rounded by the maxPrec safely.
+            otherwise, for example, letting db = Math.round(db * Math.pow(10,maxPrec))/Math.pow(10,maxPrec)
+            will yield a large number [db * Math.pow(db,maxPrec)] which cannot be represented exactly by IEEE754 double,
+            and result in the fail of lossless decompression.
+
+            eg:
+                db = 36.070883827972324
+                db_tmp = db * Math.pow(10,15) = 36070883827972320
+                db_rounded = db_tmp / Math.pow(10,15) = 36.07088382797232 (except 36.070883827972324)
+             */
             BigDecimal bd = new BigDecimal(db);
             db = bd.setScale(maxPrec, RoundingMode.HALF_UP).doubleValue();
+
             if (db == 0 && sign == 1) db = -db;
             dbs[i] = db;
         }
