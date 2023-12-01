@@ -157,15 +157,14 @@ public class ALPCompression32 {
         size += out.writeInt(bitWidth, 16);
         size += out.writeLong(state.frameOfReference, 64);
         size += out.writeInt(nValues, 32);
-        for (long forValue : state.encodedIntegers) {
-            size += out.writeLong(forValue, bitWidth);
+        for (int i = 0; i < nValues; i++) {
+            size += out.writeLong(state.encodedIntegers[i], bitWidth);
         }
         size += out.writeInt(state.exceptionsCount, 16);
         for (int i = 0; i < state.exceptionsCount; i++) {
-            size += out.writeLong(Float.floatToRawIntBits(state.exceptions[i]), 32);
-            size += out.writeLong(state.exceptionsPositions[i], 16);
+            size += out.writeInt(Float.floatToRawIntBits(state.exceptions[i]), 32);
+            size += out.writeInt(state.exceptionsPositions[i], 16);
         }
-
         /*
          TODO: bit pack
             useALP=1            使用ALP压缩         bit
@@ -249,9 +248,9 @@ public class ALPCompression32 {
             // use ALP
             for (List<Float> row : rowGroup) {  // 逐行处理
                 // 第二级采样，获取最佳组合
-                findBestFactorAndExponent(row, ALPConstants.ALP_VECTOR_SIZE, state);
+                findBestFactorAndExponent(row, row.size(), state);
                 // 压缩处理
-                compress(row, ALPConstants.ALP_VECTOR_SIZE, state);
+                compress(row, row.size(), state);
             }
         }
 //        out.flush();
