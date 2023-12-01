@@ -132,12 +132,6 @@ public class PostOfficeSolverWOG {
                     int appCost = Integer.MAX_VALUE;
                     int preK = 0;
                     for (int k = j - 1; k <= i - 1; k++) {
-                        if (arr[k] == 0 && k > 0) {
-                            continue;
-                        }
-                        if (preNonZerosCount[k] < j || postNonZerosCount[k] < num - j) {
-                            continue;
-                        }
                         int sum = dp[k][j - 1];
                         for (int p = k + 1; p <= i - 1; p++) {
                             sum += arr[p] * (p - k);
