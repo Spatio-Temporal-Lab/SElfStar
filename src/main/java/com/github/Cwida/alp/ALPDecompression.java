@@ -95,8 +95,8 @@ public class ALPDecompression {
 
         // Decoding
         for (int i = 0; i < count; i++) {
-            double encodedInteger = encodedValue[i];
-            output[i] = (double) ((long) (encodedInteger)) * factor * exponent;
+            long encodedInteger = encodedValue[i];
+            output[i] = (double) encodedInteger * factor * exponent;
         }
 
         // Exceptions Patching

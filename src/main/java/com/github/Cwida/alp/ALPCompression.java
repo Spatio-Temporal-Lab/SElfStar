@@ -182,8 +182,8 @@ public class ALPCompression {
         size += out.writeInt(bitWidth, 16);
         size += out.writeLong(state.frameOfReference, 64);
         size += out.writeInt(nValues, 32);
-        for (long forValue : state.encodedIntegers) {
-            size += out.writeLong(forValue, bitWidth);
+        for (int i = 0; i < nValues; i++) {
+            size += out.writeLong(state.encodedIntegers[i], bitWidth);
         }
         size += out.writeInt(state.exceptionsCount, 16);
         for (int i = 0; i < state.exceptionsCount; i++) {
@@ -276,9 +276,9 @@ public class ALPCompression {
 //            System.out.println("alp");
             for (List<Double> row : rowGroup) {  // 逐行处理
                 // 第二级采样，获取最佳组合
-                findBestFactorAndExponent(row, ALPConstants.ALP_VECTOR_SIZE, state);
+                findBestFactorAndExponent(row, row.size(), state);
                 // 压缩处理
-                compress(row, ALPConstants.ALP_VECTOR_SIZE, state);
+                compress(row, row.size(), state);
             }
         }
 //        out.flush();
