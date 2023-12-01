@@ -30,9 +30,9 @@ public class TestSingleCompressor {
     private static final int NO_PARAM = 0;
     private static final String INIT_FILE = "init.csv";     // warm up memory and cpu
     private final String[] fileNames = {
-            INIT_FILE,
-            "Air-pressure.csv",
-            "Bird-migration.csv",
+//            INIT_FILE,
+//            "Air-pressure.csv",
+//            "Bird-migration.csv",
             "Blockchain-tr.csv",
             "City-lat.csv",
             "City-lon.csv",
@@ -59,8 +59,9 @@ public class TestSingleCompressor {
     @Test
     public void testAllCompressor() {
         for (String fileName : fileNames) {
+            System.out.println(fileName);
 //            testFloatingCompressor(fileName);
-            testALP32Compressor(fileName);
+            testALPCompressor(fileName);
             testBuffCompressor(fileName);
 //            testXZCompressor(fileName);
 //            testZstdCompressor(fileName);
@@ -158,7 +159,7 @@ public class TestSingleCompressor {
         }
     }
 
-    private void testALP32Compressor(String fileName) {
+    private void testALPCompressor(String fileName) {
         long compressorBits;
         String fileNameParam = fileName + "," + BLOCK_SIZE;
         fileNameParamToTotalBits.put(fileNameParam, 0L);
@@ -175,7 +176,7 @@ public class TestSingleCompressor {
                     break;
                 }
                 floatingsList.add(new ArrayList<>(floatings));
-                fileNameParamToTotalBits.put(fileNameParam, fileNameParamToTotalBits.get(fileNameParam) + floatings.size() * 64L);
+                fileNameParamToTotalBits.put(fileNameParam, fileNameParamToTotalBits.get(fileNameParam) + floatings.size() * 32L);
                 if (floatingsList.size() == RGsize) {
                     RowGroups.add(new ArrayList<>(floatingsList));
                     floatingsList.clear();

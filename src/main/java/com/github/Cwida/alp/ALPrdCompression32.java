@@ -17,6 +17,7 @@ public class ALPrdCompression32 {
     public ALPrdCompression32(OutputBitStream out, long size) {
         this.out = out;
         this.size = size;
+        state = new ALPrdCompressionState32();
     }
 
     public ALPrdCompression32(OutputBitStream out, long size, int vectorSize) {

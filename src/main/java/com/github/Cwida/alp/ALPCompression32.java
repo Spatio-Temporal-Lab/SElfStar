@@ -20,6 +20,7 @@ public class ALPCompression32 {
             10000000.0F,
             100000000.0F,
             1000000000.0F,
+            10000000000.0F,
     };
     private static final float[] FRAC_ARR = {
             1.0F,
@@ -72,7 +73,6 @@ public class ALPCompression32 {
      * @return n
      */
     public static long floatToLong(float db) {
-
         float n = db + MAGIC_NUMBER - MAGIC_NUMBER;
         return (long) n;
     }
