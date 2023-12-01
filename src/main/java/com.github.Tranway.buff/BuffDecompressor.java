@@ -156,7 +156,6 @@ public class BuffDecompressor {
 
             // get the origin value
             double db = Double.longBitsToDouble(bits);
-
             BigDecimal bd = new BigDecimal(db);
             db = bd.setScale(maxPrec, RoundingMode.HALF_UP).doubleValue();
             if (db == 0 && sign == 1) db = -db;

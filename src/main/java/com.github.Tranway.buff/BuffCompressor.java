@@ -5,7 +5,7 @@ import org.urbcomp.startdb.selfstar.utils.OutputBitStream;
 import java.io.IOException;
 
 public class BuffCompressor {
-    private static final int batchSize = 1000;
+    private static int batchSize = 1000;
     private static final int[] PRECISION_MAP = new int[]{
             0, 5, 8, 11, 15, 18, 21, 25, 28, 31, 35, 38, 50, 52, 52, 52, 64, 64, 64, 64, 64, 64, 64
     };
@@ -23,6 +23,12 @@ public class BuffCompressor {
     private int columnCount;
 
     public BuffCompressor() {
+        out = new OutputBitStream(new byte[100000]);
+        size = 0;
+    }
+
+    public BuffCompressor(int batchSize) {
+        BuffCompressor.batchSize = batchSize;
         out = new OutputBitStream(new byte[100000]);
         size = 0;
     }
@@ -89,6 +95,9 @@ public class BuffCompressor {
             } else {
                 result.bitmap[index] = (byte) (result.bitmap[index] | 0b1);
                 result.outliers[result.outliersCnt++] = nums[i];
+            }
+            if (i + 1 == nums.length && (i + 1) % 8 != 0) {
+                result.bitmap[index] = (byte) (result.bitmap[index] << (i % 8) + 1);
             }
         }
 
