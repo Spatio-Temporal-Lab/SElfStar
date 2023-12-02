@@ -9,31 +9,31 @@ public class ALPCompression32 {
     static final float MAGIC_NUMBER = 12582912.0F; //(float) (Math.pow(2, 22) + Math.pow(2, 23)); // 对应文章中的sweet值，用于消除小数部分 12582912.0
     static final byte MAX_EXPONENT = 10;
     static final byte EXACT_TYPE_BITSIZE = Float.SIZE;
-    private static final float[] EXP_ARR = {
-            1.0F,
-            10.0F,
-            100.0F,
-            1000.0F,
-            10000.0F,
-            100000.0F,
-            1000000.0F,
-            10000000.0F,
-            100000000.0F,
-            1000000000.0F,
-            10000000000.0F,
+    private static final double[] EXP_ARR = {
+            1.0,
+            10.0,
+            100.0,
+            1000.0,
+            10000.0,
+            100000.0,
+            1000000.0,
+            10000000.0,
+            100000000.0,
+            1000000000.0,
+            10000000000.0,
     };
-    private static final float[] FRAC_ARR = {
-            1.0F,
-            0.1F,
-            0.01F,
-            0.001F,
-            0.0001F,
-            0.00001F,
-            0.000001F,
-            0.0000001F,
-            0.00000001F,
-            0.000000001F,
-            0.0000000001F
+    private static final double[] FRAC_ARR = {
+            1.0,
+            0.1,
+            0.01,
+            0.001,
+            0.0001,
+            0.00001,
+            0.000001,
+            0.0000001,
+            0.00000001,
+            0.000000001,
+            0.0000000001
     };
     static ALPCompressionState32 state;
     private final OutputBitStream out;
@@ -92,11 +92,11 @@ public class ALPCompression32 {
         List<Float> tmpDecodedValues = new ArrayList<>(nValues);  // Tmp array to check wether the encoded values are exceptions
         for (int i = 0; i < nValues; i++) {
             float db = inputVector.get(i);
-            float tmpEncodedValue = db * EXP_ARR[state.vectorExponent] * FRAC_ARR[state.vectorFactor];
-            long encodedValue = floatToLong(tmpEncodedValue);
+            double tmpEncodedValue = db * EXP_ARR[state.vectorExponent] * FRAC_ARR[state.vectorFactor];
+            long encodedValue = ALPCompression.doubleToLong(tmpEncodedValue);
             state.encodedIntegers[i] = encodedValue;
 
-            float decodedValue = encodedValue * ALPConstants.FACT_ARR[state.vectorFactor] * FRAC_ARR[state.vectorExponent];
+            float decodedValue = (float) (encodedValue * ALPConstants.FACT_ARR[state.vectorFactor] * FRAC_ARR[state.vectorExponent]);
             tmpDecodedValues.add(decodedValue);
         }
 
@@ -281,11 +281,11 @@ public class ALPCompression32 {
                     int idxIncrements = Math.max(1, (int) Math.ceil((float) sampledVector.size() / ALPConstants.SAMPLES_PER_VECTOR)); // 用于行组采样的向量下标增量
                     for (int dbIndex = 0; dbIndex < sampledVector.size(); dbIndex += idxIncrements) {
                         float db = sampledVector.get(dbIndex);
-                        float tmp_encoded_value = db * EXP_ARR[expIdx] * FRAC_ARR[factorIdx];
+                        float tmp_encoded_value = (float) (db * EXP_ARR[expIdx] * FRAC_ARR[factorIdx]);
                         long encoded_value = floatToLong(tmp_encoded_value);    // 对应ALPenc
 
                         // The cast to float is needed to prevent a signed integer overflow
-                        float decoded_value = (float) (encoded_value) * ALPConstants.FACT_ARR[factorIdx] * FRAC_ARR[expIdx];    // 对应Pdec
+                        float decoded_value = (float) (encoded_value * ALPConstants.FACT_ARR[factorIdx] * FRAC_ARR[expIdx]);    // 对应Pdec
                         if (decoded_value == db) {
                             nonExceptionsCnt++;
                             maxEncodedValue = Math.max(encoded_value, maxEncodedValue);
@@ -377,10 +377,10 @@ public class ALPCompression32 {
             long minEncodedValue = Long.MAX_VALUE;
 
             for (float db : vectorSample) {
-                float tmpEncodedValue = db * EXP_ARR[exponentIdx] * FRAC_ARR[factorIdx];
+                float tmpEncodedValue = (float) (db * EXP_ARR[exponentIdx] * FRAC_ARR[factorIdx]);
                 long encodedValue = (long) tmpEncodedValue;
 
-                float decodedValue = encodedValue * ALPConstants.FACT_ARR[factorIdx] * FRAC_ARR[exponentIdx];
+                float decodedValue = (float) (encodedValue * ALPConstants.FACT_ARR[factorIdx] * FRAC_ARR[exponentIdx]);
                 if (decodedValue == db) {
                     maxEncodedValue = Math.max(encodedValue, maxEncodedValue);
                     minEncodedValue = Math.min(encodedValue, minEncodedValue);
