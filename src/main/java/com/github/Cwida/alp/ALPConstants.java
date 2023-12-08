@@ -24,7 +24,6 @@ public class ALPConstants {
 
     public static void selfAdaption(int vectorSize){
         ALP_VECTOR_SIZE = vectorSize;
-//        RG_SAMPLES = (int) (8 * (1000.0/vectorSize)); // 若启用压缩率会明显降低，而采样时间上影响较小，故不启用
         SAMPLES_PER_VECTOR = (short) Math.max(32 * (vectorSize/1000.0),32);
     }
 }

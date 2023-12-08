@@ -28,8 +28,7 @@ public class ALPrdCompression {
 
     public static double estimateCompressionSize(byte rightBw, byte leftBw, short exceptionsCount, long sampleCount) {
         double exceptionsSize = exceptionsCount * ((ALPrdConstants.EXCEPTION_POSITION_SIZE + ALPrdConstants.EXCEPTION_SIZE) * 8);
-        double estimatedSize = rightBw + leftBw + (exceptionsSize / sampleCount);
-        return estimatedSize;
+        return rightBw + leftBw + (exceptionsSize / sampleCount);
     }
 
     public static double buildLeftPartsDictionary(List<Long> values, byte rightBw, byte leftBw,
@@ -70,15 +69,12 @@ public class ALPrdCompression {
             state.leftBw = leftBw;
             state.rightBw = rightBw;
             state.exceptionsCount = (short) exceptionsCount;
-
-//            assert state.leftBw > 0 && state.leftBw <= AlpRDConstants.CUTTING_LIMIT && state.rightBw > 0;
         }
 
-        double estimatedSize = estimateCompressionSize(rightBw, ALPrdConstants.DICTIONARY_BW, (short) exceptionsCount, values.size());
-        return estimatedSize;
+        return estimateCompressionSize(rightBw, ALPrdConstants.DICTIONARY_BW, (short) exceptionsCount, values.size());
     }
 
-    public static double findBestDictionary(List<Long> values, ALPrdCompressionState state) {
+    public static void findBestDictionary(List<Long> values, ALPrdCompressionState state) {
         int lBw = ALPrdConstants.DICTIONARY_BW;
         int rBw = EXACT_TYPE_BITSIZE;
         double bestDictSize = Integer.MAX_VALUE;
@@ -95,8 +91,7 @@ public class ALPrdCompression {
             }
         }
 
-        double bestEstimatedSize = buildLeftPartsDictionary(values, (byte) rBw, (byte) lBw, true, state);
-        return bestEstimatedSize;
+        buildLeftPartsDictionary(values, (byte) rBw, (byte) lBw, true, state);
     }
 
     public long getSize() {
@@ -151,33 +146,6 @@ public class ALPrdCompression {
             size += out.writeInt(state.exceptions[i], state.leftBw);
             size += out.writeInt(state.exceptionsPositions[i], 16);
         }
-        /*
-        TODO: bit pack
-            useALP=0            不使用ALP压缩   bit
-            nValues             向量长度        int
-            rightBw             右值位宽        byte
-            leftParts           左值部分        bits<ALPrdConstants.DICTIONARY_BW>[nValues]
-            rightParts          右值部分        bits<rightBw>[nValues]
-            leftPartsDict       左值字典        bits<leftBw>[ALPrdConstants.DICTIONARY_SIZE]
-            exceptionsCount     异常值数量      short
-            exceptions          异常值原值      bits<leftBw>[exceptionsCount]
-            exceptionsPositions 异常值位置      short[exceptionsCount]
-         */
-
-//        // 以下为模拟调用ALPrdDecompression,仅供测试使用
-//        ALPrdDecompression ALPrdDe = new ALPrdDecompression(leftParts, rightParts, state.leftPartsDict, nValues, state.exceptionsCount, state.exceptions, state.exceptionsPositions, state.rightBw);
-//        double[] out = ALPrdDe.decompress();
-//
-//        String csvFile = "D:\\Code\\ALP\\src\\main\\java\\RDout.csv"; // 输出文件名
-//
-//        try (FileWriter writer = new FileWriter(csvFile, true)) {
-//            for (double value : out) {
-//                writer.append(String.valueOf(value)).append("\n"); // 写入每个值并在行尾添加换行符
-//            }
-//            System.out.println("CSV file was written successfully.");
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
     }
 
     /**

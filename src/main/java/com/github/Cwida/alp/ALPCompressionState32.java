@@ -22,9 +22,9 @@ public class ALPCompressionState32 {
         this.vectorFactor = 0;
         this.exceptionsCount = 0;
         this.bitWidth = 0;
-        this.encodedIntegers = new long[1000];
-        this.exceptions = new float[1000];
-        this.exceptionsPositions = new short[1000];
+        this.encodedIntegers = new long[ALPConstants.ALP_VECTOR_SIZE];
+        this.exceptions = new float[ALPConstants.ALP_VECTOR_SIZE];
+        this.exceptionsPositions = new short[ALPConstants.ALP_VECTOR_SIZE];
     }
 
     public ALPCompressionState32(int vectorSize) {

@@ -8,7 +8,7 @@ import java.util.*;
 public class ALPCompression {
     static final double MAGIC_NUMBER = Math.pow(2, 51) + Math.pow(2, 52); // 对应文章中的sweet值，用于消除小数部分
     static final byte MAX_EXPONENT = 18;
-    static final byte EXACT_TYPE_BITSIZE = Double.SIZE;
+    static final byte EXACT_TYPE_BIT_SIZE = Double.SIZE;
     private static final double[] EXP_ARR = {
             1.0,
             10.0,
@@ -126,7 +126,6 @@ public class ALPCompression {
         }
 
         // Detecting exceptions with predicated comparison
-        int exceptionsIdx = 0;
         List<Short> exceptionsPositions = new ArrayList<>(nValues);
         for (int i = 0; i < nValues; i++) {
             double decodedValue = tmpDecodedValues.get(i);
@@ -190,34 +189,6 @@ public class ALPCompression {
             size += out.writeLong(Double.doubleToRawLongBits(state.exceptions[i]), 64);
             size += out.writeLong(state.exceptionsPositions[i], 16);
         }
-
-        /*
-         TODO: bit pack
-            useALP=1            使用ALP压缩         bit
-            ALPCombination      最佳<e,f>组合       byte + byte
-            bitWidth            FOR单值所需位宽      short
-            frameOfReference    FOR基准值           long
-            nValues             向量长度            int
-            ForValues           FOR偏移值           bits<bitWidth>[nValues]
-            exceptionsCount     异常值数量           short
-            exceptions          异常值原值           double[exceptionsCount]
-            exceptionsPositions 异常值位置           short[exceptionsCount]
-         */
-        // 以下为模拟调用ALPDecompression,仅供测试使用
-//        ALPDecompression ALPDe = new ALPDecompression(state.vectorExponent, state.vectorFactor, state.bitWidth,
-//                state.frameOfReference, nValues, state.encodedIntegers, state.exceptionsCount, state.exceptions, state.exceptionsPositions);
-//        double[] out = ALPDe.decompress();
-//
-//        String csvFile = "D:\\workplace\\github\\SElfStar\\src\\main\\resources\\floating\\teat .csv"; // 输出文件名
-//
-//        try (FileWriter writer = new FileWriter(csvFile, true)) {
-//            for (double value : out) {
-//                writer.append(String.valueOf(value)).append("\n"); // 写入每个值并在行尾添加换行符
-//            }
-//            System.out.println("CSV file was written successfully.");
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
     }
 
     private static int getWidthNeeded(long number) {
@@ -265,7 +236,6 @@ public class ALPCompression {
         size += out.writeLong(rowGroup.size(), 8);
         if (!state.useALP) {
             // use ALPrd
-//            System.out.println("alprd");
             for (List<Double> row : rowGroup) {  // 逐行处理
                 aLPrd.entry(row);
             }
@@ -273,7 +243,6 @@ public class ALPCompression {
             size += aLPrd.getSize();
         } else {
             // use ALP
-//            System.out.println("alp");
             for (List<Double> row : rowGroup) {  // 逐行处理
                 // 第二级采样，获取最佳组合
                 findBestFactorAndExponent(row, row.size(), state);
@@ -281,7 +250,6 @@ public class ALPCompression {
                 compress(row, row.size(), state);
             }
         }
-//        out.flush();
     }
 
     // 第一级采样
@@ -294,7 +262,7 @@ public class ALPCompression {
             byte bestExponent = MAX_EXPONENT;
 
             // Initialize bestTotalBits using the worst possible total bits obtained from compression【异常值大小+正常值大小】
-            long bestTotalBits = (long) nSamples * (EXACT_TYPE_BITSIZE + ALPConstants.EXCEPTION_POSITION_SIZE) + (long) nSamples * EXACT_TYPE_BITSIZE;
+            long bestTotalBits = (long) nSamples * (EXACT_TYPE_BIT_SIZE + ALPConstants.EXCEPTION_POSITION_SIZE) + (long) nSamples * EXACT_TYPE_BIT_SIZE;
 
             // Try all combinations in search for the one which minimize the compression size
             for (byte expIdx = MAX_EXPONENT; expIdx >= 0; expIdx--) {
@@ -331,7 +299,7 @@ public class ALPCompression {
                     long delta = maxEncodedValue - minEncodedValue;
                     estimatedBitsPerValue = (int) Math.ceil(Math.log(delta + 1) / Math.log(2));   // FOR单值位宽
                     estimatedCompressionSize += (long) nSamples * estimatedBitsPerValue;    // 正常编码的部分
-                    estimatedCompressionSize += (long) exceptionsCnt * (EXACT_TYPE_BITSIZE + ALPConstants.EXCEPTION_POSITION_SIZE);   // 异常值部分
+                    estimatedCompressionSize += (long) exceptionsCnt * (EXACT_TYPE_BIT_SIZE + ALPConstants.EXCEPTION_POSITION_SIZE);   // 异常值部分
 
                     // 更新单个向量中的最佳组合
                     if ((estimatedCompressionSize < bestTotalBits) ||
@@ -346,7 +314,7 @@ public class ALPCompression {
                 }
             }
             // 更新行组中的最佳组合
-            if (bestTotalBits != (long) nSamples * (EXACT_TYPE_BITSIZE + ALPConstants.EXCEPTION_POSITION_SIZE) + (long) nSamples * EXACT_TYPE_BITSIZE) {
+            if (bestTotalBits != (long) nSamples * (EXACT_TYPE_BIT_SIZE + ALPConstants.EXCEPTION_POSITION_SIZE) + (long) nSamples * EXACT_TYPE_BIT_SIZE) {
                 Map.Entry<Byte, Byte> bestCombination = new AbstractMap.SimpleEntry<>(bestExponent, bestFactor);
                 int cnt = bestKCombinationsHash.getOrDefault(bestCombination, 0);
                 bestKCombinationsHash.put(bestCombination, cnt + 1);
@@ -362,7 +330,6 @@ public class ALPCompression {
             ));
         });
 
-        // 使用 List.sort() 进行排序，传入自定义的比较器     等效于C++中的 sort(bestKCombinations.begin(), bestKCombinations.end(), compareALPCombinations);
         bestKCombinations.sort((c1, c2) -> {
             if (ALPCombination.compareALPCombinations(c1, c2)) {
                 return -1; // 返回负值表示 c1 应排在 c2 前面
@@ -420,7 +387,7 @@ public class ALPCompression {
             long delta = Math.abs(maxEncodedValue - minEncodedValue);
             int estimatedBitsPerValue = (int) Math.ceil(Math.log(delta + 1) / Math.log(2));
             estimatedCompressionSize += (long) nSamples * estimatedBitsPerValue;
-            estimatedCompressionSize += exceptionsCount * (ALPConstants.EXCEPTION_POSITION_SIZE * 8 + EXACT_TYPE_BITSIZE);
+            estimatedCompressionSize += exceptionsCount * (ALPConstants.EXCEPTION_POSITION_SIZE * 8 + EXACT_TYPE_BIT_SIZE);
 
             if (combinationIdx == 0) {
                 bestTotalBits = estimatedCompressionSize;

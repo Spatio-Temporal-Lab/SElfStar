@@ -6,9 +6,9 @@ import java.io.IOException;
 import java.util.*;
 
 public class ALPCompression32 {
-    static final float MAGIC_NUMBER = 12582912.0F; //(float) (Math.pow(2, 22) + Math.pow(2, 23)); // 对应文章中的sweet值，用于消除小数部分 12582912.0
+    static final float MAGIC_NUMBER = 12582912.0F; //(float) (Math.pow(2, 22) + Math.pow(2, 23));
     static final byte MAX_EXPONENT = 10;
-    static final byte EXACT_TYPE_BITSIZE = Float.SIZE;
+    static final byte EXACT_TYPE_BIT_SIZE = Float.SIZE;
     private static final double[] EXP_ARR = {
             1.0,
             10.0,
@@ -266,7 +266,7 @@ public class ALPCompression32 {
             byte bestExponent = MAX_EXPONENT;
 
             // Initialize bestTotalBits using the worst possible total bits obtained from compression【异常值大小+正常值大小】
-            long bestTotalBits = (long) nSamples * (EXACT_TYPE_BITSIZE + ALPConstants.EXCEPTION_POSITION_SIZE) + (long) nSamples * EXACT_TYPE_BITSIZE;
+            long bestTotalBits = (long) nSamples * (EXACT_TYPE_BIT_SIZE + ALPConstants.EXCEPTION_POSITION_SIZE) + (long) nSamples * EXACT_TYPE_BIT_SIZE;
 
             // Try all combinations in search for the one which minimize the compression size
             for (byte expIdx = MAX_EXPONENT; expIdx >= 0; expIdx--) {
@@ -303,7 +303,7 @@ public class ALPCompression32 {
                     long delta = maxEncodedValue - minEncodedValue;
                     estimatedBitsPerValue = (int) Math.ceil(Math.log(delta + 1) / Math.log(2));   // FOR单值位宽
                     estimatedCompressionSize += (long) nSamples * estimatedBitsPerValue;    // 正常编码的部分
-                    estimatedCompressionSize += (long) exceptionsCnt * (EXACT_TYPE_BITSIZE + ALPConstants.EXCEPTION_POSITION_SIZE);   // 异常值部分
+                    estimatedCompressionSize += (long) exceptionsCnt * (EXACT_TYPE_BIT_SIZE + ALPConstants.EXCEPTION_POSITION_SIZE);   // 异常值部分
 
                     // 更新单个向量中的最佳组合
                     if ((estimatedCompressionSize < bestTotalBits) ||
@@ -318,7 +318,7 @@ public class ALPCompression32 {
                 }
             }
             // 更新行组中的最佳组合
-            if (bestTotalBits != (long) nSamples * (EXACT_TYPE_BITSIZE + ALPConstants.EXCEPTION_POSITION_SIZE) + (long) nSamples * EXACT_TYPE_BITSIZE) {
+            if (bestTotalBits != (long) nSamples * (EXACT_TYPE_BIT_SIZE + ALPConstants.EXCEPTION_POSITION_SIZE) + (long) nSamples * EXACT_TYPE_BIT_SIZE) {
                 Map.Entry<Byte, Byte> bestCombination = new AbstractMap.SimpleEntry<>(bestExponent, bestFactor);
                 int cnt = bestKCombinationsHash.getOrDefault(bestCombination, 0);
                 bestKCombinationsHash.put(bestCombination, cnt + 1);
@@ -392,7 +392,7 @@ public class ALPCompression32 {
             long delta = Math.abs(maxEncodedValue - minEncodedValue);
             int estimatedBitsPerValue = (int) Math.ceil(Math.log(delta + 1) / Math.log(2));
             estimatedCompressionSize += (long) nSamples * estimatedBitsPerValue;
-            estimatedCompressionSize += exceptionsCount * (ALPConstants.EXCEPTION_POSITION_SIZE * 8 + EXACT_TYPE_BITSIZE);
+            estimatedCompressionSize += exceptionsCount * (ALPConstants.EXCEPTION_POSITION_SIZE * 8 + EXACT_TYPE_BIT_SIZE);
 
             if (combinationIdx == 0) {
                 bestTotalBits = estimatedCompressionSize;

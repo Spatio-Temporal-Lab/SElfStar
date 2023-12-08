@@ -82,11 +82,11 @@ public class TestCompressor {
     public void testAllCompressor() {
         for (String fileName : fileNames) {
             testALPCompressor(fileName, NO_PARAM);
-//            testXZCompressor(fileName, NO_PARAM);
-//            testZstdCompressor(fileName, NO_PARAM);
-//            testSnappyCompressor(fileName, NO_PARAM);
+            testXZCompressor(fileName, NO_PARAM);
+            testZstdCompressor(fileName, NO_PARAM);
+            testSnappyCompressor(fileName, NO_PARAM);
             testBuffCompressor(fileName, NO_PARAM);
-//            testFloatingCompressor(fileName);
+            testFloatingCompressor(fileName);
         }
         fileNameParamMethodToCompressedBits.forEach((fileNameParamMethod, compressedBits) -> {
             String fileNameParam = fileNameParamMethod.split(",")[0] + "," + fileNameParamMethod.split(",")[1];

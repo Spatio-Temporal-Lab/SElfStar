@@ -49,17 +49,6 @@ public class ALPDecompression32 {
     }
 
     public void deserialize() {
-        /*
-            read
-            ALPCombination      最佳<e,f>组合       byte + byte                 -> vectorExponent, vectorFactor
-            bitWidth            FOR单值所需位宽      short                      -> bitWidth
-            frameOfReference    FOR基准值           long                       -> frameOfReference
-            nValues             向量长度            int                         -> count
-            ForValues           FOR偏移值           bits<bitWidth>[nValues]    -> encodedValue
-            exceptionsCount     异常值数量           short                      -> exceptionsCount
-            exceptions          异常值原值           float[exceptionsCount]    -> exceptions
-            exceptionsPositions 异常值位置           short[exceptionsCount]     -> exceptionsPositions
-         */
         try {
             vectorExponent = (byte) in.readInt(8);
             vectorFactor = (byte) in.readInt(8);

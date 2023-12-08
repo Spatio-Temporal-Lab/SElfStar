@@ -44,17 +44,6 @@ public class ALPrdDecompression {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    /*
-        TODO: read
-            nValues             向量长度        int                                             -> valuesCount
-            rightBw             右值位宽        byte                                            -> rightBitWidth
-            leftParts           左值部分        bits<ALPrdConstants.DICTIONARY_BW>[nValues]     -> leftEncoded
-            rightParts          右值部分        bits<rightBw>[nValues]                          -> rightEncoded
-            leftPartsDict       左值字典        bits<leftBw>[ALPrdConstants.DICTIONARY_SIZE]    -> leftPartsDict
-            exceptionsCount     异常值数量      short                                           -> exceptionsCount
-            exceptions          异常值原值      bits<leftBw>[exceptionsCount]                   -> exceptions
-            exceptionsPositions 异常值位置      short[exceptionsCount]                          -> exceptionsPositions
-         */
     }
 
     public double[] decompress() {
@@ -68,9 +57,7 @@ public class ALPrdDecompression {
             outputLong[i] = ((long) left << rightBW) | right;
         }
 
-        // Exceptions Patching (exceptions only occur in left parts) 处理异常值【字典外的值】
-
-
+        // Exceptions Patching (exceptions only occur in left parts)
         for (int i = 0; i < exceptionsCount; i++) {
             long right = rightEncoded[exceptionsPositions[i]];
             int left = exceptions[i];

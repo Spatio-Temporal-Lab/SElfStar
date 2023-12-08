@@ -7,7 +7,7 @@ public class ALPrdCompressionState32 {
     public byte rightBw;
     public byte leftBw;
     public short exceptionsCount;
-    public short[] leftPartsDict = new short[ALPrdConstants.DICTIONARY_SIZE];
+    public short[] leftPartsDict;
     public short[] exceptions;
     public short[] exceptionsPositions;
     public int leftBpSize;
@@ -18,12 +18,16 @@ public class ALPrdCompressionState32 {
         this.rightBw = 0;
         this.leftBw = 0;
         this.exceptionsCount = 0;
+        leftPartsDict = new short[ALPrdConstants.DICTIONARY_SIZE];
+        exceptions = new short[ALPrdConstants.DICTIONARY_SIZE];
+        exceptionsPositions = new short[ALPrdConstants.DICTIONARY_SIZE];
     }
 
     public ALPrdCompressionState32(int vecterSize) {
         this.rightBw = 0;
         this.leftBw = 0;
         this.exceptionsCount = 0;
+        leftPartsDict = new short[vecterSize];
         exceptions = new short[vecterSize];
         exceptionsPositions = new short[vecterSize];
     }
