@@ -24,15 +24,15 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestSingleCompressor {
-    private static final String STORE_FILE = "src/test/resources/result/result32ALPBUFF.csv";
+    private static final String STORE_FILE = "src/test/resources/result/result32.csv";
     private static final double TIME_PRECISION = 1000.0;
     private static final int BLOCK_SIZE = 1000;
     private static final int NO_PARAM = 0;
     private static final String INIT_FILE = "init.csv";     // warm up memory and cpu
     private final String[] fileNames = {
-//            INIT_FILE,
-//            "Air-pressure.csv",
-//            "Bird-migration.csv",
+            INIT_FILE,
+            "Air-pressure.csv",
+            "Bird-migration.csv",
             "Blockchain-tr.csv",
             "City-lat.csv",
             "City-lon.csv",
@@ -59,12 +59,12 @@ public class TestSingleCompressor {
     @Test
     public void testAllCompressor() {
         for (String fileName : fileNames) {
-//            testFloatingCompressor(fileName);
+            testFloatingCompressor(fileName);
             testALPCompressor(fileName);
             testBuffCompressor(fileName);
-//            testXZCompressor(fileName);
-//            testZstdCompressor(fileName);
-//            testSnappyCompressor(fileName);
+            testXZCompressor(fileName);
+            testZstdCompressor(fileName);
+            testSnappyCompressor(fileName);
         }
 
         fileNameParamMethodToCompressedBits.forEach((fileNameParamMethod, compressedBits) -> {
