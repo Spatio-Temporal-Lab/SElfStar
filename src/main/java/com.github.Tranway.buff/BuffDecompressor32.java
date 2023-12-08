@@ -5,6 +5,7 @@ import org.urbcomp.startdb.selfstar.utils.InputBitStream;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 public class BuffDecompressor32 {
     private static final int[] PRECISION_MAP = new int[]{
@@ -105,7 +106,6 @@ public class BuffDecompressor32 {
     public float[] mergeDoubles() {
         float[] dbs = new float[batchSize];
         for (int i = 0; i < batchSize; i++) {
-            // 逐行提取数据
             long bitpack = 0;
             int remain = wholeWidth % 8;
             if (remain == 0) {
@@ -158,7 +158,7 @@ public class BuffDecompressor32 {
             float db = Float.intBitsToFloat(bits);
 
             BigDecimal bd = new BigDecimal(db);
-            db = bd.setScale(maxPrec, BigDecimal.ROUND_HALF_UP).floatValue();
+            db = bd.setScale(maxPrec, RoundingMode.HALF_UP).floatValue();
             if (db == 0 && sign == 1) db = -db;
             dbs[i] = db;
         }

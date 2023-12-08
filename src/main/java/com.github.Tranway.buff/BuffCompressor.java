@@ -60,7 +60,7 @@ public class BuffCompressor {
                 } else {
                     i++;
                     cnt -= Integer.parseInt(strDb.substring(i));
-                    return cnt > 0 ? cnt : 0;
+                    return Math.max(cnt, 0);
                 }
             }
             return cnt;
@@ -270,7 +270,7 @@ public class BuffCompressor {
             } else {
                 size += out.writeBit(false);
                 try {
-                    size += out.write(cols[j], batchSize * 8);
+                    size += out.write(cols[j], batchSize * 8L);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

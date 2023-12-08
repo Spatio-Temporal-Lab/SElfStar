@@ -53,7 +53,7 @@ public class BuffCompressor32 {
                 } else {
                     i++;
                     cnt -= Integer.parseInt(strDb.substring(i));
-                    return cnt > 0 ? cnt : 0;
+                    return Math.max(cnt, 0);
                 }
             }
             return cnt;
@@ -149,7 +149,7 @@ public class BuffCompressor32 {
             int exp = expBinary - 127;
 
             // get the mantissa
-            int mantissa = bits & 0x7FFFFF; // 0.11  1   -0.12  -1
+            int mantissa = bits & 0x7FFFFF;
 
             // get the mantissa with implicit bit
             int implicitMantissa = mantissa | (1 << 23);
@@ -208,20 +208,19 @@ public class BuffCompressor32 {
             int exp = expBinary - 127;
 
             // get the mantissa
-            int mantissa = bits & 0x7FFFFF; // 0.11  1   -0.12  -1
+            int mantissa = bits & 0x7FFFFF;
 
             // get the mantissa with implicit bit
             int implicitMantissa = mantissa | (1 << 23);
 
             long decimal;
             if (exp >= 0) {
-                decimal = mantissa << (9 + exp) >>> (32 - decWidth);
+                decimal = (long) mantissa << (9 + exp) >>> (32 - decWidth);
             } else {
                 if (24 - decWidth >= 0) {
                     decimal = implicitMantissa >>> 24 - decWidth >>> (-exp - 1);
-//                    decimal = implicitMantissa >>> 23 - decWidth - exp;
                 } else {
-                    decimal = implicitMantissa << decWidth - 24 >>> (-exp - 1);
+                    decimal = (long) implicitMantissa << decWidth - 24 >>> (-exp - 1);
                 }
             }
 

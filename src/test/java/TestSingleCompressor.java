@@ -59,7 +59,6 @@ public class TestSingleCompressor {
     @Test
     public void testAllCompressor() {
         for (String fileName : fileNames) {
-            System.out.println(fileName);
 //            testFloatingCompressor(fileName);
             testALPCompressor(fileName);
             testBuffCompressor(fileName);
@@ -161,7 +160,7 @@ public class TestSingleCompressor {
 
     private void testALPCompressor(String fileName) {
         long compressorBits;
-        String fileNameParam = fileName + "," + BLOCK_SIZE;
+        String fileNameParam = fileName + "," + NO_PARAM;
         fileNameParamToTotalBits.put(fileNameParam, 0L);
         fileNameParamToTotalBlock.put(fileNameParam, 0L);
         double encodingDuration = 0;
@@ -244,7 +243,6 @@ public class TestSingleCompressor {
         try (BlockReader br = new BlockReader(fileName, BLOCK_SIZE)) {
             List<Float> floatings;
             while ((floatings = br.nextSingleBlock()) != null) {
-
                 if (floatings.size() != BLOCK_SIZE) {
                     break;
                 }
@@ -559,7 +557,7 @@ public class TestSingleCompressor {
                 throw new IOException("Create directory failed: " + file);
             }
             try (FileWriter writer = new FileWriter(storeFile, true)) {
-                writer.write("Param, Method, Ratio, CTime, DTime");
+                writer.write("Dataset, Param, Method, Ratio, CTime, DTime");
                 writer.write("\r\n");
                 // 遍历键，并写入对应的值
                 for (String fileNameParamMethod : fileNameParamMethodToRatio.keySet()) {

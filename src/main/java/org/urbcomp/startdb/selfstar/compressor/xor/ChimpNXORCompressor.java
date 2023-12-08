@@ -47,7 +47,6 @@ public class ChimpNXORCompressor implements IXORCompressor {
 
     // We should have access to the series?
     public ChimpNXORCompressor(int previousValues) {
-//        out = output;
         out = new OutputBitStream(
                 new byte[(int) (((capacity + 1) * 8 + capacity / 8 + 1) * 1.2)]);
         this.previousValues = previousValues;
@@ -62,7 +61,6 @@ public class ChimpNXORCompressor implements IXORCompressor {
 
     public ChimpNXORCompressor(int previousValues, int block) {
         capacity = block;
-//        out = output;
         out = new OutputBitStream(
                 new byte[(int) (((capacity + 1) * 8 + capacity / 8 + 1) * 1.2)]);
         this.previousValues = previousValues;
