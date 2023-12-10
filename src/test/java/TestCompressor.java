@@ -77,7 +77,6 @@ public class TestCompressor {
         return doubles;
     }
 
-
     @Test
     public void testAllCompressor() {
         for (String fileName : fileNames) {
@@ -96,7 +95,6 @@ public class TestCompressor {
         System.out.println("Test All Compressor");
         writeResult(STORE_FILE, fileNameParamMethodToCompressedRatio, fileNameParamMethodToCompressTime, fileNameParamMethodToDecompressTime, fileNameParamToTotalBlock);
         System.gc();
-
     }
 
     //In this experiment, we implement window by block.
@@ -178,7 +176,6 @@ public class TestCompressor {
         }
         System.out.println("Test Block");
         writeResult(STORE_BLOCK_FILE, fileNameParamMethodToCompressedRatio, fileNameParamMethodToCompressTime, fileNameParamMethodToDecompressTime, fileNameParamToTotalBlock);
-
     }
 
     private void testPruningFloatingCompressor(String fileName) {
@@ -783,7 +780,7 @@ public class TestCompressor {
             if (!file.exists() && !file.mkdirs()) {
                 throw new IOException("Create directory failed: " + file);
             }
-            try (FileWriter writer = new FileWriter(storeFile, true)) {
+            try (FileWriter writer = new FileWriter(storeFile, false)) {
                 writer.write("Dataset, Param, Method, Ratio, CTime, DTime");
                 writer.write("\r\n");
                 // 遍历键，并写入对应的值

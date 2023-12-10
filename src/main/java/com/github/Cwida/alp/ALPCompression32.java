@@ -57,19 +57,10 @@ public class ALPCompression32 {
         state = new ALPCompressionState32();
     }
 
-    public ALPCompression32(int vectorSize) {
-        this.out = new OutputBitStream(
-                new byte[7000000]);
-        this.aLPrd = new ALPrdCompression32(out, size, vectorSize);
-        size = 0;
-        ALPConstants.selfAdaption(vectorSize);
-        state = new ALPCompressionState32(vectorSize);
-    }
-
     /**
      * 用于将float转为long，来自文章中的fast rounding部分
      *
-     * @param db
+     * @param db a float value
      * @return n
      */
     public static long floatToLong(float db) {
@@ -101,7 +92,6 @@ public class ALPCompression32 {
         }
 
         // Detecting exceptions with predicated comparison
-        int exceptionsIdx = 0;
         List<Short> exceptionsPositions = new ArrayList<>(nValues);
         for (int i = 0; i < nValues; i++) {
             float decodedValue = tmpDecodedValues.get(i);
@@ -299,12 +289,10 @@ public class ALPCompression32 {
 
         // Convert our hash pairs to a Combination vector to be able to sort
         List<ALPCombination> bestKCombinations = new ArrayList<>();
-        bestKCombinationsHash.forEach((key, value) -> {
-            bestKCombinations.add(new ALPCombination(key.getKey(),  // Exponent
-                    key.getValue(), // Factor
-                    value           // N of times it appeared (hash value)
-            ));
-        });
+        bestKCombinationsHash.forEach((key, value) -> bestKCombinations.add(new ALPCombination(key.getKey(),  // Exponent
+                key.getValue(), // Factor
+                value           // N of times it appeared (hash value)
+        )));
 
         // 使用 List.sort() 进行排序，传入自定义的比较器     等效于C++中的 sort(bestKCombinations.begin(), bestKCombinations.end(), compareALPCombinations);
         bestKCombinations.sort((c1, c2) -> {

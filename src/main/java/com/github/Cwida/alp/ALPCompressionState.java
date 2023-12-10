@@ -17,16 +17,6 @@ public class ALPCompressionState {
 
     public boolean useALP = true;
 
-    public ALPCompressionState() {
-        this.vectorExponent = 0;
-        this.vectorFactor = 0;
-        this.exceptionsCount = 0;
-        this.bitWidth = 0;
-        this.encodedIntegers = new long[ALPConstants.ALP_VECTOR_SIZE];
-        this.exceptions = new double[ALPConstants.ALP_VECTOR_SIZE];
-        this.exceptionsPositions = new short[ALPConstants.ALP_VECTOR_SIZE];
-    }
-
     public ALPCompressionState(int vectorSize) {
         this.vectorExponent = 0;
         this.vectorFactor = 0;

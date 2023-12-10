@@ -6,6 +6,7 @@ import org.urbcomp.startdb.selfstar.utils.PostOfficeSolverWOF;
 
 import java.util.Arrays;
 
+// without first-rear pruning
 public class ElfStarXORCompressorWOF implements IXORCompressor {
     private final int[] leadingRepresentation = new int[64];
     private final int[] leadingRound = new int[64];
@@ -24,11 +25,10 @@ public class ElfStarXORCompressorWOF implements IXORCompressor {
 
     private int trailingBitsPerValue;
 
-    private int capacity = 1000;
+    private final int capacity;
 
     public ElfStarXORCompressorWOF() {
-        out = new OutputBitStream(
-                new byte[(int) (((capacity + 1) * 8 + capacity / 8 + 1) * 1.2)]);
+        this(1000);
     }
 
     public ElfStarXORCompressorWOF(int window) {

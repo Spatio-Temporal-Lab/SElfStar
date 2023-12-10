@@ -524,7 +524,7 @@ public class TestSingleCompressor {
             if (!file.exists() && !file.mkdirs()) {
                 throw new IOException("Create directory failed: " + file);
             }
-            try (FileWriter writer = new FileWriter(storeFile, true)) {
+            try (FileWriter writer = new FileWriter(storeFile, false)) {
                 writer.write("Dataset, Param, Method, Ratio, CTime, DTime");
                 writer.write("\r\n");
                 // 遍历键，并写入对应的值

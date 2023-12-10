@@ -6,6 +6,7 @@ import org.urbcomp.startdb.selfstar.utils.PostOfficeSolverWOG;
 
 import java.util.Arrays;
 
+// without first-rear pruning, zero-pruning and global pruning
 public class ElfStarXORCompressorWOG implements IXORCompressor {
     private final int[] leadingRepresentation = new int[64];
     private final int[] leadingRound = new int[64];

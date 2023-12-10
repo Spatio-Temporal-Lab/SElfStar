@@ -15,17 +15,11 @@ public class BuffCompressor {
     private final OutputBitStream out;
     private long size;
     private long lowerBound;
-    private long upperBound;
     private int maxPrec;
     private int decWidth;
     private int intWidth;
     private int wholeWidth;
     private int columnCount;
-
-    public BuffCompressor() {
-        out = new OutputBitStream(new byte[100000]);
-        size = 0;
-    }
 
     public BuffCompressor(int batchSize) {
         BuffCompressor.batchSize = batchSize;
@@ -145,7 +139,7 @@ public class BuffCompressor {
 
     public void headSample(double[] dbs) {
         lowerBound = Long.MAX_VALUE;
-        upperBound = Long.MIN_VALUE;
+        long upperBound = Long.MIN_VALUE;
         for (double db : dbs) {
             // double -> bits
             long bits = Double.doubleToLongBits(db);
@@ -289,6 +283,4 @@ public class BuffCompressor {
             size += out.writeInt(sr.outliers[i], 8);
         }
     }
-
-
 }

@@ -72,15 +72,6 @@ public class ALPCompression {
         return size;
     }
 
-    public ALPCompression() {
-
-        this.out = new OutputBitStream(
-                new byte[7000000]);
-        this.aLPrd = new ALPrdCompression(out, size);
-        size = 0;
-        state = new ALPCompressionState();
-    }
-
     public ALPCompression(int vectorSize) {
         this.out = new OutputBitStream(
                 new byte[7000000]);
@@ -93,7 +84,7 @@ public class ALPCompression {
     /**
      * 用于将double转为long，来自文章中的fast rounding部分
      *
-     * @param db
+     * @param db a double value
      * @return n
      */
     public static long doubleToLong(double db) {
@@ -269,7 +260,7 @@ public class ALPCompression {
                 for (byte factorIdx = expIdx; factorIdx >= 0; factorIdx--) {
                     int exceptionsCnt = 0;  // 记录异常值出现次数
                     int nonExceptionsCnt = 0;   // 记录能够正常编码的次数
-                    int estimatedBitsPerValue = 0;  // 预计单值正常编码所需要的位宽
+                    int estimatedBitsPerValue;  // 预计单值正常编码所需要的位宽
                     long estimatedCompressionSize = 0;  // 预计编码后所需的总位数
                     long maxEncodedValue = Long.MIN_VALUE;
                     long minEncodedValue = Long.MAX_VALUE;
@@ -323,12 +314,10 @@ public class ALPCompression {
 
         // Convert our hash pairs to a Combination vector to be able to sort
         List<ALPCombination> bestKCombinations = new ArrayList<>();
-        bestKCombinationsHash.forEach((key, value) -> {
-            bestKCombinations.add(new ALPCombination(key.getKey(),  // Exponent
-                    key.getValue(), // Factor
-                    value           // N of times it appeared (hash value)
-            ));
-        });
+        bestKCombinationsHash.forEach((key, value) -> bestKCombinations.add(new ALPCombination(key.getKey(),  // Exponent
+                key.getValue(), // Factor
+                value           // N of times it appeared (hash value)
+        )));
 
         bestKCombinations.sort((c1, c2) -> {
             if (ALPCombination.compareALPCombinations(c1, c2)) {

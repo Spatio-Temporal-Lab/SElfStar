@@ -7,21 +7,12 @@ public class ALPrdCompressionState {
     public byte rightBw;
     public byte leftBw;
     public short exceptionsCount;
-    public short[] leftPartsDict = new short[ALPrdConstants.DICTIONARY_SIZE];
+    public short[] leftPartsDict;
     public short[] exceptions;
     public short[] exceptionsPositions;
     public int leftBpSize;
     public int rightBpSize;
     public Map<Short, Short> leftPartsDictMap = new HashMap<>();
-
-    public ALPrdCompressionState() {
-        this.rightBw = 0;
-        this.leftBw = 0;
-        this.exceptionsCount = 0;
-        leftPartsDict = new short[ALPrdConstants.DICTIONARY_SIZE];
-        exceptions = new short[ALPrdConstants.DICTIONARY_SIZE];
-        exceptionsPositions = new short[ALPrdConstants.DICTIONARY_SIZE];
-    }
 
     public ALPrdCompressionState(int vecterSize) {
         this.rightBw = 0;

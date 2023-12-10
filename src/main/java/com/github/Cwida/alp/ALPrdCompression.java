@@ -14,11 +14,6 @@ public class ALPrdCompression {
         state.reset();
     }
 
-    public ALPrdCompression(OutputBitStream out, long size) {
-        this.out = out;
-        this.size = size;
-    }
-
     public ALPrdCompression(OutputBitStream out, long size, int vectorSize) {
         this.out = out;
         this.size = size;

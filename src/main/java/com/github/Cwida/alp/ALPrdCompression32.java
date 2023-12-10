@@ -20,13 +20,6 @@ public class ALPrdCompression32 {
         state = new ALPrdCompressionState32();
     }
 
-    public ALPrdCompression32(OutputBitStream out, long size, int vectorSize) {
-        this.out = out;
-        this.size = size;
-        ALPrdConstants.setVectorSize(vectorSize);
-        state = new ALPrdCompressionState32(vectorSize);
-    }
-
     public static double estimateCompressionSize(byte rightBw, byte leftBw, short exceptionsCount, long sampleCount) {
         double exceptionsSize = exceptionsCount * ((ALPrdConstants.EXCEPTION_POSITION_SIZE + ALPrdConstants.EXCEPTION_SIZE) * 8);
         return rightBw + leftBw + (exceptionsSize / sampleCount);

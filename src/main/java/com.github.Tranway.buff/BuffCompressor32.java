@@ -213,7 +213,7 @@ public class BuffCompressor32 {
             // get the mantissa with implicit bit
             int implicitMantissa = mantissa | (1 << 23);
 
-            long decimal;
+            int decimal;
             if (exp >= 0) {
                 decimal =  mantissa << (9 + exp) >>> (32 - decWidth);
             } else {

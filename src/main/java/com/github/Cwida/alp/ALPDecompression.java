@@ -32,7 +32,6 @@ public class ALPDecompression {
     };
     private final ALPrdDecompression ALPrdDe;
     private long[] encodedValue;
-    private double[] output;
     private int count;
     private byte vectorFactor;
     private byte vectorExponent;
@@ -40,7 +39,6 @@ public class ALPDecompression {
     private double[] exceptions;
     private short[] exceptionsPositions;
     private long frameOfReference;
-    private short bitWidth;
     private final InputBitStream in;
 
     public ALPDecompression(byte[] bs) {
@@ -52,7 +50,7 @@ public class ALPDecompression {
         try {
             vectorExponent = (byte) in.readInt(8);
             vectorFactor = (byte) in.readInt(8);
-            bitWidth = (short) in.readInt(16);
+            short bitWidth = (short) in.readInt(16);
             frameOfReference = in.readLong(64);
             count = in.readInt(32);
             encodedValue = new long[count];
@@ -72,7 +70,7 @@ public class ALPDecompression {
     }
 
     public double[] decompress() {
-        output = new double[count];
+        double[] output = new double[count];
 
         long factor = ALPConstants.U_FACT_ARR[vectorFactor];
         double exponent = FRAC_ARR[vectorExponent];

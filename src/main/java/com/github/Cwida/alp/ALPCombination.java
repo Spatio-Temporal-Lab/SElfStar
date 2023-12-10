@@ -14,9 +14,9 @@ public class ALPCombination {
     /**
      * 判断组合c1是否优于组合c2
      *
-     * @param c1
-     * @param c2
-     * @return
+     * @param c1 combination 1
+     * @param c2 combination 2
+     * @return if c1 better than c2
      */
     public static boolean compareALPCombinations(ALPCombination c1, ALPCombination c2) {
         return (c1.bestCnt > c2.bestCnt) ||

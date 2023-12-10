@@ -1,6 +1,5 @@
 package com.github.Cwida.alp;
 
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,21 +26,10 @@ public class ALPCompressionState32 {
         this.exceptionsPositions = new short[ALPConstants.ALP_VECTOR_SIZE];
     }
 
-    public ALPCompressionState32(int vectorSize) {
-        this.vectorExponent = 0;
-        this.vectorFactor = 0;
-        this.exceptionsCount = 0;
-        this.bitWidth = 0;
-        this.encodedIntegers = new long[vectorSize];
-        this.exceptions = new float[vectorSize];
-        this.exceptionsPositions = new short[vectorSize];
-    }
-
     public void reset() {
         this.vectorExponent = 0;
         this.vectorFactor = 0;
         this.exceptionsCount = 0;
         this.bitWidth = 0;
     }
-
 }
