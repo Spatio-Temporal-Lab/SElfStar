@@ -7,28 +7,28 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ALPDecompression32 {
-    private static final double[] FRAC_ARR = {
-            1.0,
-            0.1,
-            0.01,
-            0.001,
-            0.0001,
-            0.00001,
-            0.000001,
-            0.0000001,
-            0.00000001,
-            0.000000001,
-            0.0000000001,
-            0.00000000001,
-            0.000000000001,
-            0.0000000000001,
-            0.00000000000001,
-            0.000000000000001,
-            0.0000000000000001,
-            0.00000000000000001,
-            0.000000000000000001,
-            0.0000000000000000001,
-            0.00000000000000000001
+    private static final float[] FRAC_ARR = {
+            1.0F,
+            0.1F,
+            0.01F,
+            0.001F,
+            0.0001F,
+            0.00001F,
+            0.000001F,
+            0.0000001F,
+            0.00000001F,
+            0.000000001F,
+            0.0000000001F,
+            0.00000000001F,
+            0.000000000001F,
+            0.0000000000001F,
+            0.00000000000001F,
+            0.000000000000001F,
+            0.0000000000000001F,
+            0.00000000000000001F,
+            0.000000000000000001F,
+            0.0000000000000000001F,
+            0.00000000000000000001F
     };
     private final ALPrdDecompression32 ALPrdDe;
     private long[] encodedValue;
@@ -75,7 +75,7 @@ public class ALPDecompression32 {
         output = new float[count];
 
         long factor = ALPConstants.FACT_ARR[vectorFactor];
-        double exponent = FRAC_ARR[vectorExponent];
+        float exponent = FRAC_ARR[vectorExponent];
 
         // unFOR
         for (int i = 0; i < count; i++) {
@@ -85,7 +85,7 @@ public class ALPDecompression32 {
         // Decoding
         for (int i = 0; i < count; i++) {
             long encodedInteger = encodedValue[i];
-            output[i] = (float) (encodedInteger * factor * exponent);
+            output[i] = encodedInteger * factor * exponent;
         }
 
         // Exceptions Patching
