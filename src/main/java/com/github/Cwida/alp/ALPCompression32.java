@@ -165,33 +165,6 @@ public class ALPCompression32 {
             size += out.writeInt(Float.floatToRawIntBits(state.exceptions[i]), 32);
             size += out.writeInt(state.exceptionsPositions[i], 16);
         }
-        /*
-         TODO: bit pack
-            useALP=1            使用ALP压缩         bit
-            ALPCombination      最佳<e,f>组合       byte + byte
-            bitWidth            FOR单值所需位宽      short
-            frameOfReference    FOR基准值           long
-            nValues             向量长度            int
-            ForValues           FOR偏移值           bits<bitWidth>[nValues]
-            exceptionsCount     异常值数量           short
-            exceptions          异常值原值           float[exceptionsCount]
-            exceptionsPositions 异常值位置           short[exceptionsCount]
-         */
-        // 以下为模拟调用ALPDecompression,仅供测试使用
-//        ALPDecompression ALPDe = new ALPDecompression(state.vectorExponent, state.vectorFactor, state.bitWidth,
-//                state.frameOfReference, nValues, state.encodedIntegers, state.exceptionsCount, state.exceptions, state.exceptionsPositions);
-//        float[] out = ALPDe.decompress();
-//
-//        String csvFile = "D:\\workplace\\github\\SElfStar\\src\\main\\resources\\floating\\teat .csv"; // 输出文件名
-//
-//        try (FileWriter writer = new FileWriter(csvFile, true)) {
-//            for (float value : out) {
-//                writer.append(String.valueOf(value)).append("\n"); // 写入每个值并在行尾添加换行符
-//            }
-//            System.out.println("CSV file was written successfully.");
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
     }
 
     private static int getWidthNeeded(long number) {
@@ -253,7 +226,6 @@ public class ALPCompression32 {
                 compress(row, row.size(), state);
             }
         }
-//        out.flush();
     }
 
     // 第一级采样
@@ -273,7 +245,7 @@ public class ALPCompression32 {
                 for (byte factorIdx = expIdx; factorIdx >= 0; factorIdx--) {
                     int exceptionsCnt = 0;  // 记录异常值出现次数
                     int nonExceptionsCnt = 0;   // 记录能够正常编码的次数
-                    int estimatedBitsPerValue = 0;  // 预计单值正常编码所需要的位宽
+                    int estimatedBitsPerValue;  // 预计单值正常编码所需要的位宽
                     long estimatedCompressionSize = 0;  // 预计编码后所需的总位数
                     long maxEncodedValue = Long.MIN_VALUE;
                     long minEncodedValue = Long.MAX_VALUE;
