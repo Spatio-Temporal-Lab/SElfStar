@@ -25,16 +25,11 @@ public class ElfStarXORCompressorNoFRPruning implements IXORCompressor {
 
     private int trailingBitsPerValue;
 
-    private final int capacity;
+    private final int capacity = 1000;
 
     public ElfStarXORCompressorNoFRPruning() {
-        this(1000);
-    }
-
-    public ElfStarXORCompressorNoFRPruning(int window) {
-        this.capacity = window;
         out = new OutputBitStream(
-                new byte[(int) (((capacity + 1) * 8 + capacity / 8 + 1) * 1.2)]);
+            new byte[(int) (((capacity + 1) * 8 + capacity / 8 + 1) * 1.2)]);
     }
 
     @Override

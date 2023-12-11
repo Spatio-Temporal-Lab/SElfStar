@@ -22,7 +22,7 @@ public class ElfXORCompressor implements IXORCompressor {
             24, 24, 24, 24, 24, 24, 24, 24,
             24, 24, 24, 24, 24, 24, 24, 24
     };
-    private int capacity = 1000;
+    private final int capacity;
     private int storedLeadingZeros = Integer.MAX_VALUE;
     private int storedTrailingZeros = Integer.MAX_VALUE;
     private long storedVal = 0;
@@ -37,8 +37,7 @@ public class ElfXORCompressor implements IXORCompressor {
     }
 
     public ElfXORCompressor() {
-        out = new OutputBitStream(
-                new byte[(int) (((capacity + 1) * 8 + capacity / 8 + 1) * 1.2)]);
+        this(1000);
     }
 
 
