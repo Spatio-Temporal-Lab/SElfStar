@@ -2,12 +2,12 @@ package org.urbcomp.startdb.selfstar.compressor.xor;
 
 import org.urbcomp.startdb.selfstar.utils.Elf64Utils;
 import org.urbcomp.startdb.selfstar.utils.OutputBitStream;
-import org.urbcomp.startdb.selfstar.utils.PostOfficeSolverWOZ;
+import org.urbcomp.startdb.selfstar.utils.PostOfficeSolverNoFRPruning;
 
 import java.util.Arrays;
 
-// without first-rear pruning and zero-pruning
-public class ElfStarXORCompressorWOZ implements IXORCompressor {
+// without first-rear pruning
+public class ElfStarXORCompressorNoFRPruning implements IXORCompressor {
     private final int[] leadingRepresentation = new int[64];
     private final int[] leadingRound = new int[64];
     private final int[] trailingRepresentation = new int[64];
@@ -25,14 +25,13 @@ public class ElfStarXORCompressorWOZ implements IXORCompressor {
 
     private int trailingBitsPerValue;
 
-    private int capacity = 1000;
+    private final int capacity;
 
-    public ElfStarXORCompressorWOZ() {
-        out = new OutputBitStream(
-                new byte[(int) (((capacity + 1) * 8 + capacity / 8 + 1) * 1.2)]);
+    public ElfStarXORCompressorNoFRPruning() {
+        this(1000);
     }
 
-    public ElfStarXORCompressorWOZ(int window) {
+    public ElfStarXORCompressorNoFRPruning(int window) {
         this.capacity = window;
         out = new OutputBitStream(
                 new byte[(int) (((capacity + 1) * 8 + capacity / 8 + 1) * 1.2)]);
@@ -44,15 +43,15 @@ public class ElfStarXORCompressorWOZ implements IXORCompressor {
     }
 
     private int initLeadingRoundAndRepresentation(int[] distribution) {
-        int[] positions = PostOfficeSolverWOZ.initRoundAndRepresentation(distribution, leadingRepresentation, leadingRound);
-        leadingBitsPerValue = PostOfficeSolverWOZ.positionLength2Bits[positions.length];
-        return PostOfficeSolverWOZ.writePositions(positions, out);
+        int[] positions = PostOfficeSolverNoFRPruning.initRoundAndRepresentation(distribution, leadingRepresentation, leadingRound);
+        leadingBitsPerValue = PostOfficeSolverNoFRPruning.positionLength2Bits[positions.length];
+        return PostOfficeSolverNoFRPruning.writePositions(positions, out);
     }
 
     private int initTrailingRoundAndRepresentation(int[] distribution) {
-        int[] positions = PostOfficeSolverWOZ.initRoundAndRepresentation(distribution, trailingRepresentation, trailingRound);
-        trailingBitsPerValue = PostOfficeSolverWOZ.positionLength2Bits[positions.length];
-        return PostOfficeSolverWOZ.writePositions(positions, out);
+        int[] positions = PostOfficeSolverNoFRPruning.initRoundAndRepresentation(distribution, trailingRepresentation, trailingRound);
+        trailingBitsPerValue = PostOfficeSolverNoFRPruning.positionLength2Bits[positions.length];
+        return PostOfficeSolverNoFRPruning.writePositions(positions, out);
     }
 
     /**

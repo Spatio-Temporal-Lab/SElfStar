@@ -1,6 +1,7 @@
 package org.urbcomp.startdb.selfstar.utils;
 
-public class PostOfficeSolverWOZ {
+// without First-Rear Pruning and Zero Pruning
+public class PostOfficeSolverNoFRZPruning {
     // 2^index
     public static final int[] pow2z = {1, 2, 4, 8, 16, 32};
 
@@ -23,9 +24,7 @@ public class PostOfficeSolverWOZ {
      * @return positions
      */
     public static int[] initRoundAndRepresentation(int[] distribution, int[] representation, int[] round) {
-        int[] preNonZerosCount = new int[distribution.length];   // 当前及前面的非零个数（包括当前）
-        int[] postNonZerosCount = new int[distribution.length];  // 当前后面的非零个数（不包括当前）
-        int[] totalCountAndNonZerosCount = calTotalCountAndNonZerosCounts(distribution, preNonZerosCount, postNonZerosCount);
+        int[] totalCountAndNonZerosCount = calTotalCountAndNonZerosCounts(distribution);
 
         int maxZ = Math.min(positionLength2Bits[totalCountAndNonZerosCount[1]], 5); // 最多用5个bit来表示
 
@@ -37,9 +36,9 @@ public class PostOfficeSolverWOZ {
             if (presentCost >= totalCost) {
                 break;
             }
-            int num = PostOfficeSolverWOZ.pow2z[z];     // 邮局的总数量
-            PostOfficeResult por = PostOfficeSolverWOZ.buildPostOffice(
-                    distribution, num, totalCountAndNonZerosCount[1], preNonZerosCount, postNonZerosCount);
+            int num = PostOfficeSolverNoFRZPruning.pow2z[z];     // 邮局的总数量
+            PostOfficeResult por = PostOfficeSolverNoFRZPruning.buildPostOffice(
+                    distribution, num);
             int tempTotalCost = por.getAppCost() + presentCost;
             if (tempTotalCost < totalCost) {
                 totalCost = tempTotalCost;
@@ -72,46 +71,19 @@ public class PostOfficeSolverWOZ {
         return thisSize;
     }
 
-    /**
-     * 一条直线上有居民点，每个居民点有不同的居民数。邮局只能建在居民点上。给定一个整型数组arr，
-     * 下标表示居民点的位置，每个值表示居民点的居民数。再给定一个正整数num表示邮局的数量。
-     * 每个居民只能前往其左边或者当前居民点的邮局，0坐标位置必须要建一个邮局。
-     * 选择num个居民点建立num个邮局，使得所有居民到邮局的总距离最短。
-     *
-     * @param arr The location of the settlement and the corresponding number of inhabitants
-     * @param num Number of post offices to be built
-     */
-    public static PostOfficeResult buildPostOffice(int[] arr, int num) {
-        int[] preNonZerosCount = new int[arr.length];   // 当前及前面的非零个数（包括当前）
-        int[] postNonZerosCount = new int[arr.length];  // 当前后面的非零个数（不包括当前）
-        int nonZerosCount = calTotalCountAndNonZerosCounts(arr, preNonZerosCount, postNonZerosCount)[1];
-
-        return buildPostOffice(arr, num, nonZerosCount, preNonZerosCount, postNonZerosCount);
-    }
-
-    private static int[] calTotalCountAndNonZerosCounts(int[] arr, int[] outPreNonZerosCount, int[] outPostNonZerosCount) {
+    private static int[] calTotalCountAndNonZerosCounts(int[] arr) {
         int nonZerosCount = arr.length;
         int totalCount = arr[0];
-        outPreNonZerosCount[0] = 1;            // 第一个视为非零
         for (int i = 1; i < arr.length; i++) {
             totalCount += arr[i];
             if (arr[i] == 0) {
                 nonZerosCount--;
-                outPreNonZerosCount[i] = outPreNonZerosCount[i - 1];
-            } else {
-                outPreNonZerosCount[i] = outPreNonZerosCount[i - 1] + 1;
             }
-        }
-        for (int i = 0; i < arr.length; i++) {
-            outPostNonZerosCount[i] = nonZerosCount - outPreNonZerosCount[i];
         }
         return new int[]{totalCount, nonZerosCount};
     }
 
-    private static PostOfficeResult buildPostOffice(int[] arr, int num, int nonZerosCount, int[] preNonZerosCount, int[] postNonZerosCount) {
-        int originalNum = num;
-        num = Math.min(num, nonZerosCount);
-
+    private static PostOfficeResult buildPostOffice(int[] arr, int num) {
         int[][] dp = new int[arr.length][num];      // 状态矩阵。d[i][j]表示，只考虑前i个居民点，且第i个位置是第j个邮局的总距离，i >= j，
         // 下标从0开始。注意，并非是所有居民点的总距离，因为没有考虑第j个邮局之后的居民点的距离
         int[][] pre = new int[arr.length][num];     // 对应于dp[i][j]，表示让dp[i][j]最小时，第j-1个邮局所在的位置信息
@@ -157,12 +129,6 @@ public class PostOfficeSolverWOZ {
             if (num - 1 == 0 && i > 0) {
                 break;
             }
-            if (arr[i] == 0 && i > 0) {
-                continue;
-            }
-            if (preNonZerosCount[i] < num) {
-                continue;
-            }
             int sum = dp[i][num - 1];
             for (int j = i + 1; j < arr.length; j++) {
                 sum += arr[j] * (j - i);
@@ -180,22 +146,6 @@ public class PostOfficeSolverWOZ {
             officePositions[num - i] = tempBestLast;
             tempBestLast = pre[tempBestLast][num - i];
             i++;
-        }
-
-        if (originalNum > nonZerosCount) {
-            int[] modifyingOfficePositions = new int[originalNum];
-            int j = 0, k = 0;
-            while (j < originalNum && k < num) {
-                if (j - k < originalNum - num && j < officePositions[k]) {
-                    modifyingOfficePositions[j] = j;
-                    j++;
-                } else {
-                    modifyingOfficePositions[j] = officePositions[k];
-                    j++;
-                    k++;
-                }
-            }
-            officePositions = modifyingOfficePositions;
         }
 
         return new PostOfficeResult(officePositions, tempTotalAppCost);

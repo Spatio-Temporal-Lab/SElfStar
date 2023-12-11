@@ -183,14 +183,10 @@ public class TestCompressor {
         fileNameParamToTotalBits.put(fileNameParam, 0L);
         fileNameParamToTotalBlock.put(fileNameParam, 0L);
         ICompressor[] compressors = new ICompressor[]{
-                new ElfStarCompressor(new ElfStarXORCompressorWOG()),
-                new ElfStarCompressor(new ElfStarXORCompressorWOF()),
-                new ElfStarCompressor(new ElfStarXORCompressorWOZ()),
+                new ElfStarCompressor(new ElfStarXORCompressorNoFRZGPruning()),
+                new ElfStarCompressor(new ElfStarXORCompressorNoFRPruning()),
+                new ElfStarCompressor(new ElfStarXORCompressorNoFRZPruning()),
                 new ElfStarCompressor(new ElfStarXORCompressor()),
-                new SElfStarCompressor(new SElfXORCompressorWOG()),
-                new SElfStarCompressor(new SElfXORCompressorWOF()),
-                new SElfStarCompressor(new SElfXORCompressorWOZ()),
-                new SElfStarCompressor(new SElfXORCompressor()),
         };
 
         IDecompressor[] decompressors = new IDecompressor[]{
@@ -198,10 +194,6 @@ public class TestCompressor {
                 new ElfStarDecompressor(new ElfStarXORDecompressor()),     // streaming version is the same
                 new ElfStarDecompressor(new ElfStarXORDecompressor()),
                 new ElfStarDecompressor(new ElfStarXORDecompressor()),     // streaming version is the same
-                new ElfStarDecompressor(new ElfStarXORDecompressor()),
-                new ElfStarDecompressor(new ElfStarXORDecompressor()),     // streaming version is the same
-                new ElfStarDecompressor(new ElfStarXORDecompressor()),
-                new ElfStarDecompressor(new ElfStarXORDecompressor())     // streaming version is the same
         };
         boolean firstMethod = true;
         for (int i = 0; i < compressors.length; i++) {
