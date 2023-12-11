@@ -62,7 +62,7 @@ public class SElfXORCompressor implements IXORCompressor {
 
     private int trailingBitsPerValue = 3;
 
-    private int capacity = 1000;
+    private final int capacity;
 
 
     public SElfXORCompressor(int window) {
@@ -73,8 +73,7 @@ public class SElfXORCompressor implements IXORCompressor {
     }
 
     public SElfXORCompressor() {
-        out = new OutputBitStream(
-                new byte[(int) (((capacity + 1) * 8 + capacity / 8 + 1) * 1.2)]);
+        this(1000);
     }
 
     @Override
