@@ -2,83 +2,51 @@ package org.urbcomp.startdb.selfstar.compressor.xor;
 
 import org.urbcomp.startdb.selfstar.utils.Elf64Utils;
 import org.urbcomp.startdb.selfstar.utils.OutputBitStream;
-import org.urbcomp.startdb.selfstar.utils.PostOfficeSolver;
+import org.urbcomp.startdb.selfstar.utils.PostOfficeSolverNoFRZGPruning;
 
 import java.util.Arrays;
 
-public class SElfXORCompressor implements IXORCompressor {
-    private final int[] leadingRepresentation = {
-            0, 0, 0, 0, 0, 0, 0, 0,
-            1, 1, 1, 1, 2, 2, 2, 2,
-            3, 3, 4, 4, 5, 5, 6, 6,
-            7, 7, 7, 7, 7, 7, 7, 7,
-            7, 7, 7, 7, 7, 7, 7, 7,
-            7, 7, 7, 7, 7, 7, 7, 7,
-            7, 7, 7, 7, 7, 7, 7, 7,
-            7, 7, 7, 7, 7, 7, 7, 7
-    };
-    private final int[] leadingRound = {
-            0, 0, 0, 0, 0, 0, 0, 0,
-            8, 8, 8, 8, 12, 12, 12, 12,
-            16, 16, 18, 18, 20, 20, 22, 22,
-            24, 24, 24, 24, 24, 24, 24, 24,
-            24, 24, 24, 24, 24, 24, 24, 24,
-            24, 24, 24, 24, 24, 24, 24, 24,
-            24, 24, 24, 24, 24, 24, 24, 24,
-            24, 24, 24, 24, 24, 24, 24, 24
-    };
-    private final int[] trailingRepresentation = {
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 1, 1,
-            1, 1, 1, 1, 2, 2, 2, 2,
-            3, 3, 3, 3, 4, 4, 4, 4,
-            5, 5, 6, 6, 6, 6, 7, 7,
-            7, 7, 7, 7, 7, 7, 7, 7,
-            7, 7, 7, 7, 7, 7, 7, 7,
-    };
-    private final int[] trailingRound = {
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 22, 22,
-            22, 22, 22, 22, 28, 28, 28, 28,
-            32, 32, 32, 32, 36, 36, 36, 36,
-            40, 40, 42, 42, 42, 42, 46, 46,
-            46, 46, 46, 46, 46, 46, 46, 46,
-            46, 46, 46, 46, 46, 46, 46, 46,
-    };
-    private final int[] leadDistribution = new int[64];
-    private final int[] trailDistribution = new int[64];
+// without first-rear pruning, zero-pruning and global pruning
+public class ElfStarXORCompressorNoFRZGPruning implements IXORCompressor {
+    private final int[] leadingRepresentation = new int[64];
+    private final int[] leadingRound = new int[64];
+    private final int[] trailingRepresentation = new int[64];
+    private final int[] trailingRound = new int[64];
     private int storedLeadingZeros = Integer.MAX_VALUE;
     private int storedTrailingZeros = Integer.MAX_VALUE;
     private long storedVal = 0;
     private boolean first = true;
-    private int[] leadPositions = {0, 8, 12, 16, 18, 20, 22, 24};
-    private int[] trailPositions = {0, 22, 28, 32, 36, 40, 42, 46};
-    private boolean updatePositions = false;
+    private int[] leadDistribution;
+    private int[] trailDistribution;
+
     private OutputBitStream out;
 
-    private int leadingBitsPerValue = 3;
+    private int leadingBitsPerValue;
 
-    private int trailingBitsPerValue = 3;
+    private int trailingBitsPerValue;
 
-    private final int capacity;
+    private final int capacity = 1000;
 
-
-    public SElfXORCompressor(int window) {
-        this.capacity = window;
+    public ElfStarXORCompressorNoFRZGPruning() {
         out = new OutputBitStream(
                 new byte[(int) (((capacity + 1) * 8 + capacity / 8 + 1) * 1.2)]);
-
-    }
-
-    public SElfXORCompressor() {
-        this(1000);
     }
 
     @Override
     public OutputBitStream getOutputStream() {
         return this.out;
+    }
+
+    private int initLeadingRoundAndRepresentation(int[] distribution) {
+        int[] positions = PostOfficeSolverNoFRZGPruning.initRoundAndRepresentation(distribution, leadingRepresentation, leadingRound);
+        leadingBitsPerValue = PostOfficeSolverNoFRZGPruning.positionLength2Bits[positions.length];
+        return PostOfficeSolverNoFRZGPruning.writePositions(positions, out);
+    }
+
+    private int initTrailingRoundAndRepresentation(int[] distribution) {
+        int[] positions = PostOfficeSolverNoFRZGPruning.initRoundAndRepresentation(distribution, trailingRepresentation, trailingRound);
+        trailingBitsPerValue = PostOfficeSolverNoFRZGPruning.positionLength2Bits[positions.length];
+        return PostOfficeSolverNoFRZGPruning.writePositions(positions, out);
     }
 
     /**
@@ -89,8 +57,8 @@ public class SElfXORCompressor implements IXORCompressor {
     @Override
     public int addValue(long value) {
         if (first) {
-            return PostOfficeSolver.writePositions(leadPositions, out)
-                    + PostOfficeSolver.writePositions(trailPositions, out)
+            return initLeadingRoundAndRepresentation(leadDistribution)
+                    + initTrailingRoundAndRepresentation(trailDistribution)
                     + writeFirst(value);
         } else {
             return compressValue(value);
@@ -117,17 +85,8 @@ public class SElfXORCompressor implements IXORCompressor {
     public int close() {
         int thisSize = addValue(Elf64Utils.END_SIGN);
         out.flush();
-        if (updatePositions) {
-            // we update distribution using the inner info
-            leadPositions = PostOfficeSolver.initRoundAndRepresentation(leadDistribution, leadingRepresentation, leadingRound);
-            leadingBitsPerValue = PostOfficeSolver.positionLength2Bits[leadPositions.length];
-
-            trailPositions = PostOfficeSolver.initRoundAndRepresentation(trailDistribution, trailingRepresentation, trailingRound);
-            trailingBitsPerValue = PostOfficeSolver.positionLength2Bits[trailPositions.length];
-        }
         return thisSize;
     }
-
 
     private int compressValue(long value) {
         int thisSize = 0;
@@ -140,8 +99,6 @@ public class SElfXORCompressor implements IXORCompressor {
         } else {
             int leadingZeros = leadingRound[Long.numberOfLeadingZeros(xor)];
             int trailingZeros = trailingRound[Long.numberOfTrailingZeros(xor)];
-            leadDistribution[Long.numberOfLeadingZeros(xor)]++;
-            trailDistribution[Long.numberOfTrailingZeros(xor)]++;
 
             if (leadingZeros >= storedLeadingZeros && trailingZeros >= storedTrailingZeros &&
                     (leadingZeros - storedLeadingZeros) + (trailingZeros - storedTrailingZeros) < 1 + leadingBitsPerValue + trailingBitsPerValue) {
@@ -193,13 +150,15 @@ public class SElfXORCompressor implements IXORCompressor {
         storedTrailingZeros = Integer.MAX_VALUE;
         storedVal = 0;
         first = true;
-        updatePositions = false;
-        Arrays.fill(leadDistribution, 0);
-        Arrays.fill(trailDistribution, 0);
+        Arrays.fill(leadingRepresentation, 0);
+        Arrays.fill(leadingRound, 0);
+        Arrays.fill(trailingRepresentation, 0);
+        Arrays.fill(trailingRound, 0);
     }
 
     @Override
-    public void setDistribution(int[] leadDistributionIgnore, int[] trailDistributionIgnore) {
-        this.updatePositions = true;
+    public void setDistribution(int[] leadDistribution, int[] trailDistribution) {
+        this.leadDistribution = leadDistribution;
+        this.trailDistribution = trailDistribution;
     }
 }
