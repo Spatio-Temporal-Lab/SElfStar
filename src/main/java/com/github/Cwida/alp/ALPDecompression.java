@@ -46,7 +46,7 @@ public class ALPDecompression {
         this.ALPrdDe = new ALPrdDecompression(in);
     }
 
-    public void deserialize() {
+    private void deserialize() {
         try {
             vectorExponent = (byte) in.readInt(8);
             vectorFactor = (byte) in.readInt(8);
@@ -69,7 +69,7 @@ public class ALPDecompression {
         }
     }
 
-    public double[] decompress() {
+    private double[] decompress() {
         double[] output = new double[count];
 
         long factor = ALPConstants.U_FACT_ARR[vectorFactor];
