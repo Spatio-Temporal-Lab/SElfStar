@@ -410,7 +410,6 @@ public class TestCompressor {
             int RGsize = 100;
             while ((floatings = br.nextBlock()) != null) {
                 if (floatings.size() != block) {
-//                if (floatings.isEmpty()) {
                     break;
                 }
                 floatingsList.add(new ArrayList<>(floatings));
