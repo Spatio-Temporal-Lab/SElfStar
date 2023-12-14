@@ -34,19 +34,14 @@ public class ElfPlusCompressor implements ICompressor {
             compressedSizeInBits += os.writeInt(2, 2); // case 10
             vPrimeLong = 0xfff8000000000000L & vLong;
         } else {
-            //1
             // C1: v is a normal or subnormal
-            int[] alphaAndBetaStar = Elf64Utils.getAlphaAndBetaStar(v, lastBetaStar);// 问题点1
-            //5
+            int[] alphaAndBetaStar = Elf64Utils.getAlphaAndBetaStar(v, lastBetaStar);
             int e = ((int) (vLong >> 52)) & 0x7ff;
-            //4 up
             int gAlpha = Elf64Utils.getFAlpha(alphaAndBetaStar[0]) + e - 1023;
 
-            //3
             int eraseBits = 52 - gAlpha;
             long mask = 0xffffffffffffffffL << eraseBits;
             long delta = (~mask) & vLong;
-            //2
 
             if (delta != 0 && eraseBits > 4) {  // C2
                 if (alphaAndBetaStar[1] == lastBetaStar) {
@@ -60,7 +55,6 @@ public class ElfPlusCompressor implements ICompressor {
                 compressedSizeInBits += os.writeInt(2, 2); // case 10
                 vPrimeLong = vLong;
             }
-
         }
         compressedSizeInBits += xorCompressor.addValue(vPrimeLong);
     }
