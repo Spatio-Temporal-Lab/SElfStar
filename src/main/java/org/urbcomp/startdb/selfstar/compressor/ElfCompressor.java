@@ -9,14 +9,12 @@ public class ElfCompressor implements ICompressor {
     private int compressedSizeInBits = 0;
     private OutputBitStream os;
 
-
     private int numberOfValues = 0;
 
     public ElfCompressor(IXORCompressor xorCompressor) {
         this.xorCompressor = xorCompressor;
         os = xorCompressor.getOutputStream();
     }
-
 
     @Override
     public void addValue(double v) {
@@ -29,7 +27,7 @@ public class ElfCompressor implements ICompressor {
             vPrimeLong = vLong;
         } else if (Double.isNaN(v)) {
             compressedSizeInBits += os.writeBit(false);
-            vPrimeLong = 0xfff8000000000000L & vLong;
+            vPrimeLong = 0x7ff8000000000000L;
         } else {
             int[] alphaAndBetaStar = Elf64Utils.getAlphaAndBetaStar(v);
             int e = ((int) (vLong >> 52)) & 0x7ff;
