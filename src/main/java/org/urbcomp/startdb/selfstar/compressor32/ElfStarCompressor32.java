@@ -38,7 +38,7 @@ public class ElfStarCompressor32 implements ICompressor32 {
             vPrimeList[numberOfValues] = vInt;
             betaStarList[numberOfValues] = Integer.MAX_VALUE;
         } else if (Float.isNaN(v)) {
-            vPrimeList[numberOfValues] = 0xffc00000 & vInt;
+            vPrimeList[numberOfValues] = 0x7fc00000;
             betaStarList[numberOfValues] = Integer.MAX_VALUE;
         } else {
             // C1: v is a normal or subnormal
