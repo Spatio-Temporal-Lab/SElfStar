@@ -63,10 +63,7 @@ public class ChimpXORDecompressor32 implements IXORDecompressor32 {
         if (first) {
             first = false;
             storedVal = in.readInt(32);
-            if (storedVal == Elf32Utils.END_SIGN) {
-                endOfStream = true;
-            }
-
+            endOfStream = storedVal == Elf32Utils.END_SIGN;
         } else {
             nextValue();
         }
@@ -84,22 +81,16 @@ public class ChimpXORDecompressor32 implements IXORDecompressor32 {
                 storedLeadingZeros = leadingRepresentation[in.readInt(3)];
                 value = in.readInt(32 - storedLeadingZeros);
                 value = storedVal ^ value;
-                if (value == Elf32Utils.END_SIGN) {
-                    endOfStream = true;
-                    return;
-                } else {
-                    storedVal = value;
-                }
+
+                endOfStream = value == Elf32Utils.END_SIGN;
+                storedVal = value;
                 break;
             case 2:
                 value = in.readInt(32 - storedLeadingZeros);
                 value = storedVal ^ value;
-                if (value == Elf32Utils.END_SIGN) {
-                    endOfStream = true;
-                    return;
-                } else {
-                    storedVal = value;
-                }
+
+                endOfStream = value == Elf32Utils.END_SIGN;
+                storedVal = value;
                 break;
             case 1:
                 storedLeadingZeros = leadingRepresentation[in.readInt(3)];
@@ -111,12 +102,9 @@ public class ChimpXORDecompressor32 implements IXORDecompressor32 {
                 value = in.readInt(32 - storedLeadingZeros - storedTrailingZeros);
                 value <<= storedTrailingZeros;
                 value = storedVal ^ value;
-                if (value == Elf32Utils.END_SIGN) {
-                    endOfStream = true;
-                    return;
-                } else {
-                    storedVal = value;
-                }
+
+                endOfStream = value == Elf32Utils.END_SIGN;
+                storedVal = value;
                 break;
             default:
         }
