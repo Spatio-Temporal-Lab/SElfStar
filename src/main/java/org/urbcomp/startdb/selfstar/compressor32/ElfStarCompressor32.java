@@ -17,13 +17,6 @@ public class ElfStarCompressor32 implements ICompressor32 {
     private int lastBetaStar = Integer.MAX_VALUE;
     private int numberOfValues = 0;
 
-    public ElfStarCompressor32(IXORCompressor32 xorCompressor, int window) {
-        this.xorCompressor = xorCompressor;
-        this.os = xorCompressor.getOutputStream();
-        this.betaStarList = new int[window + 1];     // one for the end sign
-        this.vPrimeList = new int[window + 1];      // one for the end sign
-    }
-
     public ElfStarCompressor32(IXORCompressor32 xorCompressor) {
         this.xorCompressor = xorCompressor;
         this.os = xorCompressor.getOutputStream();

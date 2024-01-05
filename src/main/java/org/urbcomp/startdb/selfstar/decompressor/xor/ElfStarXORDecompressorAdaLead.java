@@ -5,7 +5,6 @@ import org.urbcomp.startdb.selfstar.utils.InputBitStream;
 import org.urbcomp.startdb.selfstar.utils.PostOfficeSolver;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 public class ElfStarXORDecompressorAdaLead implements IXORDecompressor {
     private long storedVal = 0;
@@ -51,15 +50,8 @@ public class ElfStarXORDecompressorAdaLead implements IXORDecompressor {
 
     @Override
     public void refresh() {
-        storedVal = 0;
-        storedLeadingZeros = Integer.MAX_VALUE;
-        storedTrailingZeros = Integer.MAX_VALUE;
         first = true;
         endOfStream = false;
-
-        Arrays.fill(leadingRepresentation, 0);
-
-        leadingBitsPerValue = 0;
     }
 
     /**

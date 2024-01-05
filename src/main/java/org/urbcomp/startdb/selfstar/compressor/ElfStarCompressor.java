@@ -25,10 +25,7 @@ public class ElfStarCompressor implements ICompressor {
     }
 
     public ElfStarCompressor(IXORCompressor xorCompressor) {
-        this.xorCompressor = xorCompressor;
-        this.os = xorCompressor.getOutputStream();
-        this.betaStarList = new int[1001];     // one for the end sign
-        this.vPrimeList = new long[1001];      // one for the end sign
+        this(xorCompressor, 1000);
     }
 
     public void addValue(double v) {

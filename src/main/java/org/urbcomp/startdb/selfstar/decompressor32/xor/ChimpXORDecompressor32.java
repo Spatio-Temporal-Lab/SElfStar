@@ -36,8 +36,6 @@ public class ChimpXORDecompressor32 implements IXORDecompressor32 {
 
     @Override
     public void refresh() {
-        storedLeadingZeros = Integer.MAX_VALUE;
-        storedVal = 0;
         first = true;
         endOfStream = false;
     }

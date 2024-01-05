@@ -45,10 +45,6 @@ public class ElfXORDecompressor32 implements IXORDecompressor32 {
 
     @Override
     public void refresh() {
-        in = new InputBitStream(new byte[0]);
-        storedVal = 0;
-        storedLeadingZeros = Integer.MAX_VALUE;
-        storedTrailingZeros = Integer.MAX_VALUE;
         first = true;
         endOfStream = false;
     }
