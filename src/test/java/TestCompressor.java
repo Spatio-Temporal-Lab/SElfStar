@@ -125,7 +125,7 @@ public class TestCompressor {
 
                 IDecompressor[] decompressors = new IDecompressor[]{
                         new ElfStarDecompressor(new ElfStarXORDecompressor()),
-                        new ElfStarDecompressor(new ElfStarXORDecompressor()),     // streaming version is the same
+                        new ElfStarDecompressor(new SElfStarXORDecompressor()),
                 };
                 testParamCompressor(fileName, window, compressors, decompressors);
             }
@@ -191,9 +191,9 @@ public class TestCompressor {
 
         IDecompressor[] decompressors = new IDecompressor[]{
                 new ElfStarDecompressor(new ElfStarXORDecompressor()),
-                new ElfStarDecompressor(new ElfStarXORDecompressor()),     // streaming version is the same
                 new ElfStarDecompressor(new ElfStarXORDecompressor()),
-                new ElfStarDecompressor(new ElfStarXORDecompressor()),     // streaming version is the same
+                new ElfStarDecompressor(new ElfStarXORDecompressor()),
+                new ElfStarDecompressor(new ElfStarXORDecompressor()),
         };
         boolean firstMethod = true;
         for (int i = 0; i < compressors.length; i++) {
@@ -276,7 +276,7 @@ public class TestCompressor {
                 new ElfStarDecompressor(new ElfStarXORDecompressorAdaLead()),
                 new ElfStarDecompressor(new ElfStarXORDecompressorAdaLeadAdaTrail()),
                 new ElfStarDecompressor(new ElfStarXORDecompressor()),
-                new ElfStarDecompressor(new ElfStarXORDecompressor())     // streaming version is the same
+                new ElfStarDecompressor(new SElfStarXORDecompressor())
         };
         boolean firstMethod = true;
         for (int i = 0; i < compressors.length; i++) {
@@ -325,7 +325,6 @@ public class TestCompressor {
                     }
                     compressor.refresh();
                     decompressor.refresh();
-
                 }
             } catch (Exception e) {
                 throw new RuntimeException(fileName, e);
@@ -766,6 +765,38 @@ public class TestCompressor {
                              Map<String, Double> fileNameParamMethodToCTime,
                              Map<String, Double> fileNameParamMethodToDTime,
                              Map<String, Long> fileNameParamToTotalBlock) {
+        Map<String, List<Double>> methodToRatios = new TreeMap<>();
+        Map<String, List<Double>> methodToCTimes = new HashMap<>();
+        Map<String, List<Double>> methodToDTimes = new HashMap<>();
+
+        for (String fileNameParamMethod : fileNameParamMethodToRatio.keySet()) {
+            String fileName = fileNameParamMethod.split(",")[0];
+            String param = fileNameParamMethod.split(",")[1];
+            String method = fileNameParamMethod.split(",")[2];
+            String fileNameParam = fileName + "," + param;
+            if (fileName.equals(INIT_FILE)) {
+                continue;
+            }
+            String paramMethod = param + "\t" + method;
+            if (!methodToRatios.containsKey(paramMethod)) {
+                methodToRatios.put(paramMethod, new ArrayList<>());
+                methodToCTimes.put(paramMethod, new ArrayList<>());
+                methodToDTimes.put(paramMethod, new ArrayList<>());
+            }
+            methodToRatios.get(paramMethod).add(fileNameParamMethodToRatio.get(fileNameParamMethod));
+            methodToCTimes.get(paramMethod).add(fileNameParamMethodToCTime.get(fileNameParamMethod) / fileNameParamToTotalBlock.get(fileNameParam));
+            methodToDTimes.get(paramMethod).add(fileNameParamMethodToDTime.get(fileNameParamMethod) / fileNameParamToTotalBlock.get(fileNameParam));
+        }
+
+        System.out.println("Average Performance");
+        System.out.println("Param\tMethod\tRatio\tCTime\tDTime");
+        for (String paramMethod : methodToRatios.keySet()) {
+            System.out.print(paramMethod + "\t");
+            System.out.print(methodToRatios.get(paramMethod).stream().mapToDouble(o -> o).average().orElse(0) + "\t");
+            System.out.print(methodToCTimes.get(paramMethod).stream().mapToDouble(o -> o).average().orElse(0) + "\t");
+            System.out.println(methodToDTimes.get(paramMethod).stream().mapToDouble(o -> o).average().orElse(0));
+        }
+
         try {
             File file = new File(storeFile).getParentFile();
             if (!file.exists() && !file.mkdirs()) {

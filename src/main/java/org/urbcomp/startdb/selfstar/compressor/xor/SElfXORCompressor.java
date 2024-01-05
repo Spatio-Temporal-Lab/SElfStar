@@ -56,6 +56,7 @@ public class SElfXORCompressor implements IXORCompressor {
     private int[] leadPositions = {0, 8, 12, 16, 18, 20, 22, 24};
     private int[] trailPositions = {0, 22, 28, 32, 36, 40, 42, 46};
     private boolean updatePositions = false;
+    private boolean writePositions = false;
     private OutputBitStream out;
 
     private int leadingBitsPerValue = 3;
@@ -89,9 +90,14 @@ public class SElfXORCompressor implements IXORCompressor {
     @Override
     public int addValue(long value) {
         if (first) {
-            return PostOfficeSolver.writePositions(leadPositions, out)
-                    + PostOfficeSolver.writePositions(trailPositions, out)
-                    + writeFirst(value);
+            if (writePositions) {
+                return out.writeBit(true)
+                + PostOfficeSolver.writePositions(leadPositions, out)
+                + PostOfficeSolver.writePositions(trailPositions, out)
+                + writeFirst(value);
+            } else {
+                return out.writeBit(false) + writeFirst(value);
+            }
         } else {
             return compressValue(value);
         }
@@ -125,6 +131,7 @@ public class SElfXORCompressor implements IXORCompressor {
             trailPositions = PostOfficeSolver.initRoundAndRepresentation(trailDistribution, trailingRepresentation, trailingRound);
             trailingBitsPerValue = PostOfficeSolver.positionLength2Bits[trailPositions.length];
         }
+        writePositions = updatePositions;
         return thisSize;
     }
 
@@ -189,9 +196,6 @@ public class SElfXORCompressor implements IXORCompressor {
     public void refresh() {
         out = new OutputBitStream(
                 new byte[(int) (((capacity + 1) * 8 + capacity / 8 + 1) * 1.2)]);
-        storedLeadingZeros = Integer.MAX_VALUE;
-        storedTrailingZeros = Integer.MAX_VALUE;
-        storedVal = 0;
         first = true;
         updatePositions = false;
         Arrays.fill(leadDistribution, 0);
