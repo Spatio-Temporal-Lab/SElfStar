@@ -75,4 +75,5 @@ public class ElfPlusDecompressor implements IDecompressor {
             throw new RuntimeException("IO error: " + e.getMessage());
         }
     }
+
 }
