@@ -1658,4 +1658,67 @@ public class InputBitStream implements BooleanIterator, Flushable, Closeable {
             length -= toRead;
         }
     }
+
+
+    private int initialInt;
+    private int remainBits;
+    private long initialLong;
+
+    public int readBufferInt(int len) {
+        int result;
+        if (len <= remainBits) {
+            // 如果 len 小于等于剩余的位数，只从已读取的数据中取位
+            result = (initialInt & ((1 << remainBits) - 1)) >>> (remainBits - len);
+            remainBits -= len;
+        } else {
+            // 如果 len 大于剩余的位数，先取完剩余的位，然后从流中读取更多位
+            int additionalBitsNeeded = len - remainBits;
+            result = (initialInt & ((1 << remainBits) - 1)) << additionalBitsNeeded;
+            try {
+                result |= readInt(additionalBitsNeeded);
+            } catch (IOException e) {
+                throw new RuntimeException(e.getMessage());
+            }
+            remainBits = 0;
+        }
+        return result;
+    }
+
+    public int readBufferInt(int len, int bufferSize) throws IOException {
+        if (bufferSize < len || len < 0) {
+            throw new IllegalArgumentException("Invalid len or t values");
+        }
+        initialInt = readInt(bufferSize);
+        this.remainBits = bufferSize - len;
+        return (initialInt >>> (bufferSize - len)) & ((1 << len) - 1);
+    }
+
+    public long readBufferLong(int len) {
+        long result;
+        if (len <= remainBits) {
+            // 如果 len 小于等于剩余的位数，只从已读取的数据中取位
+            result = (initialLong & ((1L << remainBits) - 1)) >>> (remainBits - len);
+            remainBits -= len;
+        } else {
+            // 如果 len 大于剩余的位数，先取完剩余的位，然后从流中读取更多位
+            int additionalBitsNeeded = len - remainBits;
+            result = (initialLong & ((1L << remainBits) - 1)) << additionalBitsNeeded;
+            try {
+                result |= readInt(additionalBitsNeeded);
+            } catch (IOException e) {
+                throw new RuntimeException(e.getMessage());
+            }
+            remainBits = 0;
+        }
+        return result;
+    }
+
+    public long readBufferLong(int len, int bufferSize) throws IOException {
+        if (bufferSize < len || len < 0) {
+            throw new IllegalArgumentException("Invalid len or t values");
+        }
+        initialLong = readInt(bufferSize);
+        this.remainBits = bufferSize - len;
+        return (initialLong >>> (bufferSize - len)) & ((1L << len) - 1);
+    }
 }
