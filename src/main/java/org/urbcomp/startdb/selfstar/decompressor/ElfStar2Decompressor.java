@@ -18,7 +18,7 @@ public class ElfStar2Decompressor implements IDecompressor {
 
     private int maxCodeLen = 0;
 
-    private long[] lookUpArray;
+    private Node[] lookUpArray;
 
     public ElfStar2Decompressor(IXORDecompressor xorDecompressor) {
         this.xorDecompressor = xorDecompressor;
@@ -34,48 +34,33 @@ public class ElfStar2Decompressor implements IDecompressor {
         return values;
     }
 
-    private static long[] generateLookupArray(List<Node> huffmanCodes, int maxCodeLength) {
-        long[] lookupArray = new long[1 << maxCodeLength];
-        Map<String, Long> codeMap = new HashMap<>();
 
-        // 将霍夫曼编码映射为长整型码值
-        for (HuffmanCode huffmanCode : huffmanCodes) {
-            String binaryCode = Long.toBinaryString(huffmanCode.code);
-            while (binaryCode.length() < huffmanCode.bitLength) {
-                binaryCode = "0" + binaryCode;
-            }
-            codeMap.put(binaryCode, huffmanCode.code);
-        }
+    //todo
+    public static Node[] generateLookupArray(List<Node> huffmanCodes, int maxCodeLength) {
+        Node[] lookupArray = new Node[1 << maxCodeLength];
 
-        // 生成数组
-        for (int i = 0; i < lookupArray.length; i++) {
-            String binaryIndex = Integer.toBinaryString(i);
-            while (binaryIndex.length() < maxCodeLength) {
-                binaryIndex = "0" + binaryIndex;
-            }
-
-            for (Map.Entry<String, Long> entry : codeMap.entrySet()) {
-                if (binaryIndex.startsWith(entry.getKey())) {
-                    lookupArray[i] = entry.getValue();
-                    break;
-                }
+        for (Node huffmanCode : huffmanCodes) {
+            int failingBit = maxCodeLength - huffmanCode.depth;
+            for (long i = huffmanCode.code << failingBit; i < (huffmanCode.code + 1) << failingBit; i++) {
+                lookupArray[(int) i] = huffmanCode;
             }
         }
-
         return lookupArray;
     }
 
     public void initHuffmanTree() {
         for (int state : states) {
             Node node = new Node(state);
-            node.depth = readInt(3);
+            node.depth = readInt(5);
             huffmanCode.add(node);
             if (node.depth > maxCodeLen) {
                 maxCodeLen = node.depth;
             }
         }
         CanonicalHuff.generateCode(huffmanCode);
-
+        System.out.println(huffmanCode);
+        System.out.println(maxCodeLen);
+        lookUpArray = generateLookupArray(huffmanCode, maxCodeLen);
     }
 
     @Override
@@ -92,13 +77,25 @@ public class ElfStar2Decompressor implements IDecompressor {
 
     @Override
     public Double nextValue() {
-
-        return 0.0;
+        Double v;
+        int lookupCode = readBufferInt(maxCodeLen);
+        Node node = lookUpArray[lookupCode];
+        setRemainBits(node.depth);
+        System.out.println(node+" "+Integer.toBinaryString(lookupCode));
+        if (node.data != 17) {
+            lastBetaStar = node.data;
+            v = recoverVByBetaStar();
+        } else {
+            v = xorDecompressor.readValue();
+        }
+        System.out.println(v);
+        return v;
     }
 
     private Double recoverVByBetaStar() {
         double v;
         Double vPrime = xorDecompressor.readValue();
+        System.out.println(vPrime);
         int sp = Elf64Utils.getSP(Math.abs(vPrime));
         if (lastBetaStar == 0) {
             v = Elf64Utils.get10iN(-sp - 1);
@@ -121,12 +118,14 @@ public class ElfStar2Decompressor implements IDecompressor {
         }
     }
 
-    private int readBufferInt(int len, int bufferSize) {
+    private int readBufferInt(int bufferSize) {
         InputBitStream in = xorDecompressor.getInputStream();
-        try {
-            return in.readBufferInt(len, bufferSize);
-        } catch (IOException e) {
-            throw new RuntimeException("IO error: " + e.getMessage());
-        }
+        return in.readIntToBuffer(bufferSize);
+
+    }
+
+    private void setRemainBits(int len) {
+        InputBitStream in = xorDecompressor.getInputStream();
+        in.setRemainBits(len);
     }
 }

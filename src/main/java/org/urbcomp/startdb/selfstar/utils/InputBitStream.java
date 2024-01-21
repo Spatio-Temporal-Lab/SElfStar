@@ -1660,20 +1660,28 @@ public class InputBitStream implements BooleanIterator, Flushable, Closeable {
     }
 
 
-    private int initialInt;
+    private long initial;
     private int remainBits;
-    private long initialLong;
+    private int initialSize;
 
     public int readBufferInt(int len) {
+
+        if (remainBits == 0) {
+            try {
+                return readInt(len);
+            } catch (IOException e) {
+                throw new RuntimeException(e.getMessage());
+            }
+        }
         int result;
         if (len <= remainBits) {
             // 如果 len 小于等于剩余的位数，只从已读取的数据中取位
-            result = (initialInt & ((1 << remainBits) - 1)) >>> (remainBits - len);
+            result = ((int) initial & ((1 << remainBits) - 1)) >>> (remainBits - len);
             remainBits -= len;
         } else {
             // 如果 len 大于剩余的位数，先取完剩余的位，然后从流中读取更多位
             int additionalBitsNeeded = len - remainBits;
-            result = (initialInt & ((1 << remainBits) - 1)) << additionalBitsNeeded;
+            result = ((int) initial & ((1 << remainBits) - 1)) << additionalBitsNeeded;
             try {
                 result |= readInt(additionalBitsNeeded);
             } catch (IOException e) {
@@ -1684,41 +1692,62 @@ public class InputBitStream implements BooleanIterator, Flushable, Closeable {
         return result;
     }
 
-    public int readBufferInt(int len, int bufferSize) throws IOException {
-        if (bufferSize < len || len < 0) {
-            throw new IllegalArgumentException("Invalid len or t values");
+    public int readIntToBuffer(int len) {
+        long oldInitial = 0;
+        int oldRemainBits = 0;
+
+        // 如果还有未使用的位，保存当前的 initial 和 remainBits
+        if (remainBits > 0) {
+            oldInitial = initial & ((1L << remainBits) - 1); // 保存未使用的位
+            oldRemainBits = remainBits;
         }
-        initialInt = readInt(bufferSize);
-        this.remainBits = bufferSize - len;
-        return (initialInt >>> (bufferSize - len)) & ((1 << len) - 1);
+
+        try {
+            initial = readInt(len); // 读取新的 initial
+            initialSize = len;
+        } catch (IOException e) {
+            throw new RuntimeException("IO error: " + e.getMessage());
+        }
+
+        // 如果有未使用的位，将它们合并到新的 initial 中
+        if (oldRemainBits > 0) {
+            initial |= (oldInitial << len); // 将未使用的位移动到正确的位置并合并
+            initialSize += oldRemainBits; // 更新 initialSize
+
+            System.out.println("initialSize "+initialSize);
+        }
+        return (int) initial>>>oldRemainBits;
+    }
+
+    public void setRemainBits(int len) {
+        remainBits = initialSize - len;
     }
 
     public long readBufferLong(int len) {
+        System.out.println("len " + len + ", remainBits " + remainBits);
         long result;
+        if (remainBits == 0) {
+            try {
+                return readLong(len);
+            } catch (IOException e) {
+                throw new RuntimeException(e.getMessage());
+            }
+        }
         if (len <= remainBits) {
             // 如果 len 小于等于剩余的位数，只从已读取的数据中取位
-            result = (initialLong & ((1L << remainBits) - 1)) >>> (remainBits - len);
+            result = (initial & ((1L << remainBits) - 1)) >>> (remainBits - len);
             remainBits -= len;
         } else {
             // 如果 len 大于剩余的位数，先取完剩余的位，然后从流中读取更多位
             int additionalBitsNeeded = len - remainBits;
-            result = (initialLong & ((1L << remainBits) - 1)) << additionalBitsNeeded;
+            result = (initial & ((1L << remainBits) - 1)) << additionalBitsNeeded;
             try {
-                result |= readInt(additionalBitsNeeded);
+                result |= readLong(additionalBitsNeeded);
             } catch (IOException e) {
                 throw new RuntimeException(e.getMessage());
             }
             remainBits = 0;
         }
         return result;
-    }
-
-    public long readBufferLong(int len, int bufferSize) throws IOException {
-        if (bufferSize < len || len < 0) {
-            throw new IllegalArgumentException("Invalid len or t values");
-        }
-        initialLong = readInt(bufferSize);
-        this.remainBits = bufferSize - len;
-        return (initialLong >>> (bufferSize - len)) & ((1L << len) - 1);
     }
 }

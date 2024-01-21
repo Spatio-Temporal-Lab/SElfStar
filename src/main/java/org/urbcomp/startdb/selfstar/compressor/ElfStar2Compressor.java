@@ -89,6 +89,7 @@ public class ElfStar2Compressor implements ICompressor {
     private void compress() {
         CanonicalHuff huffmanEncode = new CanonicalHuff(states, frequency);
         huffmanCode = huffmanEncode.getNodeList();
+        System.out.println(huffmanCode);
         compressedSizeInBits += huffmanEncode.writeHuffmanCodes(os);
         xorCompressor.setDistribution(leadDistribution, trailDistribution);
         for (int i = 0; i < numberOfValues; i++) {

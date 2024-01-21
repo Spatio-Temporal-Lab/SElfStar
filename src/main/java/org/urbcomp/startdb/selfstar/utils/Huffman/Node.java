@@ -1,5 +1,8 @@
 package org.urbcomp.startdb.selfstar.utils.Huffman;
 
+import java.util.Comparator;
+
+
 public class Node implements Comparable<Node> {
     public int data;
     public int frequency;
@@ -33,12 +36,23 @@ public class Node implements Comparable<Node> {
                 "data=" + data +
                 ", frequency=" + frequency +
                 ", depth=" + depth +
-                ", code=" + code +
+                ", code=" + Long.toBinaryString(code) +
                 '}';
     }
 
     @Override
     public int compareTo(Node o) {
         return this.frequency - o.frequency;
+    }
+}
+class CustomComparator implements Comparator<Node> {
+
+    @Override
+    public int compare(Node o1, Node o2) {
+        if (o1.getDepth() != o2.getDepth()) {
+            return Integer.compare(o1.getDepth(), o2.getDepth());
+        } else {
+            return Integer.compare(o1.getData(), o2.getData());
+        }
     }
 }
