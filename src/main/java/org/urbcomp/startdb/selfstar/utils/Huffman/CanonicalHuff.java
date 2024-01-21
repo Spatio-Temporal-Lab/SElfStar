@@ -1,5 +1,7 @@
 package org.urbcomp.startdb.selfstar.utils.Huffman;
 
+import org.urbcomp.startdb.selfstar.decompressor.ElfStar2Decompressor;
+import org.urbcomp.startdb.selfstar.decompressor.xor.ElfStarXORDecompressor;
 import org.urbcomp.startdb.selfstar.utils.InputBitStream;
 import org.urbcomp.startdb.selfstar.utils.OutputBitStream;
 
@@ -7,7 +9,7 @@ import java.io.IOException;
 import java.util.*;
 
 public class CanonicalHuff {
-    private static final int CODE_LEN = 3;
+    private static final int CODE_LEN = 5;
     private static final List<Node> nodeList = new ArrayList<>();
     private final int num;
     private final int[] values;
@@ -22,7 +24,7 @@ public class CanonicalHuff {
     }
 
     public static void generateCode(List<Node> nodeList) {
-        nodeList.sort(Comparator.comparingInt(Node::getDepth));
+        nodeList.sort(new CustomComparator());
         int num = nodeList.size();
         int lastDepth = nodeList.get(0).depth;
         long lastCode = 0;
@@ -54,8 +56,27 @@ public class CanonicalHuff {
 
         List<Node> huffmanCode = new ArrayList<>();
         InputBitStream in = new InputBitStream(Arrays.copyOf(out.getBuffer(), 4));
-    }
+        int maxCodeLen = 0;
+        for (int state : values) {
+            Node node = new Node(state);
+            node.depth = in.readInt(3);
+            huffmanCode.add(node);
+            if (node.depth > maxCodeLen) {
+                maxCodeLen = node.depth;
+            }
+        }
+        CanonicalHuff.generateCode(huffmanCode);
+        for(Node node:huffmanCode){
+//            System.out.println(node);
+        }
+        System.out.println("-------------------------------");
+        Node[] lookup = ElfStar2Decompressor.generateLookupArray(huffmanCode, maxCodeLen);
+        for(int i=0;i<lookup.length;i++){
+//            System.out.println(Integer.toBinaryString(i)+"  "+lookup[i]);
+        }
 
+
+    }
     public void calculateDepth() {
         PriorityQueue<Node> nodePriorityQueue = new PriorityQueue<>();
         // Construct priorityQueue
