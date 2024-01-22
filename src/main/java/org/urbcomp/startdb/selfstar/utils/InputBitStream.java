@@ -1694,29 +1694,26 @@ public class InputBitStream implements BooleanIterator, Flushable, Closeable {
 
     public int readIntToBuffer(int len) {
         long oldInitial = 0;
-        int oldRemainBits = 0;
+        int fail = len;
 
         // 如果还有未使用的位，保存当前的 initial 和 remainBits
         if (remainBits > 0) {
             oldInitial = initial & ((1L << remainBits) - 1); // 保存未使用的位
-            oldRemainBits = remainBits;
+            fail = len - remainBits;
         }
 
         try {
-            initial = readInt(len); // 读取新的 initial
+            initial = readInt(fail); // 读取新的 initial
             initialSize = len;
         } catch (IOException e) {
             throw new RuntimeException("IO error: " + e.getMessage());
         }
 
         // 如果有未使用的位，将它们合并到新的 initial 中
-        if (oldRemainBits > 0) {
-            initial |= (oldInitial << len); // 将未使用的位移动到正确的位置并合并
-            initialSize += oldRemainBits; // 更新 initialSize
-
-            System.out.println("initialSize "+initialSize);
+        if (remainBits > 0) {
+            initial |= (oldInitial << fail); // 将未使用的位移动到正确的位置并合并
         }
-        return (int) initial>>>oldRemainBits;
+        return (int) initial;
     }
 
     public void setRemainBits(int len) {
@@ -1724,7 +1721,7 @@ public class InputBitStream implements BooleanIterator, Flushable, Closeable {
     }
 
     public long readBufferLong(int len) {
-        System.out.println("len " + len + ", remainBits " + remainBits);
+//        System.out.println("len " + len + ", remainBits " + remainBits);
         long result;
         if (remainBits == 0) {
             try {
