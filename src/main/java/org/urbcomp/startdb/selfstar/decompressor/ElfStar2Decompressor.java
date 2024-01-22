@@ -58,8 +58,8 @@ public class ElfStar2Decompressor implements IDecompressor {
             }
         }
         CanonicalHuff.generateCode(huffmanCode);
-        System.out.println(huffmanCode);
-        System.out.println(maxCodeLen);
+//        System.out.println(huffmanCode);
+//        System.out.println(maxCodeLen);
         lookUpArray = generateLookupArray(huffmanCode, maxCodeLen);
     }
 
@@ -81,21 +81,21 @@ public class ElfStar2Decompressor implements IDecompressor {
         int lookupCode = readBufferInt(maxCodeLen);
         Node node = lookUpArray[lookupCode];
         setRemainBits(node.depth);
-        System.out.println(node+" "+Integer.toBinaryString(lookupCode));
+//        System.out.println(node+" "+Integer.toBinaryString(lookupCode));
         if (node.data != 17) {
             lastBetaStar = node.data;
             v = recoverVByBetaStar();
         } else {
             v = xorDecompressor.readValue();
         }
-        System.out.println(v);
+//        System.out.println(v);
         return v;
     }
 
     private Double recoverVByBetaStar() {
         double v;
         Double vPrime = xorDecompressor.readValue();
-        System.out.println(vPrime);
+//        System.out.println(vPrime);
         int sp = Elf64Utils.getSP(Math.abs(vPrime));
         if (lastBetaStar == 0) {
             v = Elf64Utils.get10iN(-sp - 1);

@@ -35,27 +35,27 @@ public class TestCompressor {
     private final String[] fileNames = {
 //            INIT_FILE,
             "Air-pressure.csv",
-//            "Air-sensor.csv",
-//            "Basel-temp.csv",
-//            "Basel-wind.csv",
-//            "Bird-migration.csv",
-//            "Bitcoin-price.csv",
-//            "Blockchain-tr.csv",
-//            "City-lat.csv",
-//            "City-lon.csv",
-//            "City-temp.csv",
-//            "Dew-point-temp.csv",
-//            "electric_vehicle_charging.csv",
-//            "Food-price.csv",
-//            "IR-bio-temp.csv",
-//            "PM10-dust.csv",
-//            "POI-lat.csv",
-//            "POI-lon.csv",
-//            "SSD-bench.csv",
-//            "Stocks-DE.csv",
-//            "Stocks-UK.csv",
-//            "Stocks-USA.csv",
-//            "Wind-Speed.csv"
+            "Air-sensor.csv",
+            "Basel-temp.csv",
+            "Basel-wind.csv",
+            "Bird-migration.csv",
+            "Bitcoin-price.csv",
+            "Blockchain-tr.csv",
+            "City-lat.csv",
+            "City-lon.csv",
+            "City-temp.csv",
+            "Dew-point-temp.csv",
+            "electric_vehicle_charging.csv",
+            "Food-price.csv",
+            "IR-bio-temp.csv",
+            "PM10-dust.csv",
+            "POI-lat.csv",
+            "POI-lon.csv",
+            "SSD-bench.csv",
+            "Stocks-DE.csv",
+            "Stocks-UK.csv",
+            "Stocks-USA.csv",
+            "Wind-Speed.csv"
     };
 
     private final Map<String, Long> fileNameParamToTotalBits = new HashMap<>();
@@ -161,13 +161,13 @@ public class TestCompressor {
 //                new BaseCompressor(new ChimpNXORCompressor(128)),
 //                new BaseCompressor(new GorillaXORCompressor()),
 //                new ElfCompressor(new ElfXORCompressor()),
-//                new ElfPlusCompressor(new ElfPlusXORCompressor()),
+                new ElfPlusCompressor(new ElfPlusXORCompressor()),
 //                new ElfStarCompressor(new ElfStarXORCompressorAdaLead()),
 //                new ElfStarCompressor(new ElfStarXORCompressorAdaLeadAdaTrail()),
-//                new ElfStarCompressor(new ElfStarXORCompressor()),
+                new ElfStarCompressor(new ElfStarXORCompressor()),
 //                new SElfStarCompressor(new SElfXORCompressor()),
                 new ElfStar2Compressor(new ElfStarXORCompressor()),
-//                new ElfStarH2Compressor(new ElfStarXORCompressor()),
+                new ElfStarH2Compressor(new ElfStarXORCompressor()),
 //                new SElfStar2Compressor(new SElfXORCompressor())
         };
 
@@ -176,13 +176,13 @@ public class TestCompressor {
 //                new BaseDecompressor(new ChimpNXORDecompressor(128)),
 //                new BaseDecompressor(new GorillaXORDecompressor()),
 //                new ElfDecompressor(new ElfXORDecompressor()),
-//                new ElfPlusDecompressor(new ElfPlusXORDecompressor()),
+                new ElfPlusDecompressor(new ElfPlusXORDecompressor()),
 //                new ElfStarDecompressor(new ElfStarXORDecompressorAdaLead()),
 //                new ElfStarDecompressor(new ElfStarXORDecompressorAdaLeadAdaTrail()),
-//                new ElfStarDecompressor(new ElfStarXORDecompressor()),
+                new ElfStarDecompressor(new ElfStarXORDecompressor()),
 //                new ElfStarDecompressor(new ElfStarXORDecompressor()),     // streaming version is the same
                 new ElfStar2Decompressor(new ElfStarXOR2Decompressor()),
-//                new ElfStar2Decompressor(new ElfStarXORDecompressor()),
+                new ElfStarH2Decompressor(new ElfStarXORDecompressor()),
 //                new SElfStar2Decompressor(new ElfStarXORDecompressor())
         };
         boolean firstMethod = true;
