@@ -12,14 +12,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class ElfStarH2Decompressor implements IDecompressor {
+public class ElfStarHuffmanDecompressor implements IDecompressor {
     private static final HashMap<Integer, Pair<Long, Integer>> huffmanCode = new HashMap<>();
     private static final int[] states = new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17};
     private final IXORDecompressor xorDecompressor;
     private int lastBetaStar = Integer.MAX_VALUE;
     private Node root;
 
-    public ElfStarH2Decompressor(IXORDecompressor xorDecompressor) {
+    public ElfStarHuffmanDecompressor(IXORDecompressor xorDecompressor) {
         this.xorDecompressor = xorDecompressor;
     }
 

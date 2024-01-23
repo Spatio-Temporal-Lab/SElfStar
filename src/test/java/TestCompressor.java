@@ -166,8 +166,8 @@ public class TestCompressor {
 //                new ElfStarCompressor(new ElfStarXORCompressorAdaLeadAdaTrail()),
                 new ElfStarCompressor(new ElfStarXORCompressor()),
 //                new SElfStarCompressor(new SElfXORCompressor()),
-                new ElfStar2Compressor(new ElfStarXORCompressor()),
-                new ElfStarH2Compressor(new ElfStarXORCompressor()),
+                new ElfStarCanonicalHuffmanCompressor(new ElfStarXORCompressor()),
+                new ElfStarHuffmanCompressor(new ElfStarXORCompressor()),
 //                new SElfStar2Compressor(new SElfXORCompressor())
         };
 
@@ -181,8 +181,8 @@ public class TestCompressor {
 //                new ElfStarDecompressor(new ElfStarXORDecompressorAdaLeadAdaTrail()),
                 new ElfStarDecompressor(new ElfStarXORDecompressor()),
 //                new ElfStarDecompressor(new ElfStarXORDecompressor()),     // streaming version is the same
-                new ElfStar2Decompressor(new ElfStarXOR2Decompressor()),
-                new ElfStarH2Decompressor(new ElfStarXORDecompressor()),
+                new ElfStarCanonicalHuffmanDecompressor(new ElfStarXOR2Decompressor()),
+                new ElfStarHuffmanDecompressor(new ElfStarXORDecompressor()),
 //                new SElfStar2Decompressor(new ElfStarXORDecompressor())
         };
         boolean firstMethod = true;
