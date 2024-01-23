@@ -1,21 +1,20 @@
 package org.urbcomp.startdb.selfstar.utils.Huffman;
 
-import org.urbcomp.startdb.selfstar.decompressor.ElfStar2Decompressor;
-import org.urbcomp.startdb.selfstar.decompressor.xor.ElfStarXORDecompressor;
+import org.urbcomp.startdb.selfstar.decompressor.ElfStarCanonicalHuffmanDecompressor;
 import org.urbcomp.startdb.selfstar.utils.InputBitStream;
 import org.urbcomp.startdb.selfstar.utils.OutputBitStream;
 
 import java.io.IOException;
 import java.util.*;
 
-public class CanonicalHuff {
+public class CanonicalHuffman {
     private static final int CODE_LEN = 5;
     private static final List<Node> nodeList = new ArrayList<>();
     private final int num;
     private final int[] values;
     private final int[] frequencies;
 
-    public CanonicalHuff(int[] values, int[] frequencies) {
+    public CanonicalHuffman(int[] values, int[] frequencies) {
         this.values = values;
         this.frequencies = frequencies;
         num = values.length;
@@ -50,7 +49,7 @@ public class CanonicalHuff {
         int[] f = new int[]{
                 11, 5, 7, 8, 323, 22, 1, 22
         };
-        CanonicalHuff ch = new CanonicalHuff(values, f);
+        CanonicalHuffman ch = new CanonicalHuffman(values, f);
         OutputBitStream out = new OutputBitStream(new byte[100]);
         ch.writeHuffmanCodes(out);
 
@@ -65,12 +64,12 @@ public class CanonicalHuff {
                 maxCodeLen = node.depth;
             }
         }
-        CanonicalHuff.generateCode(huffmanCode);
+        CanonicalHuffman.generateCode(huffmanCode);
         for(Node node:huffmanCode){
 //            System.out.println(node);
         }
         System.out.println("-------------------------------");
-        Node[] lookup = ElfStar2Decompressor.generateLookupArray(huffmanCode, maxCodeLen);
+        Node[] lookup = ElfStarCanonicalHuffmanDecompressor.generateLookupArray(huffmanCode, maxCodeLen);
         for(int i=0;i<lookup.length;i++){
 //            System.out.println(Integer.toBinaryString(i)+"  "+lookup[i]);
         }
