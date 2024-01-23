@@ -7,7 +7,7 @@ import org.urbcomp.startdb.selfstar.utils.PostOfficeSolver;
 import java.io.IOException;
 import java.util.Arrays;
 
-public class ElfStarXOR2Decompressor implements IXORDecompressor {
+public class ElfStarXORCanonicalHuffmanDecompressor implements IXORDecompressor {
     private long storedVal = 0;
     private int storedLeadingZeros = Integer.MAX_VALUE;
     private int storedTrailingZeros = Integer.MAX_VALUE;
@@ -24,7 +24,7 @@ public class ElfStarXOR2Decompressor implements IXORDecompressor {
 
     private int trailingBitsPerValue;
 
-    public ElfStarXOR2Decompressor() {
+    public ElfStarXORCanonicalHuffmanDecompressor() {
     }
 
 
@@ -121,7 +121,7 @@ public class ElfStarXOR2Decompressor implements IXORDecompressor {
         }
     }
 
-    private void nextValue() throws IOException {
+    private void nextValue() {
         long value;
         int centerBits;
 

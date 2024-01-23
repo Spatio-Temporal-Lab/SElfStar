@@ -14,7 +14,7 @@ import org.urbcomp.startdb.selfstar.compressor.xor.ElfStarXORCompressor;
 import org.urbcomp.startdb.selfstar.compressor.xor.SElfXORCompressor;
 import org.urbcomp.startdb.selfstar.decompressor.*;
 import org.urbcomp.startdb.selfstar.decompressor.xor.ElfPlusXORDecompressor;
-import org.urbcomp.startdb.selfstar.decompressor.xor.ElfStarXOR2Decompressor;
+import org.urbcomp.startdb.selfstar.decompressor.xor.ElfStarXORCanonicalHuffmanDecompressor;
 import org.urbcomp.startdb.selfstar.decompressor.xor.ElfStarXORDecompressor;
 
 import java.io.*;
@@ -181,7 +181,7 @@ public class TestCompressor {
 //                new ElfStarDecompressor(new ElfStarXORDecompressorAdaLeadAdaTrail()),
                 new ElfStarDecompressor(new ElfStarXORDecompressor()),
 //                new ElfStarDecompressor(new ElfStarXORDecompressor()),     // streaming version is the same
-                new ElfStarCanonicalHuffmanDecompressor(new ElfStarXOR2Decompressor()),
+                new ElfStarCanonicalHuffmanDecompressor(new ElfStarXORCanonicalHuffmanDecompressor()),
                 new ElfStarHuffmanDecompressor(new ElfStarXORDecompressor()),
 //                new SElfStar2Decompressor(new ElfStarXORDecompressor())
         };
