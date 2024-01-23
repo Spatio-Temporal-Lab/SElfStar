@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 
 // all ElfStar (batch and stream) share the same decompressor
-public class SElfStar2Decompressor implements IDecompressor {
+public class SElfStarHuffmanDecompressor implements IDecompressor {
 
     private final IXORDecompressor xorDecompressor;
     private int lastBetaStar = Integer.MAX_VALUE;
@@ -26,7 +26,7 @@ public class SElfStar2Decompressor implements IDecompressor {
     private HashMap<Integer, Pair<Long, Integer>> huffmanCode = new HashMap<>();
     private Node root;
 
-    public SElfStar2Decompressor(IXORDecompressor xorDecompressor) {
+    public SElfStarHuffmanDecompressor(IXORDecompressor xorDecompressor) {
         this.xorDecompressor = xorDecompressor;
     }
 
