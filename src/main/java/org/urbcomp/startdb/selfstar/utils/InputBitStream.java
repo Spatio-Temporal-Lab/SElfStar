@@ -1665,7 +1665,6 @@ public class InputBitStream implements BooleanIterator, Flushable, Closeable {
     private int initialSize;
 
     public int readBufferInt(int len) {
-
         if (remainBits == 0) {
             try {
                 return readInt(len);
@@ -1679,7 +1678,6 @@ public class InputBitStream implements BooleanIterator, Flushable, Closeable {
             result = ((int) initial & ((1 << remainBits) - 1)) >>> (remainBits - len);
             remainBits -= len;
         } else {
-            // 如果 len 大于剩余的位数，先取完剩余的位，然后从流中读取更多位
             int additionalBitsNeeded = len - remainBits;
             result = ((int) initial & ((1 << remainBits) - 1)) << additionalBitsNeeded;
             try {
@@ -1695,8 +1693,6 @@ public class InputBitStream implements BooleanIterator, Flushable, Closeable {
     public int readIntToBuffer(int len) {
         long oldInitial = 0;
         int fail = len;
-
-        // 如果还有未使用的位，保存当前的 initial 和 remainBits
         if (remainBits > 0) {
             oldInitial = initial & ((1L << remainBits) - 1); // 保存未使用的位
             fail = len - remainBits;
@@ -1721,7 +1717,6 @@ public class InputBitStream implements BooleanIterator, Flushable, Closeable {
     }
 
     public long readBufferLong(int len) {
-//        System.out.println("len " + len + ", remainBits " + remainBits);
         long result;
         if (remainBits == 0) {
             try {
