@@ -9,7 +9,7 @@ import org.urbcomp.startdb.selfstar.utils.OutputBitStream;
 import java.util.Arrays;
 import java.util.HashMap;
 
-public class SElfStar2Compressor implements ICompressor {
+public class SElfStarHuffmanCompressor implements ICompressor {
     private final IXORCompressor xorCompressor;
 
     private OutputBitStream os;
@@ -31,7 +31,7 @@ public class SElfStar2Compressor implements ICompressor {
 
     private boolean init = true;
 
-    public SElfStar2Compressor(IXORCompressor xorCompressor) {
+    public SElfStarHuffmanCompressor(IXORCompressor xorCompressor) {
         this.xorCompressor = xorCompressor;
         os = xorCompressor.getOutputStream();
     }
