@@ -11,11 +11,13 @@ import org.junit.jupiter.api.Test;
 import org.urbcomp.startdb.selfstar.compressor.*;
 import org.urbcomp.startdb.selfstar.compressor.xor.ElfPlusXORCompressor;
 import org.urbcomp.startdb.selfstar.compressor.xor.ElfStarXORCompressor;
+import org.urbcomp.startdb.selfstar.compressor.xor.ElfStarXORSignCompressor;
 import org.urbcomp.startdb.selfstar.compressor.xor.SElfXORCompressor;
 import org.urbcomp.startdb.selfstar.decompressor.*;
 import org.urbcomp.startdb.selfstar.decompressor.xor.ElfPlusXORDecompressor;
 import org.urbcomp.startdb.selfstar.decompressor.xor.ElfStarXORCanonicalHuffmanDecompressor;
 import org.urbcomp.startdb.selfstar.decompressor.xor.ElfStarXORDecompressor;
+import org.urbcomp.startdb.selfstar.decompressor.xor.ElfStarXORSignDecompressor;
 
 import java.io.*;
 import java.nio.ByteBuffer;
@@ -34,28 +36,28 @@ public class TestCompressor {
     private static final String INIT_FILE = "init.csv";     // warm up memory and cpu
     private final String[] fileNames = {
 //            INIT_FILE,
-            "Air-pressure.csv",
-            "Air-sensor.csv",
-            "Basel-temp.csv",
-            "Basel-wind.csv",
-            "Bird-migration.csv",
-            "Bitcoin-price.csv",
-            "Blockchain-tr.csv",
+//            "Air-pressure.csv",
+//            "Air-sensor.csv",
+//            "Basel-temp.csv",
+//            "Basel-wind.csv",
+//            "Bird-migration.csv",
+//            "Bitcoin-price.csv",
+//            "Blockchain-tr.csv",
             "City-lat.csv",
             "City-lon.csv",
-            "City-temp.csv",
-            "Dew-point-temp.csv",
-            "electric_vehicle_charging.csv",
-            "Food-price.csv",
-            "IR-bio-temp.csv",
-            "PM10-dust.csv",
+//            "City-temp.csv",
+//            "Dew-point-temp.csv",
+//            "electric_vehicle_charging.csv",
+//            "Food-price.csv",
+//            "IR-bio-temp.csv",
+//            "PM10-dust.csv",
             "POI-lat.csv",
             "POI-lon.csv",
-            "SSD-bench.csv",
-            "Stocks-DE.csv",
-            "Stocks-UK.csv",
-            "Stocks-USA.csv",
-            "Wind-Speed.csv"
+//            "SSD-bench.csv",
+//            "Stocks-DE.csv",
+//            "Stocks-UK.csv",
+//            "Stocks-USA.csv",
+//            "Wind-Speed.csv"
     };
 
     private final Map<String, Long> fileNameParamToTotalBits = new HashMap<>();
@@ -167,7 +169,7 @@ public class TestCompressor {
                 new ElfStarCompressor(new ElfStarXORCompressor()),
 //                new SElfStarCompressor(new SElfXORCompressor()),
                 new ElfStarCanonicalHuffmanCompressor(new ElfStarXORCompressor()),
-                new ElfStarHuffmanCompressor(new ElfStarXORCompressor()),
+                new ElfStarHuffmanCompressor(new ElfStarXORSignCompressor()),
 //                new SElfStar2Compressor(new SElfXORCompressor())
         };
 
@@ -182,7 +184,7 @@ public class TestCompressor {
                 new ElfStarDecompressor(new ElfStarXORDecompressor()),
 //                new ElfStarDecompressor(new ElfStarXORDecompressor()),     // streaming version is the same
                 new ElfStarCanonicalHuffmanDecompressor(new ElfStarXORCanonicalHuffmanDecompressor()),
-                new ElfStarHuffmanDecompressor(new ElfStarXORDecompressor()),
+                new ElfStarHuffmanDecompressor(new ElfStarXORSignDecompressor()),
 //                new SElfStar2Decompressor(new ElfStarXORDecompressor())
         };
         boolean firstMethod = true;
