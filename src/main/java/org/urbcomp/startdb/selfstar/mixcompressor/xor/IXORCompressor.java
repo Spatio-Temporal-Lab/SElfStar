@@ -5,9 +5,9 @@ import org.urbcomp.startdb.selfstar.utils.OutputBitStream;
 
 public interface IXORCompressor {
 
-    void setOutputStream();
-
     OutputBitStream getOutputStream();
+
+    void setOutputBitStream(OutputBitStream out);
 
     int addValue(long value);
 

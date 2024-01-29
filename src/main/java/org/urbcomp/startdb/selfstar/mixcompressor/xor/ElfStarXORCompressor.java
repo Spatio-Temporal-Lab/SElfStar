@@ -6,12 +6,12 @@ import org.urbcomp.startdb.selfstar.utils.PostOfficeSolver;
 
 import java.util.Arrays;
 
-public class ElfStarXORSignCompressor implements IXORCompressor {
+public class ElfStarXORCompressor implements IXORCompressor {
     private final int[] leadingRepresentation = new int[64];
     private final int[] leadingRound = new int[64];
     private final int[] trailingRepresentation = new int[64];
     private final int[] trailingRound = new int[64];
-    private final long SIGN_MASK = 0x7fffffffffffffffL;
+    private final int capacity;
     private int storedLeadingZeros = Integer.MAX_VALUE;
     private int storedTrailingZeros = Integer.MAX_VALUE;
     private long storedVal = 0;
@@ -19,18 +19,17 @@ public class ElfStarXORSignCompressor implements IXORCompressor {
     private int[] leadDistribution;
     private int[] trailDistribution;
     private OutputBitStream out;
-
     private int leadingBitsPerValue;
-
     private int trailingBitsPerValue;
 
-    private int capacity = 1000;
-
-    public ElfStarXORSignCompressor() {
+    public ElfStarXORCompressor() {
+        this(1000);
     }
 
-    public ElfStarXORSignCompressor(int window) {
+    public ElfStarXORCompressor(int window) {
         this.capacity = window;
+        out = new OutputBitStream(
+                new byte[(int) (((capacity + 1) * 8 + capacity / 8 + 1) * 1.2)]);
     }
 
     @Override
@@ -73,15 +72,14 @@ public class ElfStarXORSignCompressor implements IXORCompressor {
 
     private int writeFirst(long value) {
         first = false;
-        out.writeLong(value >>> 63, 1);
-        storedVal = value & SIGN_MASK;
-        int trailingZeros = Long.numberOfTrailingZeros(storedVal);
+        storedVal = value;
+        int trailingZeros = Long.numberOfTrailingZeros(value);
         out.writeInt(trailingZeros, 7);
         if (trailingZeros < 64) {
-            out.writeLong(storedVal >>> (trailingZeros + 1), 62 - trailingZeros);
+            out.writeLong(storedVal >>> (trailingZeros + 1), 63 - trailingZeros);
             return 70 - trailingZeros;
         } else {
-            return 8;
+            return 7;
         }
     }
 
@@ -97,9 +95,6 @@ public class ElfStarXORSignCompressor implements IXORCompressor {
 
     private int compressValue(long value) {
         int thisSize = 0;
-        out.writeLong(value >>> 63, 1);
-        thisSize += 1;
-        value = value & SIGN_MASK;
         long xor = storedVal ^ value;
 
         if (xor == 0) {
