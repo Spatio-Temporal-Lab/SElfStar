@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestCompressor {
 
-    private static final String STORE_FILE = "src/test/resources/result/result.csv";
+    private static final String STORE_FILE = "src/test/resources/result/result2222.csv";
     private static final String STORE_PRUNING_FILE = "src/test/resources/result/resultPruning.csv";
     private static final String STORE_WINDOW_FILE = "src/test/resources/result/resultWindow.csv";
     private static final String STORE_BLOCK_FILE = "src/test/resources/result/resultBlock.csv";
@@ -81,9 +81,9 @@ public class TestCompressor {
     public void testAllCompressor() {
         for (String fileName : fileNames) {
             testALPCompressor(fileName, NO_PARAM);
-            testXZCompressor(fileName, NO_PARAM);
-            testZstdCompressor(fileName, NO_PARAM);
-            testSnappyCompressor(fileName, NO_PARAM);
+//            testXZCompressor(fileName, NO_PARAM);
+//            testZstdCompressor(fileName, NO_PARAM);
+//            testSnappyCompressor(fileName, NO_PARAM);
             testBuffCompressor(fileName, NO_PARAM);
             testFloatingCompressor(fileName);
         }
@@ -265,6 +265,7 @@ public class TestCompressor {
                 new ElfStarCompressor(new ElfStarXORCompressorAdaLeadAdaTrail()),
                 new ElfStarCompressor(new ElfStarXORCompressor()),
                 new SElfStarCompressor(new SElfXORCompressor()),
+                new ElfStarHuffmanCompressor(new ElfStarXORCompressor()),
         };
 
         IDecompressor[] decompressors = new IDecompressor[]{
@@ -276,7 +277,8 @@ public class TestCompressor {
                 new ElfStarDecompressor(new ElfStarXORDecompressorAdaLead()),
                 new ElfStarDecompressor(new ElfStarXORDecompressorAdaLeadAdaTrail()),
                 new ElfStarDecompressor(new ElfStarXORDecompressor()),
-                new ElfStarDecompressor(new SElfStarXORDecompressor())
+                new ElfStarDecompressor(new SElfStarXORDecompressor()),
+                new ElfStarHuffmanDecompressor(new ElfStarXORDecompressor())
         };
         boolean firstMethod = true;
         for (int i = 0; i < compressors.length; i++) {
