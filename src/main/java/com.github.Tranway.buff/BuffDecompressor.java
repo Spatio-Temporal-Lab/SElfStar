@@ -1,5 +1,6 @@
 package com.github.Tranway.buff;
 
+import org.urbcomp.startdb.selfstar.utils.Elf64Utils;
 import org.urbcomp.startdb.selfstar.utils.InputBitStream;
 
 import java.io.IOException;
@@ -167,8 +168,20 @@ public class BuffDecompressor {
                 db_tmp = db * Math.pow(10,15) = 36070883827972320
                 db_rounded = db_tmp / Math.pow(10,15) = 36.07088382797232 (except 36.070883827972324)
              */
-            BigDecimal bd = new BigDecimal(db);
-            db = bd.setScale(maxPrec, RoundingMode.HALF_UP).doubleValue();
+
+            int sp = (int) Math.floor(Math.log10(Math.abs(db)));
+            int beta = maxPrec + sp + 1;
+            if (beta < 17) {
+                db = Elf64Utils.round(db, maxPrec);
+            } else {
+                BigDecimal bd = new BigDecimal(db);
+                db = bd.setScale(maxPrec, RoundingMode.HALF_UP).doubleValue();
+            }
+
+//
+//
+//            BigDecimal bd = new BigDecimal(db);
+//            db = bd.setScale(maxPrec, RoundingMode.HALF_UP).doubleValue();
 
             if (db == 0 && sign == 1) db = -db;
             dbs[i] = db;
