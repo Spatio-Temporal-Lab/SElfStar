@@ -33,7 +33,7 @@ public class TestCompressor {
     private static final int NO_PARAM = 0;
     private static final String INIT_FILE = "init.csv";     // warm up memory and cpu
     private final String[] fileNames = {
-//            INIT_FILE,
+            INIT_FILE,
             "Air-pressure.csv",
             "Air-sensor.csv",
             "Basel-temp.csv",
@@ -165,10 +165,10 @@ public class TestCompressor {
 //                new ElfStarCompressor(new ElfStarXORCompressorAdaLead()),
 //                new ElfStarCompressor(new ElfStarXORCompressorAdaLeadAdaTrail()),
                 new ElfStarCompressor(new ElfStarXORCompressor()),
-//                new SElfStarCompressor(new SElfXORCompressor()),
                 new ElfStarCanonicalHuffmanCompressor(new ElfStarXORCompressor()),
                 new ElfStarHuffmanCompressor(new ElfStarXORCompressor()),
-//                new SElfStar2Compressor(new SElfXORCompressor())
+                new SElfStarCompressor(new SElfXORCompressor()),
+                new SElfStarHuffmanCompressor(new SElfXORCompressor())
         };
 
         IDecompressor[] decompressors = new IDecompressor[]{
@@ -180,10 +180,10 @@ public class TestCompressor {
 //                new ElfStarDecompressor(new ElfStarXORDecompressorAdaLead()),
 //                new ElfStarDecompressor(new ElfStarXORDecompressorAdaLeadAdaTrail()),
                 new ElfStarDecompressor(new ElfStarXORDecompressor()),
-//                new ElfStarDecompressor(new ElfStarXORDecompressor()),     // streaming version is the same
                 new ElfStarCanonicalHuffmanDecompressor(new ElfStarXORCanonicalHuffmanDecompressor()),
                 new ElfStarHuffmanDecompressor(new ElfStarXORDecompressor()),
-//                new SElfStar2Decompressor(new ElfStarXORDecompressor())
+                new ElfStarDecompressor(new ElfStarXORDecompressor()),     // streaming version is the same
+                new SElfStarHuffmanDecompressor(new ElfStarXORDecompressor())
         };
         boolean firstMethod = true;
         for (int i = 0; i < compressors.length; i++) {
