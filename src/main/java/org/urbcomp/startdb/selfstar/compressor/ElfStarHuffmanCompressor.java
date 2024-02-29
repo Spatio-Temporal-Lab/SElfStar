@@ -7,7 +7,6 @@ import org.urbcomp.startdb.selfstar.utils.Huffman.HuffmanEncode;
 import org.urbcomp.startdb.selfstar.utils.OutputBitStream;
 
 import java.util.Arrays;
-import java.util.HashMap;
 
 public class ElfStarHuffmanCompressor implements ICompressor {
     private final IXORCompressor xorCompressor;
@@ -21,7 +20,7 @@ public class ElfStarHuffmanCompressor implements ICompressor {
     private int numberOfValues = 0;
     private static final int[] states = new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17};
     private final int[] frequency = new int[states.length];
-    private HashMap<Integer, Pair<Long, Integer>> huffmanCode = new HashMap<>();
+    private Pair<Long, Integer>[] huffmanCode;
 
     public ElfStarHuffmanCompressor(IXORCompressor xorCompressor, int window) {
         this.xorCompressor = xorCompressor;
@@ -89,9 +88,9 @@ public class ElfStarHuffmanCompressor implements ICompressor {
         xorCompressor.setDistribution(leadDistribution, trailDistribution);
         for (int i = 0; i < numberOfValues; i++) {
             if (betaStarList[i] == Integer.MAX_VALUE) {
-                compressedSizeInBits += os.writeLong(huffmanCode.get(17).getKey(), huffmanCode.get(17).getValue()); // not erase
+                compressedSizeInBits += os.writeLong(huffmanCode[17].getKey(), huffmanCode[17].getValue()); // not erase
             } else {
-                compressedSizeInBits += os.writeLong(huffmanCode.get(betaStarList[i]).getKey(), huffmanCode.get(betaStarList[i]).getValue());  // case 11, 2 + 4 = 6
+                compressedSizeInBits += os.writeLong(huffmanCode[betaStarList[i]].getKey(), huffmanCode[betaStarList[i]].getValue());  // case 11, 2 + 4 = 6
             }
             compressedSizeInBits += xorCompressor.addValue(vPrimeList[i]);
         }
@@ -115,7 +114,7 @@ public class ElfStarHuffmanCompressor implements ICompressor {
         calculateDistribution();
         compress();
         // we write one more bit here, for marking an end of the stream.
-        compressedSizeInBits += os.writeLong(huffmanCode.get(17).getKey(), huffmanCode.get(17).getValue()); // not erase
+        compressedSizeInBits += os.writeLong(huffmanCode[17].getKey(), huffmanCode[17].getValue()); // not erase
         compressedSizeInBits += xorCompressor.close();
     }
 
@@ -129,7 +128,6 @@ public class ElfStarHuffmanCompressor implements ICompressor {
         lastBetaStar = Integer.MAX_VALUE;
         numberOfValues = 0;
         os = xorCompressor.getOutputStream();
-        huffmanCode.clear();
         Arrays.fill(frequency, 0);
         Arrays.fill(leadDistribution, 0);
         Arrays.fill(trailDistribution, 0);

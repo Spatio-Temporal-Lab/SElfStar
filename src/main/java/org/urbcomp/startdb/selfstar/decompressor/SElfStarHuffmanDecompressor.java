@@ -10,7 +10,6 @@ import org.urbcomp.startdb.selfstar.utils.InputBitStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 
 // all ElfStar (batch and stream) share the same decompressor
@@ -23,7 +22,7 @@ public class SElfStarHuffmanDecompressor implements IDecompressor {
     private static final int[] states = new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17};
     private final int[] frequency = new int[STATES_NUM];
     private boolean isFirst = true;
-    private HashMap<Integer, Pair<Long, Integer>> huffmanCode = new HashMap<>();
+    private Pair<Long, Integer>[] huffmanCode;
     private Node root;
 
     public SElfStarHuffmanDecompressor(IXORDecompressor xorDecompressor) {

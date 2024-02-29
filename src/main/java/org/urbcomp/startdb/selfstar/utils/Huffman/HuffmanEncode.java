@@ -3,14 +3,12 @@ package org.urbcomp.startdb.selfstar.utils.Huffman;
 import javafx.util.Pair;
 import org.urbcomp.startdb.selfstar.utils.OutputBitStream;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 import java.util.PriorityQueue;
 
 public class HuffmanEncode {
     // Map value -> <code, length>
-    private static final HashMap<Integer, Pair<Long, Integer>> huffmanCodes = new HashMap<>();
+    private static final Pair<Long, Integer>[] huffmanCodes = new Pair[18];
     private final int[] values;
 
     public HuffmanEncode(int[] values, int[] frequencies) {
@@ -18,7 +16,7 @@ public class HuffmanEncode {
         buildHuffmanTreeAndConToHashMap(values, frequencies);
     }
 
-    public HashMap<Integer, Pair<Long, Integer>> getHuffmanCodes(){
+    public Pair<Long, Integer>[] getHuffmanCodes(){
         return huffmanCodes;
     }
 
@@ -45,20 +43,19 @@ public class HuffmanEncode {
     private static void generateHuffmanCodes(Node root, long code, int length) {
         if (root != null) {
             if (root.data != -Integer.MAX_VALUE) {
-                huffmanCodes.put(root.data, new Pair<>(code, length));
+                huffmanCodes[root.data] = new Pair<>(code, length);
             }
             generateHuffmanCodes(root.children[0], code << 1, length + 1);
             generateHuffmanCodes(root.children[1], (code << 1) | 1, length + 1);
         }
     }
 
-    public static Node hashMapToTree(HashMap<Integer, Pair<Long, Integer>> huffmanCodes) {
+    public static Node hashMapToTree(Pair<Long, Integer>[] huffmanCodes) {
         Node root = new Node(-Integer.MAX_VALUE, 0);
         Node curNode = root;
-        for (Map.Entry<Integer, Pair<Long, Integer>> valueToCodeAndLen : huffmanCodes.entrySet()) {
-            int value = valueToCodeAndLen.getKey();
-            long code = valueToCodeAndLen.getValue().getKey();
-            int length = valueToCodeAndLen.getValue().getValue();
+        for (int value = 0; value < huffmanCodes.length; value++) {
+            long code = huffmanCodes[value].getKey();
+            int length = huffmanCodes[value].getValue();
             long signal;
             while (length != 0) {
                 signal = (code >> (length - 1)) & 1;
@@ -84,8 +81,8 @@ public class HuffmanEncode {
     public int writeHuffmanCodes(OutputBitStream out) {
         int thisSize = 0;
         for (int value : values) {
-            thisSize += out.writeInt(huffmanCodes.get(value).getValue(), 5);
-            thisSize += out.writeLong(huffmanCodes.get(value).getKey(), huffmanCodes.get(value).getValue());
+            thisSize += out.writeInt(huffmanCodes[value].getValue(), 5);
+            thisSize += out.writeLong(huffmanCodes[value].getKey(), huffmanCodes[value].getValue());
         }
         return thisSize;
     }
