@@ -12,8 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ElfStarHuffmanDecompressor implements IDecompressor {
-    private static final int[] states = new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17};
-    private static Code[] huffmanCode = new Code[states.length];
+    private static Code[] huffmanCode = new Code[18];
     private final IXORDecompressor xorDecompressor;
     private int lastBetaStar = Integer.MAX_VALUE;
     private Node root;
@@ -33,10 +32,10 @@ public class ElfStarHuffmanDecompressor implements IDecompressor {
     }
 
     private void initHuffmanTree() {
-        for (int state : states) {
+        for (int i = 0; i < huffmanCode.length; i++) {
             int length = readInt(5);
             long code = readInt(length);
-            huffmanCode[state] = new Code(code, length);
+            huffmanCode[i] = new Code(code, length);
         }
         root = HuffmanEncode.hashMapToTree(huffmanCode);
     }
@@ -45,7 +44,7 @@ public class ElfStarHuffmanDecompressor implements IDecompressor {
     public void refresh() {
         lastBetaStar = Integer.MAX_VALUE;
         xorDecompressor.refresh();
-        huffmanCode = new Code[states.length];
+        huffmanCode = new Code[18];
     }
 
     @Override
