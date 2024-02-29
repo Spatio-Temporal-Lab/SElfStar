@@ -2,7 +2,6 @@ package org.urbcomp.startdb.selfstar.utils.Huffman;
 
 import org.urbcomp.startdb.selfstar.utils.OutputBitStream;
 
-import java.util.Objects;
 import java.util.PriorityQueue;
 
 public class HuffmanEncode {
@@ -18,7 +17,7 @@ public class HuffmanEncode {
     }
 
     private static void buildHuffmanTreeAndConToHashMap(int[] frequencies) {
-        PriorityQueue<Node> nodePriorityQueue = new PriorityQueue<>();
+        PriorityQueue<Node> nodePriorityQueue = new PriorityQueue<>(huffmanCodes.length);
 
         // Construct priorityQueue
         for (int i = 0; i < frequencies.length; i++) {
@@ -29,7 +28,8 @@ public class HuffmanEncode {
         while (nodePriorityQueue.size() > 1) {
             Node left = nodePriorityQueue.poll();
             Node right = nodePriorityQueue.poll();
-            Node newNode = new Node(-Integer.MAX_VALUE, left.frequency + Objects.requireNonNull(right).frequency);
+            @SuppressWarnings("all")
+            Node newNode = new Node(-Integer.MAX_VALUE, left.frequency + right.frequency);
             newNode.children[0] = left;
             newNode.children[1] = right;
             nodePriorityQueue.add(newNode);
