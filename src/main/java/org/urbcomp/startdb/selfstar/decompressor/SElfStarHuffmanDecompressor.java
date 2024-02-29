@@ -85,11 +85,7 @@ public class SElfStarHuffmanDecompressor implements IDecompressor {
         Double v;
         Node current = root;
         while (true) {
-            if (readInt(1) == 0) {
-                current = current.left;
-            } else {
-                current = current.right;
-            }
+            current = current.children[readInt(1)];
             if (current.data != -Integer.MAX_VALUE) {
                 if (current.data != STATES_NUM - 1) {
                     lastBetaStar = current.data;

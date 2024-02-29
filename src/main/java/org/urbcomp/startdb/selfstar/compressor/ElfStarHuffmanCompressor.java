@@ -10,18 +10,17 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 public class ElfStarHuffmanCompressor implements ICompressor {
-    private static final int STATES_NUM = 18;
-    private static final int[] states = new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17};
     private final IXORCompressor xorCompressor;
     private final int[] betaStarList;
     private final long[] vPrimeList;
     private final int[] leadDistribution = new int[64];
     private final int[] trailDistribution = new int[64];
-    private final int[] frequency = new int[STATES_NUM];
     private OutputBitStream os;
     private int compressedSizeInBits = 0;
     private int lastBetaStar = Integer.MAX_VALUE;
     private int numberOfValues = 0;
+    private static final int[] states = new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17};
+    private final int[] frequency = new int[states.length];
     private HashMap<Integer, Pair<Long, Integer>> huffmanCode = new HashMap<>();
 
     public ElfStarHuffmanCompressor(IXORCompressor xorCompressor, int window) {

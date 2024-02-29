@@ -33,7 +33,7 @@ public class ElfStarHuffmanDecompressor implements IDecompressor {
         return values;
     }
 
-    public void initHuffmanTree() {
+    private void initHuffmanTree() {
         for (int state : states) {
             int length = readInt(5);
             long code = readInt(length);
@@ -59,11 +59,7 @@ public class ElfStarHuffmanDecompressor implements IDecompressor {
         Double v;
         Node current = root;
         while (true) {
-            if (readInt(1) == 0) {
-                current = current.left;
-            } else {
-                current = current.right;
-            }
+            current = current.children[readInt(1)];
             if (current.data != -Integer.MAX_VALUE) {
                 if (current.data != 17) {
                     lastBetaStar = current.data;

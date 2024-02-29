@@ -22,7 +22,7 @@ public class HuffmanEncode {
         return huffmanCodes;
     }
 
-    public static void buildHuffmanTreeAndConToHashMap(int[] values, int[] frequencies) {
+    private static void buildHuffmanTreeAndConToHashMap(int[] values, int[] frequencies) {
         PriorityQueue<Node> nodePriorityQueue = new PriorityQueue<>();
 
         // Construct priorityQueue
@@ -35,8 +35,8 @@ public class HuffmanEncode {
             Node left = nodePriorityQueue.poll();
             Node right = nodePriorityQueue.poll();
             Node newNode = new Node(-Integer.MAX_VALUE, left.frequency + Objects.requireNonNull(right).frequency);
-            newNode.left = left;
-            newNode.right = right;
+            newNode.children[0] = left;
+            newNode.children[1] = right;
             nodePriorityQueue.add(newNode);
         }
         generateHuffmanCodes(nodePriorityQueue.peek(), 0, 0);
@@ -47,8 +47,8 @@ public class HuffmanEncode {
             if (root.data != -Integer.MAX_VALUE) {
                 huffmanCodes.put(root.data, new Pair<>(code, length));
             }
-            generateHuffmanCodes(root.left, code << 1, length + 1);
-            generateHuffmanCodes(root.right, (code << 1) | 1, length + 1);
+            generateHuffmanCodes(root.children[0], code << 1, length + 1);
+            generateHuffmanCodes(root.children[1], (code << 1) | 1, length + 1);
         }
     }
 
@@ -63,15 +63,15 @@ public class HuffmanEncode {
             while (length != 0) {
                 signal = (code >> (length - 1)) & 1;
                 if (signal == 0) {
-                    if (curNode.left == null) {
-                        curNode.left = new Node(-Integer.MAX_VALUE, 0);
+                    if (curNode.children[0] == null) {
+                        curNode.children[0] = new Node(-Integer.MAX_VALUE, 0);
                     }
-                    curNode = curNode.left;
+                    curNode = curNode.children[0];
                 } else {
-                    if (curNode.right == null) {
-                        curNode.right = new Node(-Integer.MAX_VALUE, 0);
+                    if (curNode.children[1] == null) {
+                        curNode.children[1] = new Node(-Integer.MAX_VALUE, 0);
                     }
-                    curNode = curNode.right;
+                    curNode = curNode.children[1];
                 }
                 length -= 1;
             }
