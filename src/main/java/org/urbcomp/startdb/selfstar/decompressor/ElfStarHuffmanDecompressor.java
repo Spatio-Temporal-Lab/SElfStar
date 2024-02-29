@@ -1,20 +1,18 @@
 package org.urbcomp.startdb.selfstar.decompressor;
 
-import javafx.util.Pair;
 import org.urbcomp.startdb.selfstar.decompressor.xor.IXORDecompressor;
 import org.urbcomp.startdb.selfstar.utils.Elf64Utils;
+import org.urbcomp.startdb.selfstar.utils.Huffman.Code;
 import org.urbcomp.startdb.selfstar.utils.Huffman.HuffmanEncode;
 import org.urbcomp.startdb.selfstar.utils.Huffman.Node;
 import org.urbcomp.startdb.selfstar.utils.InputBitStream;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 public class ElfStarHuffmanDecompressor implements IDecompressor {
-    private static final HashMap<Integer, Pair<Long, Integer>> huffmanCode = new HashMap<>();
-    private static final int[] states = new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17};
+    private static Code[] huffmanCode = new Code[18];
     private final IXORDecompressor xorDecompressor;
     private int lastBetaStar = Integer.MAX_VALUE;
     private Node root;
@@ -33,11 +31,11 @@ public class ElfStarHuffmanDecompressor implements IDecompressor {
         return values;
     }
 
-    public void initHuffmanTree() {
-        for (int state : states) {
+    private void initHuffmanTree() {
+        for (int i = 0; i < huffmanCode.length; i++) {
             int length = readInt(5);
             long code = readInt(length);
-            huffmanCode.put(state, new Pair<>(code, length));
+            huffmanCode[i] = new Code(code, length);
         }
         root = HuffmanEncode.hashMapToTree(huffmanCode);
     }
@@ -46,7 +44,7 @@ public class ElfStarHuffmanDecompressor implements IDecompressor {
     public void refresh() {
         lastBetaStar = Integer.MAX_VALUE;
         xorDecompressor.refresh();
-        huffmanCode.clear();
+        huffmanCode = new Code[18];
     }
 
     @Override
@@ -59,11 +57,7 @@ public class ElfStarHuffmanDecompressor implements IDecompressor {
         Double v;
         Node current = root;
         while (true) {
-            if (readInt(1) == 0) {
-                current = current.left;
-            } else {
-                current = current.right;
-            }
+            current = current.children[readInt(1)];
             if (current.data != -Integer.MAX_VALUE) {
                 if (current.data != 17) {
                     lastBetaStar = current.data;
