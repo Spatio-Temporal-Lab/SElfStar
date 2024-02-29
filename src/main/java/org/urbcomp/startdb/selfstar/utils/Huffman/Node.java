@@ -45,6 +45,7 @@ public class Node implements Comparable<Node> {
         return this.frequency - o.frequency;
     }
 }
+
 class CustomComparator implements Comparator<Node> {
 
     @Override
