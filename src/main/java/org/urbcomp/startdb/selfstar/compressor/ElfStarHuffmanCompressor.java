@@ -18,8 +18,7 @@ public class ElfStarHuffmanCompressor implements ICompressor {
     private int compressedSizeInBits = 0;
     private int lastBetaStar = Integer.MAX_VALUE;
     private int numberOfValues = 0;
-    private static final int[] states = new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17};
-    private final int[] frequency = new int[states.length];
+    private final int[] frequency = new int[18];    // 0 is for 10-i, 17 is for not erasing
     private Code[] huffmanCode;
 
     public ElfStarHuffmanCompressor(IXORCompressor xorCompressor, int window) {
@@ -82,7 +81,7 @@ public class ElfStarHuffmanCompressor implements ICompressor {
     }
 
     private void compress() {
-        HuffmanEncode huffmanEncode = new HuffmanEncode(states, frequency);
+        HuffmanEncode huffmanEncode = new HuffmanEncode(frequency);
         huffmanCode = huffmanEncode.getHuffmanCodes();
         compressedSizeInBits += huffmanEncode.writeHuffmanCodes(os);
         xorCompressor.setDistribution(leadDistribution, trailDistribution);

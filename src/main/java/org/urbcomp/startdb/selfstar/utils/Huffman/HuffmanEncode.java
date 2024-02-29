@@ -8,23 +8,21 @@ import java.util.PriorityQueue;
 public class HuffmanEncode {
     // Map value -> <code, length>
     private static final Code[] huffmanCodes = new Code[18];
-    private final int[] values;
 
-    public HuffmanEncode(int[] values, int[] frequencies) {
-        this.values = values;
-        buildHuffmanTreeAndConToHashMap(values, frequencies);
+    public HuffmanEncode(int[] frequencies) {
+        buildHuffmanTreeAndConToHashMap(frequencies);
     }
 
     public Code[] getHuffmanCodes(){
         return huffmanCodes;
     }
 
-    private static void buildHuffmanTreeAndConToHashMap(int[] values, int[] frequencies) {
+    private static void buildHuffmanTreeAndConToHashMap(int[] frequencies) {
         PriorityQueue<Node> nodePriorityQueue = new PriorityQueue<>();
 
         // Construct priorityQueue
-        for (int i = 0; i < values.length; i++) {
-            nodePriorityQueue.add(new Node(values[i], frequencies[i]));
+        for (int i = 0; i < frequencies.length; i++) {
+            nodePriorityQueue.add(new Node(i, frequencies[i]));
         }
 
         // Construct huffman tree
@@ -79,9 +77,9 @@ public class HuffmanEncode {
 
     public int writeHuffmanCodes(OutputBitStream out) {
         int thisSize = 0;
-        for (int value : values) {
-            thisSize += out.writeInt(huffmanCodes[value].length, 5);
-            thisSize += out.writeLong(huffmanCodes[value].value, huffmanCodes[value].length);
+        for (Code huffmanCode : huffmanCodes) {
+            thisSize += out.writeInt(huffmanCode.length, 5);
+            thisSize += out.writeLong(huffmanCode.value, huffmanCode.length);
         }
         return thisSize;
     }

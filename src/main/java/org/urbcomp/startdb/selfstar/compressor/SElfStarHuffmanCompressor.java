@@ -22,10 +22,9 @@ public class SElfStarHuffmanCompressor implements ICompressor {
     private double storeCompressionRatio = 0;
 
     private boolean isFirst = true;
-    private Code[] huffmanCode;
 
-    private static final int[] states = new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17};
-    private int[] frequency = new int[states.length];
+    private Code[] huffmanCode;
+    private int[] frequency = new int[18];
 
     private boolean init = true;
 
@@ -36,9 +35,9 @@ public class SElfStarHuffmanCompressor implements ICompressor {
 
     public void addValue(double v) {
         if (init) {
-            HuffmanEncode huffmanEncode = new HuffmanEncode(states, frequency);
+            HuffmanEncode huffmanEncode = new HuffmanEncode(frequency);
             huffmanCode = huffmanEncode.getHuffmanCodes();
-            frequency = new int[states.length];
+            frequency = new int[18];
             init = false;
         }
         if (isFirst) {
@@ -56,11 +55,11 @@ public class SElfStarHuffmanCompressor implements ICompressor {
         if (v == 0.0 || Double.isInfinite(v)) {
             compressedSizeInBits += os.writeInt(2, 2); // case 10
             vPrimeLong = vLong;
-            frequency[states.length - 1]++;
+            frequency[17]++;
         } else if (Double.isNaN(v)) {
             compressedSizeInBits += os.writeInt(2, 2); // case 10
             vPrimeLong = 0xfff8000000000000L & vLong;
-            frequency[states.length - 1]++;
+            frequency[17]++;
         } else {
             // C1: v is a normal or subnormal
             int[] alphaAndBetaStar = Elf64Utils.getAlphaAndBetaStar(v, lastBetaStar);
@@ -81,7 +80,7 @@ public class SElfStarHuffmanCompressor implements ICompressor {
             } else {
                 compressedSizeInBits += os.writeInt(2, 2); // case 10
                 vPrimeLong = vLong;
-                frequency[states.length - 1]++;
+                frequency[17]++;
             }
         }
         compressedSizeInBits += xorCompressor.addValue(vPrimeLong);
@@ -93,13 +92,13 @@ public class SElfStarHuffmanCompressor implements ICompressor {
         numberOfValues++;
 
         if (v == 0.0 || Double.isInfinite(v)) {
-            compressedSizeInBits += os.writeLong(huffmanCode[states.length - 1].value, huffmanCode[states.length - 1].length); // not erase
+            compressedSizeInBits += os.writeLong(huffmanCode[17].value, huffmanCode[17].length); // not erase
             vPrimeLong = vLong;
-            frequency[states.length - 1]++;
+            frequency[17]++;
         } else if (Double.isNaN(v)) {
-            compressedSizeInBits += os.writeLong(huffmanCode[states.length - 1].value, huffmanCode[states.length - 1].length); // not erase
+            compressedSizeInBits += os.writeLong(huffmanCode[17].value, huffmanCode[17].length); // not erase
             vPrimeLong = 0xfff8000000000000L & vLong;
-            frequency[states.length - 1]++;
+            frequency[17]++;
         } else {
             // C1: v is a normal or subnormal
             int[] alphaAndBetaStar = Elf64Utils.getAlphaAndBetaStar(v, lastBetaStar);
@@ -114,9 +113,9 @@ public class SElfStarHuffmanCompressor implements ICompressor {
                 vPrimeLong = mask & vLong;
                 frequency[alphaAndBetaStar[1]]++;
             } else {
-                compressedSizeInBits += os.writeLong(huffmanCode[states.length - 1].value, huffmanCode[states.length - 1].length); // not erase
+                compressedSizeInBits += os.writeLong(huffmanCode[17].value, huffmanCode[17].length); // not erase
                 vPrimeLong = vLong;
-                frequency[states.length - 1]++;
+                frequency[17]++;
             }
         }
         compressedSizeInBits += xorCompressor.addValue(vPrimeLong);
@@ -153,7 +152,7 @@ public class SElfStarHuffmanCompressor implements ICompressor {
         if (isFirst) {
             compressedSizeInBits += os.writeInt(2, 2);  // case 10
         } else {
-            compressedSizeInBits += os.writeLong(huffmanCode[states.length - 1].value, huffmanCode[states.length - 1].length); // not erase
+            compressedSizeInBits += os.writeLong(huffmanCode[17].value, huffmanCode[17].length); // not erase
         }
         compressedSizeInBits += xorCompressor.close();
 

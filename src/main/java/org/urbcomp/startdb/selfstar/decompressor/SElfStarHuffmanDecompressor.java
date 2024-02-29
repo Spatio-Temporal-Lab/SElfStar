@@ -18,9 +18,7 @@ public class SElfStarHuffmanDecompressor implements IDecompressor {
     private final IXORDecompressor xorDecompressor;
     private int lastBetaStar = Integer.MAX_VALUE;
 
-    private static final int STATES_NUM = 18;
-    private static final int[] states = new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17};
-    private final int[] frequency = new int[STATES_NUM];
+    private final int[] frequency = new int[18];
     private boolean isFirst = true;
     private Node root;
 
@@ -34,7 +32,7 @@ public class SElfStarHuffmanDecompressor implements IDecompressor {
         while ((value = nextValue()) != null) {
             values.add(value);
         }
-        HuffmanEncode huffmanEncode = new HuffmanEncode(states, frequency);
+        HuffmanEncode huffmanEncode = new HuffmanEncode(frequency);
         Code[] huffmanCode = huffmanEncode.getHuffmanCodes();
         root = HuffmanEncode.hashMapToTree(huffmanCode);
         Arrays.fill(frequency, 0);
@@ -70,7 +68,7 @@ public class SElfStarHuffmanDecompressor implements IDecompressor {
             frequency[lastBetaStar]++;
         } else if (readInt(1) == 0) {
             v = xorDecompressor.readValue();        // case 10
-            frequency[STATES_NUM - 1]++;
+            frequency[17]++;
         } else {
             lastBetaStar = readInt(4);          // case 11
             v = recoverVByBetaStar();
@@ -85,14 +83,14 @@ public class SElfStarHuffmanDecompressor implements IDecompressor {
         while (true) {
             current = current.children[readInt(1)];
             if (current.data != -Integer.MAX_VALUE) {
-                if (current.data != STATES_NUM - 1) {
+                if (current.data != 17) {
                     lastBetaStar = current.data;
                     v = recoverVByBetaStar();
 
                     frequency[lastBetaStar]++;
                 } else {
                     v = xorDecompressor.readValue();
-                    frequency[STATES_NUM - 1]++;
+                    frequency[17]++;
                 }
                 break;
             }
