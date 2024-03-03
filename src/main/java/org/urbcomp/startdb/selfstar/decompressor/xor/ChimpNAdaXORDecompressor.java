@@ -98,6 +98,8 @@ public class ChimpNAdaXORDecompressor implements IXORDecompressor {
             if (storedValues[current] == END_SIGN) {
                 endOfStream = true;
             }
+            System.out.println(Arrays.toString(leadingRepresentation));
+            System.out.println(leadingBitsPerValue);
         } else {
             nextValue();
         }
@@ -109,6 +111,8 @@ public class ChimpNAdaXORDecompressor implements IXORDecompressor {
         long value;
         switch (flag) {
             case 3:
+//                System.out.println("33333333333333333333333333333333333333333333333");
+
                 storedLeadingZeros = leadingRepresentation[in.readInt(leadingBitsPerValue)];
                 value = in.readLong(64 - storedLeadingZeros);
                 value = storedVal ^ value;
@@ -123,6 +127,8 @@ public class ChimpNAdaXORDecompressor implements IXORDecompressor {
                 }
                 break;
             case 2:
+
+//                System.out.println("2222222222222222222222222222222222222222222");
                 value = in.readLong(64 - storedLeadingZeros);
                 value = storedVal ^ value;
                 if (value == END_SIGN) {
@@ -135,6 +141,7 @@ public class ChimpNAdaXORDecompressor implements IXORDecompressor {
                 }
                 break;
             case 1:
+//                System.out.println("11111111111111111111111111111111111111111");
                 int fill = this.initialFill + leadingBitsPerValue;
                 int temp = in.readInt(fill);
                 int index = temp >>> (fill -= previousValuesLog2) & (1 << previousValuesLog2) - 1;
@@ -158,6 +165,7 @@ public class ChimpNAdaXORDecompressor implements IXORDecompressor {
                 }
                 break;
             default:
+//                System.out.println("0000000000000000000000000000000000000");
                 // else -> same value as before
                 storedVal = storedValues[(int) in.readLong(previousValuesLog2)];
                 current = (current + 1) % previousValues;

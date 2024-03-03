@@ -97,9 +97,11 @@ public class ChimpNAdaXORCompressor implements IXORCompressor {
      */
     @Override
     public int close() {
-        System.out.println(updatePositions);
         int thisSize = addValue(Elf64Utils.END_SIGN);
         out.flush();
+        System.out.println("com");
+        System.out.println(Arrays.toString(leadPositions));
+        System.out.println(leadingBitsPerValue);
         if (updatePositions) {
             // we update distribution using the inner info
             leadPositions = PostOfficeSolver.initRoundAndRepresentation(leadDistribution, leadingRepresentation, leadingRound);
@@ -140,7 +142,8 @@ public class ChimpNAdaXORCompressor implements IXORCompressor {
 
             if (trailingZeros > threshold) {
                 int significantBits = 64 - leadingZeros - trailingZeros;
-                out.writeInt(512 * (previousValues + previousIndex) + 64 * leadingRepresentation[leadingZeros] + significantBits, this.flagOneSize + leadingBitsPerValue);
+//                out.writeInt(512 * (previousValues + previousIndex) + 64 * leadingRepresentation[leadingZeros] + significantBits, this.flagOneSize + leadingBitsPerValue);
+                out.writeInt(((previousValues + previousIndex) << (leadingBitsPerValue + 6)) | (leadingRepresentation[leadingZeros] << 6) | significantBits, this.flagOneSize + leadingBitsPerValue);
                 out.writeLong(xor >>> trailingZeros, significantBits); // Store the meaningful bits of XOR
                 thisSize += significantBits + this.flagOneSize + leadingBitsPerValue;
                 storedLeadingZeros = 65;
@@ -152,7 +155,9 @@ public class ChimpNAdaXORCompressor implements IXORCompressor {
             } else {
                 storedLeadingZeros = leadingZeros;
                 int significantBits = 64 - leadingZeros;
-                out.writeInt(24 + leadingRepresentation[leadingZeros], 2 + leadingBitsPerValue);
+//                out.writeInt(24 + leadingRepresentation[leadingZeros], 2 + leadingBitsPerValue);
+                out.writeInt(3 << leadingBitsPerValue | leadingRepresentation[leadingZeros], 2 + leadingBitsPerValue);
+
                 out.writeLong(xor, significantBits);
                 thisSize += 2 + leadingBitsPerValue + significantBits;
             }
