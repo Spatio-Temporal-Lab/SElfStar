@@ -139,7 +139,6 @@ public class ChimpNAdaXORCompressor implements IXORCompressor {
 
             if (trailingZeros > threshold) {
                 int significantBits = 64 - leadingZeros - trailingZeros;
-//                out.writeInt(512 * (previousValues + previousIndex) + 64 * leadingRepresentation[leadingZeros] + significantBits, this.flagOneSize + leadingBitsPerValue);
                 out.writeInt(((previousValues + previousIndex) << (leadingBitsPerValue + 6)) | (leadingRepresentation[leadingZeros] << 6) | significantBits, this.flagOneSize + leadingBitsPerValue);
                 out.writeLong(xor >>> trailingZeros, significantBits); // Store the meaningful bits of XOR
                 thisSize += significantBits + this.flagOneSize + leadingBitsPerValue;
@@ -152,7 +151,6 @@ public class ChimpNAdaXORCompressor implements IXORCompressor {
             } else {
                 storedLeadingZeros = leadingZeros;
                 int significantBits = 64 - leadingZeros;
-//                out.writeInt(24 + leadingRepresentation[leadingZeros], 2 + leadingBitsPerValue);
                 out.writeInt(3 << leadingBitsPerValue | leadingRepresentation[leadingZeros], 2 + leadingBitsPerValue);
 
                 out.writeLong(xor, significantBits);
