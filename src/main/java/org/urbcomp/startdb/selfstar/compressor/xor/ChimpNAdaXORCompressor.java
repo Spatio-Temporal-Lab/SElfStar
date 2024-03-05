@@ -14,7 +14,7 @@ import java.util.Arrays;
  */
 public class ChimpNAdaXORCompressor implements IXORCompressor {
 
-    public final static int[] leadingRepresentation = {0, 0, 0, 0, 0, 0, 0, 0,
+    private final int[] leadingRepresentation = {0, 0, 0, 0, 0, 0, 0, 0,
             1, 1, 1, 1, 2, 2, 2, 2,
             3, 3, 4, 4, 5, 5, 6, 6,
             7, 7, 7, 7, 7, 7, 7, 7,
@@ -23,7 +23,7 @@ public class ChimpNAdaXORCompressor implements IXORCompressor {
             7, 7, 7, 7, 7, 7, 7, 7,
             7, 7, 7, 7, 7, 7, 7, 7
     };
-    public final static int[] leadingRound = {0, 0, 0, 0, 0, 0, 0, 0,
+    private final int[] leadingRound = {0, 0, 0, 0, 0, 0, 0, 0,
             8, 8, 8, 8, 12, 12, 12, 12,
             16, 16, 18, 18, 20, 20, 22, 22,
             24, 24, 24, 24, 24, 24, 24, 24,
@@ -99,9 +99,6 @@ public class ChimpNAdaXORCompressor implements IXORCompressor {
     public int close() {
         int thisSize = addValue(Elf64Utils.END_SIGN);
         out.flush();
-        System.out.println("com");
-        System.out.println(Arrays.toString(leadPositions));
-        System.out.println(leadingBitsPerValue);
         if (updatePositions) {
             // we update distribution using the inner info
             leadPositions = PostOfficeSolver.initRoundAndRepresentation(leadDistribution, leadingRepresentation, leadingRound);
@@ -184,6 +181,7 @@ public class ChimpNAdaXORCompressor implements IXORCompressor {
         index = 0;
         current = 0;
         updatePositions = false;
+        Arrays.fill(storedValues, 0);
         Arrays.fill(leadDistribution, 0);
         Arrays.fill(indices, 0);
     }

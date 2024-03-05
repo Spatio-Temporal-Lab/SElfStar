@@ -9,13 +9,9 @@ import org.apache.hadoop.io.compress.CompressionInputStream;
 import org.apache.hadoop.io.compress.CompressionOutputStream;
 import org.junit.jupiter.api.Test;
 import org.urbcomp.startdb.selfstar.compressor.*;
-import org.urbcomp.startdb.selfstar.compressor.xor.ElfPlusXORCompressor;
-import org.urbcomp.startdb.selfstar.compressor.xor.ElfStarXORCompressor;
-import org.urbcomp.startdb.selfstar.compressor.xor.SElfXORCompressor;
+import org.urbcomp.startdb.selfstar.compressor.xor.*;
 import org.urbcomp.startdb.selfstar.decompressor.*;
-import org.urbcomp.startdb.selfstar.decompressor.xor.ElfPlusXORDecompressor;
-import org.urbcomp.startdb.selfstar.decompressor.xor.ElfStarXORCanonicalHuffmanDecompressor;
-import org.urbcomp.startdb.selfstar.decompressor.xor.ElfStarXORDecompressor;
+import org.urbcomp.startdb.selfstar.decompressor.xor.*;
 
 import java.io.*;
 import java.nio.ByteBuffer;
@@ -79,9 +75,9 @@ public class TestCompressor {
     @Test
     public void testAllCompressor() {
         for (String fileName : fileNames) {
-//            testXZCompressor(fileName, NO_PARAM);
-//            testZstdCompressor(fileName, NO_PARAM);
-//            testSnappyCompressor(fileName, NO_PARAM);
+            testXZCompressor(fileName, NO_PARAM);
+            testZstdCompressor(fileName, NO_PARAM);
+            testSnappyCompressor(fileName, NO_PARAM);
             testFloatingCompressor(fileName);
         }
         fileNameParamMethodToCompressedBits.forEach((fileNameParamMethod, compressedBits) -> {
@@ -157,33 +153,37 @@ public class TestCompressor {
         fileNameParamToTotalBits.put(fileNameParam, 0L);
         fileNameParamToTotalBlock.put(fileNameParam, 0L);
         ICompressor[] compressors = new ICompressor[]{
-//                new BaseCompressor(new ChimpXORCompressor()),
-//                new BaseCompressor(new ChimpNXORCompressor(128)),
-//                new BaseCompressor(new GorillaXORCompressor()),
-//                new ElfCompressor(new ElfXORCompressor()),
+                new BaseCompressor(new ChimpXORCompressor()),
+                new BaseCompressor(new ChimpNXORCompressor(128)),
+                new BaseCompressor(new GorillaXORCompressor()),
+                new SBaseCompressor(new ChimpAdaXORCompressor()),
+                new SBaseCompressor(new ChimpNAdaXORCompressor(128)),
+                new ElfCompressor(new ElfXORCompressor()),
                 new ElfPlusCompressor(new ElfPlusXORCompressor()),
-//                new ElfStarCompressor(new ElfStarXORCompressorAdaLead()),
-//                new ElfStarCompressor(new ElfStarXORCompressorAdaLeadAdaTrail()),
+                new ElfStarCompressor(new ElfStarXORCompressorAdaLead()),
+                new ElfStarCompressor(new ElfStarXORCompressorAdaLeadAdaTrail()),
                 new ElfStarCompressor(new ElfStarXORCompressor()),
                 new ElfStarCanonicalHuffmanCompressor(new ElfStarXORCompressor()),
                 new ElfStarHuffmanCompressor(new ElfStarXORCompressor()),
                 new SElfStarCompressor(new SElfXORCompressor()),
-                new SElfStarHuffmanCompressor(new SElfXORCompressor())
+                new SElfStarHuffmanCompressor(new SElfXORCompressor()),
         };
 
         IDecompressor[] decompressors = new IDecompressor[]{
-//                new BaseDecompressor(new ChimpXORDecompressor()),
-//                new BaseDecompressor(new ChimpNXORDecompressor(128)),
-//                new BaseDecompressor(new GorillaXORDecompressor()),
-//                new ElfDecompressor(new ElfXORDecompressor()),
+                new BaseDecompressor(new ChimpXORDecompressor()),
+                new BaseDecompressor(new ChimpNXORDecompressor(128)),
+                new BaseDecompressor(new GorillaXORDecompressor()),
+                new BaseDecompressor(new ChimpAdaXORDecompressor()),
+                new BaseDecompressor(new ChimpNAdaXORDecompressor(128)),
+                new ElfDecompressor(new ElfXORDecompressor()),
                 new ElfPlusDecompressor(new ElfPlusXORDecompressor()),
-//                new ElfStarDecompressor(new ElfStarXORDecompressorAdaLead()),
-//                new ElfStarDecompressor(new ElfStarXORDecompressorAdaLeadAdaTrail()),
+                new ElfStarDecompressor(new ElfStarXORDecompressorAdaLead()),
+                new ElfStarDecompressor(new ElfStarXORDecompressorAdaLeadAdaTrail()),
                 new ElfStarDecompressor(new ElfStarXORDecompressor()),
                 new ElfStarCanonicalHuffmanDecompressor(new ElfStarXORCanonicalHuffmanDecompressor()),
                 new ElfStarHuffmanDecompressor(new ElfStarXORDecompressor()),
                 new ElfStarDecompressor(new ElfStarXORDecompressor()),     // streaming version is the same
-                new SElfStarHuffmanDecompressor(new ElfStarXORDecompressor())
+                new SElfStarHuffmanDecompressor(new ElfStarXORDecompressor()),
         };
         boolean firstMethod = true;
         for (int i = 0; i < compressors.length; i++) {
@@ -203,7 +203,10 @@ public class TestCompressor {
                         fileNameParamToTotalBlock.put(fileNameParam, fileNameParamToTotalBlock.get(fileNameParam) + 1L);
                     }
                     double start = System.nanoTime();
-                    floatings.forEach(compressor::addValue);
+                    for (double floating : floatings) {
+                        compressor.addValue(floating);
+                    }
+//                    floatings.forEach(compressor::addValue);
                     compressor.close();
                     compressTime += (System.nanoTime() - start) / TIME_PRECISION;
                     IDecompressor decompressor = decompressors[i];
@@ -232,7 +235,6 @@ public class TestCompressor {
                     }
                     compressor.refresh();
                     decompressor.refresh();
-
                 }
             } catch (Exception e) {
                 e.printStackTrace();
