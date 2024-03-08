@@ -78,7 +78,6 @@ public class SElfStarCompressor implements ICompressor {
         // for streaming scenarios, we do nothing here
     }
 
-
     public void close() {
         double thisCompressionRatio = compressedSizeInBits / (numberOfValues * 64.0);
         if (storeCompressionRatio < thisCompressionRatio) {

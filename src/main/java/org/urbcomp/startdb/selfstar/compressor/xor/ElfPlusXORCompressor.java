@@ -30,11 +30,10 @@ public class ElfPlusXORCompressor implements IXORCompressor {
     private boolean first = true;
     private OutputBitStream out;
 
-    private int capacity = 1000;
+    private final int capacity;
 
     public ElfPlusXORCompressor() {
-        out = new OutputBitStream(
-                new byte[(int) (((capacity + 1) * 8 + capacity / 8 + 1) * 1.2)]);
+        this(1000);
     }
 
     public ElfPlusXORCompressor(int capacity) {

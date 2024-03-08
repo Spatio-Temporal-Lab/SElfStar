@@ -34,10 +34,6 @@ public class ElfPlusXORDecompressor implements IXORDecompressor {
 
     @Override
     public void refresh() {
-        in = new InputBitStream(new byte[0]);
-        storedVal = 0;
-        storedLeadingZeros = Integer.MAX_VALUE;
-        storedTrailingZeros = Integer.MAX_VALUE;
         first = true;
         endOfStream = false;
     }
@@ -65,9 +61,7 @@ public class ElfPlusXORDecompressor implements IXORDecompressor {
             first = false;
             int trailingZeros = in.readInt(7);
             storedVal = in.readLong(64 - trailingZeros) << trailingZeros;
-            if (storedVal == Elf64Utils.END_SIGN) {
-                endOfStream = true;
-            }
+            endOfStream = storedVal == Elf64Utils.END_SIGN;
         } else {
             nextValue();
         }
@@ -89,11 +83,8 @@ public class ElfPlusXORDecompressor implements IXORDecompressor {
                 storedTrailingZeros = 64 - storedLeadingZeros - centerBits;
                 value = in.readLong(centerBits) << storedTrailingZeros;
                 value = storedVal ^ value;
-                if (value == Elf64Utils.END_SIGN) {
-                    endOfStream = true;
-                } else {
-                    storedVal = value;
-                }
+                endOfStream = value == Elf64Utils.END_SIGN;
+                storedVal = value;
                 break;
             case 2:
                 // case 10
@@ -106,11 +97,8 @@ public class ElfPlusXORDecompressor implements IXORDecompressor {
                 storedTrailingZeros = 64 - storedLeadingZeros - centerBits;
                 value = in.readLong(centerBits) << storedTrailingZeros;
                 value = storedVal ^ value;
-                if (value == Elf64Utils.END_SIGN) {
-                    endOfStream = true;
-                } else {
-                    storedVal = value;
-                }
+                endOfStream = value == Elf64Utils.END_SIGN;
+                storedVal = value;
                 break;
             case 1:
                 // case 01, we do nothing, the same value as before
@@ -120,11 +108,8 @@ public class ElfPlusXORDecompressor implements IXORDecompressor {
                 centerBits = 64 - storedLeadingZeros - storedTrailingZeros;
                 value = in.readLong(centerBits) << storedTrailingZeros;
                 value = storedVal ^ value;
-                if (value == Elf64Utils.END_SIGN) {
-                    endOfStream = true;
-                } else {
-                    storedVal = value;
-                }
+                endOfStream = value == Elf64Utils.END_SIGN;
+                storedVal = value;
                 break;
         }
     }
