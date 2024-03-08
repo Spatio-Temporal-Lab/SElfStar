@@ -12,16 +12,20 @@ public class ElfStarXORCompressorNoFRZPruning implements IXORCompressor {
     private final int[] leadingRound = new int[64];
     private final int[] trailingRepresentation = new int[64];
     private final int[] trailingRound = new int[64];
-    private final int capacity = 1000;
     private int storedLeadingZeros = Integer.MAX_VALUE;
     private int storedTrailingZeros = Integer.MAX_VALUE;
     private long storedVal = 0;
     private boolean first = true;
     private int[] leadDistribution;
     private int[] trailDistribution;
+
     private OutputBitStream out;
+
     private int leadingBitsPerValue;
+
     private int trailingBitsPerValue;
+
+    private final int capacity = 1000;
 
     public ElfStarXORCompressorNoFRZPruning() {
         out = new OutputBitStream(

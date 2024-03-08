@@ -3,14 +3,14 @@ package org.urbcomp.startdb.selfstar.utils;
 public class PostOfficeSolverNoFRZGPruning {
     //  (int) Math.ceil(Math.log(index) / Math.log(2))
     public static final int[] positionLength2Bits = {
-            0, 0, 1, 2, 2, 3, 3, 3, 3,
-            4, 4, 4, 4, 4, 4, 4, 4,
-            5, 5, 5, 5, 5, 5, 5, 5,
-            5, 5, 5, 5, 5, 5, 5, 5,
-            6, 6, 6, 6, 6, 6, 6, 6,
-            6, 6, 6, 6, 6, 6, 6, 6,
-            6, 6, 6, 6, 6, 6, 6, 6,
-            6, 6, 6, 6, 6, 6, 6, 6
+        0, 0, 1, 2, 2, 3, 3, 3, 3,
+        4, 4, 4, 4, 4, 4, 4, 4,
+        5, 5, 5, 5, 5, 5, 5, 5,
+        5, 5, 5, 5, 5, 5, 5, 5,
+        6, 6, 6, 6, 6, 6, 6, 6,
+        6, 6, 6, 6, 6, 6, 6, 6,
+        6, 6, 6, 6, 6, 6, 6, 6,
+        6, 6, 6, 6, 6, 6, 6, 6
     };
 
     /**
@@ -27,7 +27,7 @@ public class PostOfficeSolverNoFRZGPruning {
         for (int z = 1; z < 64; z++) {
             int presentCost = totalCount * positionLength2Bits[z];
             PostOfficeResult por = PostOfficeSolverNoFRZGPruning.buildPostOffice(
-                    distribution, z);
+                distribution, z);
             int tempTotalCost = por.getAppCost() + presentCost;
             if (tempTotalCost < totalCost) {
                 totalCost = tempTotalCost;

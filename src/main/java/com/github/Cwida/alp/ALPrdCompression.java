@@ -10,6 +10,10 @@ public class ALPrdCompression {
     private final OutputBitStream out;
     private long size;
 
+    public void reset() {
+        state.reset();
+    }
+
     public ALPrdCompression(OutputBitStream out, long size, int vectorSize) {
         this.out = out;
         this.size = size;
@@ -83,10 +87,6 @@ public class ALPrdCompression {
         }
 
         buildLeftPartsDictionary(values, (byte) rBw, (byte) lBw, true, state);
-    }
-
-    public void reset() {
-        state.reset();
     }
 
     public long getSize() {

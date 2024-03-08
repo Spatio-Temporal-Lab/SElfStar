@@ -31,7 +31,6 @@ public class ALPDecompression32 {
             0.00000000000000000001F
     };
     private final ALPrdDecompression32 ALPrdDe;
-    private final InputBitStream in;
     private long[] encodedValue;
     private int count;
     private byte vectorFactor;
@@ -40,6 +39,7 @@ public class ALPDecompression32 {
     private float[] exceptions;
     private short[] exceptionsPositions;
     private long frameOfReference;
+    private final InputBitStream in;
 
     public ALPDecompression32(byte[] bs) {
         in = new InputBitStream(bs);

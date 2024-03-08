@@ -35,7 +35,7 @@ public class ElfStarCompressor implements ICompressor {
             vPrimeList[numberOfValues] = vLong;
             betaStarList[numberOfValues] = Integer.MAX_VALUE;
         } else if (Double.isNaN(v)) {
-            vPrimeList[numberOfValues] = 0xfff8000000000000L & vLong;
+            vPrimeList[numberOfValues] = 0x7ff8000000000000L;
             betaStarList[numberOfValues] = Integer.MAX_VALUE;
         } else {
             // C1: v is a normal or subnormal

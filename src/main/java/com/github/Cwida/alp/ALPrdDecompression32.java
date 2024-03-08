@@ -5,9 +5,9 @@ import org.urbcomp.startdb.selfstar.utils.InputBitStream;
 import java.io.IOException;
 
 public class ALPrdDecompression32 {
-    private final InputBitStream in;
     private int nValues;
     private byte rightBW;
+    private final InputBitStream in;
     private int[] rightEncoded;
     private int[] leftEncoded;
     private int[] leftPartsDict;

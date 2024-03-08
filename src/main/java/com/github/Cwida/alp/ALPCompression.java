@@ -63,6 +63,15 @@ public class ALPCompression {
     ALPrdCompression aLPrd;
     private long size;
 
+    public void reset(){
+        state.reset();
+        aLPrd.reset();
+    }
+
+    public long getSize(){
+        return size;
+    }
+
     public ALPCompression(int vectorSize) {
         this.out = new OutputBitStream(
                 new byte[7000000]);
@@ -84,26 +93,6 @@ public class ALPCompression {
         return (long) n;
     }
 
-    private static int getWidthNeeded(long number) {
-        if (number == 0) {
-            return 0;
-        }
-        int bitCount = 0;
-        while (number > 0) {
-            bitCount++;
-            number = number >>> 1; // 右移一位
-        }
-        return bitCount;
-    }
-
-    public void reset() {
-        state.reset();
-        aLPrd.reset();
-    }
-
-    public long getSize() {
-        return size;
-    }
 
     public void compress(List<Double> inputVector, int nValues, ALPCompressionState state) {
         if (state.bestKCombinations.size() > 1) {
@@ -132,7 +121,7 @@ public class ALPCompression {
         for (int i = 0; i < nValues; i++) {
             double decodedValue = tmpDecodedValues.get(i);
             double actualValue = inputVector.get(i);
-            boolean isException = (decodedValue != actualValue) || Double.doubleToRawLongBits(actualValue) == -9223372036854775808L;  // 将-0.00归为异常值
+            boolean isException = (decodedValue != actualValue) || Double.doubleToRawLongBits(actualValue)==-9223372036854775808L;  // 将-0.00归为异常值
             if (isException)
                 exceptionsPositions.add((short) i);
         }
@@ -191,6 +180,18 @@ public class ALPCompression {
             size += out.writeLong(Double.doubleToRawLongBits(state.exceptions[i]), 64);
             size += out.writeLong(state.exceptionsPositions[i], 16);
         }
+    }
+
+    private static int getWidthNeeded(long number) {
+        if (number == 0) {
+            return 0;
+        }
+        int bitCount = 0;
+        while (number > 0) {
+            bitCount++;
+            number = number >>> 1; // 右移一位
+        }
+        return bitCount;
     }
 
     public byte[] getOut() {

@@ -215,7 +215,7 @@ public class BuffCompressor32 {
 
             int decimal;
             if (exp >= 0) {
-                decimal = mantissa << (9 + exp) >>> (32 - decWidth);
+                decimal =  mantissa << (9 + exp) >>> (32 - decWidth);
             } else {
                 if (24 - decWidth >= 0) {
                     decimal = implicitMantissa >>> 24 - decWidth >>> (-exp - 1);
