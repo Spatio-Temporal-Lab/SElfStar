@@ -16,7 +16,6 @@ public class SBaseDecompressor implements IDecompressor {
         List<Double> values = new ArrayList<>(1024);
         Double value;
         while ((value = nextValue()) != null) {
-            System.out.println(value);
             values.add(value);
         }
 

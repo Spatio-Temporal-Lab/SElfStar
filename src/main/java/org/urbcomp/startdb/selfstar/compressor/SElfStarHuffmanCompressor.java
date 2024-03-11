@@ -26,7 +26,7 @@ public class SElfStarHuffmanCompressor implements ICompressor {
     private Code[] huffmanCode;
     private int[] frequency = new int[18];
 
-    private boolean init = true;
+    private boolean init = false;
 
     public SElfStarHuffmanCompressor(IXORCompressor xorCompressor) {
         this.xorCompressor = xorCompressor;
@@ -37,8 +37,6 @@ public class SElfStarHuffmanCompressor implements ICompressor {
         if (init) {
             HuffmanEncode huffmanEncode = new HuffmanEncode(frequency);
             huffmanCode = huffmanEncode.getHuffmanCodes();
-
-//            System.out.println(Arrays.toString(frequency));
             frequency = new int[18];
             init = false;
         }
@@ -48,7 +46,6 @@ public class SElfStarHuffmanCompressor implements ICompressor {
         } else {
             addValueFirst(v);
         }
-//        System.out.println(Arrays.toString(huffmanCode));
     }
 
     public void addValueFirst(double v) {
@@ -160,7 +157,6 @@ public class SElfStarHuffmanCompressor implements ICompressor {
             compressedSizeInBits += os.writeLong(huffmanCode[17].value, huffmanCode[17].length); // not erase
         }
         compressedSizeInBits += xorCompressor.close();
-//        init = true;
     }
 
 
@@ -176,5 +172,6 @@ public class SElfStarHuffmanCompressor implements ICompressor {
         xorCompressor.refresh();        // note this refresh should be at the last
         os = xorCompressor.getOutputStream();
         isFirst = false;
+        init = true;
     }
 }
