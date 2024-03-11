@@ -16,6 +16,7 @@ public class ElfStarHuffmanDecompressor implements IDecompressor {
     private final IXORDecompressor xorDecompressor;
     private int lastBetaStar = Integer.MAX_VALUE;
     private Node root;
+    private final HuffmanEncode huffmanEncode = new HuffmanEncode(new int[18]);
 
     public ElfStarHuffmanDecompressor(IXORDecompressor xorDecompressor) {
         this.xorDecompressor = xorDecompressor;
@@ -37,7 +38,7 @@ public class ElfStarHuffmanDecompressor implements IDecompressor {
             long code = readInt(length);
             huffmanCode[i] = new Code(code, length);
         }
-        root = HuffmanEncode.hashMapToTree(huffmanCode);
+        root = huffmanEncode.hashMapToTree(huffmanCode);
     }
 
     @Override

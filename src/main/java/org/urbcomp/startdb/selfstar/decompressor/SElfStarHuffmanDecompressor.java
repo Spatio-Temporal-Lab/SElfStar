@@ -32,9 +32,10 @@ public class SElfStarHuffmanDecompressor implements IDecompressor {
         while ((value = nextValue()) != null) {
             values.add(value);
         }
+        frequency[17]--;
         HuffmanEncode huffmanEncode = new HuffmanEncode(frequency);
         Code[] huffmanCode = huffmanEncode.getHuffmanCodes();
-        root = HuffmanEncode.hashMapToTree(huffmanCode);
+        root = huffmanEncode.hashMapToTree(huffmanCode);
         Arrays.fill(frequency, 0);
         return values;
     }
@@ -53,10 +54,10 @@ public class SElfStarHuffmanDecompressor implements IDecompressor {
 
     @Override
     public Double nextValue() {
-        if (isFirst) {
-            return nextValueFirst();
-        } else {
+        if (!isFirst) {
             return nextValueHuffman();
+        } else {
+            return nextValueFirst();
         }
     }
 
