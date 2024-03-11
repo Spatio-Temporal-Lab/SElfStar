@@ -24,11 +24,10 @@ public class ElfStarXORCompressor implements IXORCompressor {
 
     private int trailingBitsPerValue;
 
-    private int capacity = 1000;
+    private final int capacity;
 
     public ElfStarXORCompressor() {
-        out = new OutputBitStream(
-                new byte[(int) (((capacity + 1) * 8 + capacity / 8 + 1) * 1.2)]);
+        this(1000);
     }
 
     public ElfStarXORCompressor(int window) {

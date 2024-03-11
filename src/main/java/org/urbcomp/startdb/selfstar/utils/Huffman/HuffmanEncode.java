@@ -6,7 +6,7 @@ import java.util.PriorityQueue;
 
 public class HuffmanEncode {
     // Map value -> <code, length>
-    private static final Code[] huffmanCodes = new Code[18];
+    private final Code[] huffmanCodes = new Code[18];
 
     public HuffmanEncode(int[] frequencies) {
         buildHuffmanTreeAndConToHashMap(frequencies);
@@ -16,7 +16,7 @@ public class HuffmanEncode {
         return huffmanCodes;
     }
 
-    private static void buildHuffmanTreeAndConToHashMap(int[] frequencies) {
+    private void buildHuffmanTreeAndConToHashMap(int[] frequencies) {
         PriorityQueue<Node> nodePriorityQueue = new PriorityQueue<>(huffmanCodes.length);
 
         // Construct priorityQueue
@@ -37,7 +37,7 @@ public class HuffmanEncode {
         generateHuffmanCodes(nodePriorityQueue.peek(), 0, 0);
     }
 
-    private static void generateHuffmanCodes(Node root, long code, int length) {
+    private void generateHuffmanCodes(Node root, long code, int length) {
         if (root != null) {
             if (root.data != -Integer.MAX_VALUE) {
                 huffmanCodes[root.data] = new Code(code, length);
@@ -47,7 +47,7 @@ public class HuffmanEncode {
         }
     }
 
-    public static Node hashMapToTree(Code[] huffmanCodes) {
+    public Node hashMapToTree(Code[] huffmanCodes) {
         Node root = new Node(-Integer.MAX_VALUE, 0);
         Node curNode = root;
         for (int value = 0; value < huffmanCodes.length; value++) {

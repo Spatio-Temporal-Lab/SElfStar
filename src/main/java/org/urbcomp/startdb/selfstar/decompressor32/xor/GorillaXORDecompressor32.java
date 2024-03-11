@@ -47,9 +47,6 @@ public class GorillaXORDecompressor32 implements IXORDecompressor32 {
 
     @Override
     public void refresh() {
-        storedLeadingZeros = Integer.MAX_VALUE;
-        storedTrailingZeros = 0;
-        storedVal = 0;
         first = true;
         endOfStream = false;
     }
@@ -59,10 +56,7 @@ public class GorillaXORDecompressor32 implements IXORDecompressor32 {
         if (first) {
             first = false;
             storedVal = in.readInt(32);
-            if (storedVal == Elf32Utils.END_SIGN) {
-                endOfStream = true;
-            }
-
+            endOfStream = storedVal == Elf32Utils.END_SIGN;
         } else {
             nextValue();
         }
@@ -85,11 +79,8 @@ public class GorillaXORDecompressor32 implements IXORDecompressor32 {
             int value = in.readInt(32 - storedLeadingZeros - storedTrailingZeros);
             value <<= storedTrailingZeros;
             value = storedVal ^ value;
-            if (value == Elf32Utils.END_SIGN) {
-                endOfStream = true;
-            } else {
-                storedVal = value;
-            }
+            endOfStream = value == Elf32Utils.END_SIGN;
+            storedVal = value;
         }
     }
 }
