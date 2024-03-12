@@ -1,8 +1,6 @@
 package transmit;
 
 import org.junit.jupiter.api.Test;
-import org.urbcomp.startdb.selfstar.compressor.INetCompressor;
-import org.urbcomp.startdb.selfstar.decompressor.INetDecompressor;
 
 import java.io.File;
 import java.io.FileNotFoundException;
