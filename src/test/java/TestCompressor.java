@@ -203,15 +203,12 @@ public class TestCompressor {
                         fileNameParamToTotalBlock.put(fileNameParam, fileNameParamToTotalBlock.get(fileNameParam) + 1L);
                     }
                     double start = System.nanoTime();
-                    for (double floating : floatings) {
-                        compressor.addValue(floating);
-                    }
-//                    floatings.forEach(compressor::addValue);
+                    floatings.forEach(compressor::addValue);
                     compressor.close();
                     compressTime += (System.nanoTime() - start) / TIME_PRECISION;
                     IDecompressor decompressor = decompressors[i];
                     decompressor.setBytes(compressor.getBytes());
-//
+
                     start = System.nanoTime();
                     List<Double> deValues = decompressor.decompress();
                     decompressTime = (System.nanoTime() - start) / TIME_PRECISION;

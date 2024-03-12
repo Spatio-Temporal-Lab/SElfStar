@@ -34,12 +34,6 @@ public class SElfStarHuffmanCompressor implements ICompressor {
     }
 
     public void addValue(double v) {
-        if (init) {
-            HuffmanEncode huffmanEncode = new HuffmanEncode(frequency);
-            huffmanCode = huffmanEncode.getHuffmanCodes();
-            frequency = new int[18];
-            init = false;
-        }
 
         if (!isFirst) {
             addValueHuffman(v);
@@ -109,7 +103,6 @@ public class SElfStarHuffmanCompressor implements ICompressor {
             long mask = 0xffffffffffffffffL << eraseBits;
             long delta = (~mask) & vLong;
             if (delta != 0 && eraseBits > 4) {  // C2
-//                System.out.println(huffmanCode[alphaAndBetaStar[1]]);
                 compressedSizeInBits += os.writeLong(huffmanCode[alphaAndBetaStar[1]].value, huffmanCode[alphaAndBetaStar[1]].length);  // case 11, 2 + 4 = 6
                 lastBetaStar = alphaAndBetaStar[1];
                 vPrimeLong = mask & vLong;
@@ -156,6 +149,9 @@ public class SElfStarHuffmanCompressor implements ICompressor {
         } else {
             compressedSizeInBits += os.writeLong(huffmanCode[17].value, huffmanCode[17].length); // not erase
         }
+        HuffmanEncode huffmanEncode = new HuffmanEncode(frequency);
+        huffmanCode = huffmanEncode.getHuffmanCodes();
+        frequency = new int[18];
         compressedSizeInBits += xorCompressor.close();
     }
 
@@ -172,6 +168,5 @@ public class SElfStarHuffmanCompressor implements ICompressor {
         xorCompressor.refresh();        // note this refresh should be at the last
         os = xorCompressor.getOutputStream();
         isFirst = false;
-        init = true;
     }
 }

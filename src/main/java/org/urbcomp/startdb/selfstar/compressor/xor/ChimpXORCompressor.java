@@ -11,8 +11,8 @@ import org.urbcomp.startdb.selfstar.utils.OutputBitStream;
  */
 public class ChimpXORCompressor implements IXORCompressor {
 
-    public final static int THRESHOLD = 6;
-    public final static short[] leadingRepresentation = {0, 0, 0, 0, 0, 0, 0, 0,
+    private final static int THRESHOLD = 6;
+    private final static short[] leadingRepresentation = {0, 0, 0, 0, 0, 0, 0, 0,
             1, 1, 1, 1, 2, 2, 2, 2,
             3, 3, 4, 4, 5, 5, 6, 6,
             7, 7, 7, 7, 7, 7, 7, 7,
@@ -21,7 +21,7 @@ public class ChimpXORCompressor implements IXORCompressor {
             7, 7, 7, 7, 7, 7, 7, 7,
             7, 7, 7, 7, 7, 7, 7, 7
     };
-    public final static short[] leadingRound = {0, 0, 0, 0, 0, 0, 0, 0,
+    private final static short[] leadingRound = {0, 0, 0, 0, 0, 0, 0, 0,
             8, 8, 8, 8, 12, 12, 12, 12,
             16, 16, 18, 18, 20, 20, 22, 22,
             24, 24, 24, 24, 24, 24, 24, 24,
@@ -83,8 +83,7 @@ public class ChimpXORCompressor implements IXORCompressor {
         long xor = storedVal ^ value;
         if (xor == 0) {
             // Write 0
-            out.writeBit(false);
-            out.writeBit(false);
+            out.writeInt(0,2);
             thisSize += 2;
             storedLeadingZeros = 65;
         } else {
@@ -93,24 +92,21 @@ public class ChimpXORCompressor implements IXORCompressor {
 
             if (trailingZeros > THRESHOLD) {
                 int significantBits = 64 - leadingZeros - trailingZeros;
-                out.writeBit(false);
-                out.writeBit(true);
+                out.writeInt(1,2);
                 out.writeInt(leadingRepresentation[leadingZeros], 3);
                 out.writeInt(significantBits, 6);
                 out.writeLong(xor >>> trailingZeros, significantBits); // Store the meaningful bits of XOR
                 thisSize += 11 + significantBits;
                 storedLeadingZeros = 65;
             } else if (leadingZeros == storedLeadingZeros) {
-                out.writeBit(true);
-                out.writeBit(false);
+                out.writeInt(2,2);
                 int significantBits = 64 - leadingZeros;
                 out.writeLong(xor, significantBits);
                 thisSize += 2 + significantBits;
             } else {
                 storedLeadingZeros = leadingZeros;
                 int significantBits = 64 - leadingZeros;
-                out.writeBit(true);
-                out.writeBit(true);
+                out.writeInt(3,2);
                 out.writeInt(leadingRepresentation[leadingZeros], 3);
                 out.writeLong(xor, significantBits);
                 thisSize += 5 + significantBits;
