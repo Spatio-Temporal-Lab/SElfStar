@@ -26,7 +26,6 @@ public class SElfStarHuffmanCompressor implements ICompressor {
     private Code[] huffmanCode;
     private int[] frequency = new int[18];
 
-    private boolean init = false;
 
     public SElfStarHuffmanCompressor(IXORCompressor xorCompressor) {
         this.xorCompressor = xorCompressor;
@@ -34,7 +33,6 @@ public class SElfStarHuffmanCompressor implements ICompressor {
     }
 
     public void addValue(double v) {
-
         if (!isFirst) {
             addValueHuffman(v);
         } else {
