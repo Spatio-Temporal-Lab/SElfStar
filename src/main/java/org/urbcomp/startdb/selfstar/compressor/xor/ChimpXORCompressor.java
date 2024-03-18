@@ -72,8 +72,7 @@ public class ChimpXORCompressor implements IXORCompressor {
      */
     @Override
     public int close() {
-        int thisSize = addValue(Elf64Utils.END_SIGN);
-        out.writeBit(false);
+        int thisSize = addValue(Elf64Utils.END_SIGN) + out.writeBit(false);
         out.flush();
         return thisSize;
     }

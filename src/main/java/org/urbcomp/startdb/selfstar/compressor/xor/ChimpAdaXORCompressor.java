@@ -15,23 +15,25 @@ import java.util.Arrays;
 public class ChimpAdaXORCompressor implements IXORCompressor {
 
     private final static int THRESHOLD = 6;
-    private final int[] leadingRepresentation = {0, 0, 0, 0, 0, 0, 0, 0,
-            1, 1, 1, 1, 2, 2, 2, 2,
-            3, 3, 4, 4, 5, 5, 6, 6,
-            7, 7, 7, 7, 7, 7, 7, 7,
-            7, 7, 7, 7, 7, 7, 7, 7,
-            7, 7, 7, 7, 7, 7, 7, 7,
-            7, 7, 7, 7, 7, 7, 7, 7,
-            7, 7, 7, 7, 7, 7, 7, 7
+    private final int[] leadingRepresentation = {
+        0, 0, 0, 0, 0, 0, 0, 0,
+        1, 1, 1, 1, 2, 2, 2, 2,
+        3, 3, 4, 4, 5, 5, 6, 6,
+        7, 7, 7, 7, 7, 7, 7, 7,
+        7, 7, 7, 7, 7, 7, 7, 7,
+        7, 7, 7, 7, 7, 7, 7, 7,
+        7, 7, 7, 7, 7, 7, 7, 7,
+        7, 7, 7, 7, 7, 7, 7, 7
     };
-    private final int[] leadingRound = {0, 0, 0, 0, 0, 0, 0, 0,
-            8, 8, 8, 8, 12, 12, 12, 12,
-            16, 16, 18, 18, 20, 20, 22, 22,
-            24, 24, 24, 24, 24, 24, 24, 24,
-            24, 24, 24, 24, 24, 24, 24, 24,
-            24, 24, 24, 24, 24, 24, 24, 24,
-            24, 24, 24, 24, 24, 24, 24, 24,
-            24, 24, 24, 24, 24, 24, 24, 24
+    private final int[] leadingRound = {
+        0, 0, 0, 0, 0, 0, 0, 0,
+        8, 8, 8, 8, 12, 12, 12, 12,
+        16, 16, 18, 18, 20, 20, 22, 22,
+        24, 24, 24, 24, 24, 24, 24, 24,
+        24, 24, 24, 24, 24, 24, 24, 24,
+        24, 24, 24, 24, 24, 24, 24, 24,
+        24, 24, 24, 24, 24, 24, 24, 24,
+        24, 24, 24, 24, 24, 24, 24, 24
     };
     private final int[] leadDistribution = new int[64];
     private final int capacity = 1000;
@@ -50,6 +52,7 @@ public class ChimpAdaXORCompressor implements IXORCompressor {
                 new byte[(int) (((capacity + 1) * 8 + capacity / 8 + 1) * 1.2)]);
     }
 
+    @Override
     public OutputBitStream getOutputStream() {
         return this.out;
     }
@@ -59,6 +62,7 @@ public class ChimpAdaXORCompressor implements IXORCompressor {
      *
      * @param value next floating point value in the series
      */
+    @Override
     public int addValue(long value) {
         if (first) {
             return PostOfficeSolver.writePositions(leadPositions, out) + writeFirst(value);
@@ -66,7 +70,6 @@ public class ChimpAdaXORCompressor implements IXORCompressor {
             return compressValue(value);
         }
     }
-
 
     private int writeFirst(long value) {
         first = false;
@@ -80,8 +83,7 @@ public class ChimpAdaXORCompressor implements IXORCompressor {
      */
     @Override
     public int close() {
-        int thisSize = addValue(Elf64Utils.END_SIGN);
-        out.writeBit(false);
+        int thisSize = addValue(Elf64Utils.END_SIGN) + out.writeBit(false);
         out.flush();
         if (updatePositions) {
             // we update distribution using the inner info
@@ -130,6 +132,7 @@ public class ChimpAdaXORCompressor implements IXORCompressor {
         return thisSize;
     }
 
+    @Override
     public byte[] getOut() {
         return out.getBuffer();
     }
