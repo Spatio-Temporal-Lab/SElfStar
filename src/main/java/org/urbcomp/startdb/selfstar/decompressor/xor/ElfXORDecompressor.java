@@ -40,7 +40,8 @@ public class ElfXORDecompressor implements IXORDecompressor {
 
     @Override
     public void setBytes(byte[] bs) {
-        in = new InputBitStream(bs);
+//        in = new InputBitStream(bs);
+        in.setBuffer(bs);
     }
 
     @Override

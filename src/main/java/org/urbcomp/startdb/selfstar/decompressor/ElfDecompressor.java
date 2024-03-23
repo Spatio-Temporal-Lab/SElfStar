@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ElfDecompressor implements IDecompressor {
+public class ElfDecompressor implements IDecompressor, INetDecompressor {
     private final IXORDecompressor xorDecompressor;
 
     public ElfDecompressor(IXORDecompressor xorDecompressor) {
@@ -53,6 +53,17 @@ public class ElfDecompressor implements IDecompressor {
     @Override
     public void setBytes(byte[] bs) {
         this.xorDecompressor.setBytes(bs);
+    }
+
+    /**
+     * used for transmit test, which decompress db one by one
+     * @param input bits for single db
+     * @return db decompressed
+     */
+    @Override
+    public double decompress(byte[] input) {
+        setBytes(input);
+        return nextValue();
     }
 
     @Override

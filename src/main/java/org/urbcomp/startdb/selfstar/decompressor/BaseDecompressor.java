@@ -5,7 +5,7 @@ import org.urbcomp.startdb.selfstar.decompressor.xor.IXORDecompressor;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BaseDecompressor implements IDecompressor {
+public class BaseDecompressor implements IDecompressor, INetDecompressor {
     private final IXORDecompressor xorDecompressor;
 
     public BaseDecompressor(IXORDecompressor xorDecompressor) {
@@ -20,6 +20,17 @@ public class BaseDecompressor implements IDecompressor {
         }
 
         return values;
+    }
+
+    /**
+     * used for transmit test, which decompress db one by one
+     * @param input bits for single db
+     * @return db decompressed
+     */
+    @Override
+    public double decompress(byte[] input) {
+        setBytes(input);
+        return nextValue();
     }
 
     @Override

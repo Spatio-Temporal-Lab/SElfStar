@@ -6,9 +6,10 @@ import org.urbcomp.startdb.selfstar.utils.Huffman.Code;
 import org.urbcomp.startdb.selfstar.utils.Huffman.HuffmanEncode;
 import org.urbcomp.startdb.selfstar.utils.OutputBitStream;
 
+import java.io.IOException;
 import java.util.Arrays;
 
-public class SElfStarHuffmanCompressor implements ICompressor {
+public class SElfStarHuffmanCompressor implements ICompressor, INetCompressor {
     private final IXORCompressor xorCompressor;
 
     private OutputBitStream os;
@@ -20,6 +21,8 @@ public class SElfStarHuffmanCompressor implements ICompressor {
     private int numberOfValues = 0;
 
     private double storeCompressionRatio = 0;
+
+    private int byteCount = 0;
 
     private boolean isFirst = true;
 
@@ -137,6 +140,16 @@ public class SElfStarHuffmanCompressor implements ICompressor {
         return Arrays.copyOf(xorCompressor.getOut(), byteCount);
     }
 
+    private byte[] getSingleBytes() throws IOException {
+//        xorCompressor.getOutputStream().align();
+        os.align();
+        int preByteCnt = byteCount;
+        byteCount += (int) Math.ceil(compressedSizeInBits / 8.0);
+        compressedSizeInBits=0;
+        return Arrays.copyOfRange(xorCompressor.getOut(),preByteCnt,byteCount);
+    }
+
+
     @Override
     public void setDistribution(int[] leadDistribution, int[] trailDistribution) {
         // for streaming scenarios, we do nothing here
@@ -164,10 +177,26 @@ public class SElfStarHuffmanCompressor implements ICompressor {
         return getClass().getSimpleName();
     }
 
+    @Override
+    public byte[] compress(double v) throws IOException {
+        compressedSizeInBits += os.writeInt(0,8);   // prepared for byteCnt in transmit test
+        addValue(v);
+        return getSingleBytes();
+    }
+
+    @Override
+    public byte[] compressAndClose(double v) throws IOException {
+        compressedSizeInBits += os.writeInt(0,8);   // prepared for byteCnt in transmit test
+        addValue(v);
+        close();
+        return getSingleBytes();
+    }
+
     public void refresh() {
         compressedSizeInBits = 0;
         lastBetaStar = Integer.MAX_VALUE;
         numberOfValues = 0;
+        byteCount = 0;
 
         xorCompressor.refresh();        // note this refresh should be at the last
         os = xorCompressor.getOutputStream();

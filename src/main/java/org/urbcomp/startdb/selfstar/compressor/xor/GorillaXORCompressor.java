@@ -13,7 +13,7 @@ public class GorillaXORCompressor implements IXORCompressor {
 
     public GorillaXORCompressor() {
         out = new OutputBitStream(
-                new byte[(int) (((capacity + 1) * 8 + capacity / 8 + 1) * 1.2)]);
+                new byte[(int) (((capacity + 1) * 8 + capacity / 8 + 1) * 1.3)]);
     }
 
     public OutputBitStream getOutputStream() {
@@ -144,7 +144,7 @@ public class GorillaXORCompressor implements IXORCompressor {
     @Override
     public void refresh() {
         out = new OutputBitStream(
-                new byte[(int) (((capacity + 1) * 8 + capacity / 8 + 1) * 1.2)]);
+                new byte[(int) (((capacity + 1) * 8 + capacity / 8 + 1) * 1.3)]);
         storedLeadingZeros = Integer.MAX_VALUE;
         storedTrailingZeros = 0;
         storedVal = 0;

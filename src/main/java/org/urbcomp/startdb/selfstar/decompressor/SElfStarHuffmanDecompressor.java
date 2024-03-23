@@ -13,7 +13,7 @@ import java.util.Arrays;
 import java.util.List;
 
 // all ElfStar (batch and stream) share the same decompressor
-public class SElfStarHuffmanDecompressor implements IDecompressor {
+public class SElfStarHuffmanDecompressor implements IDecompressor, INetDecompressor {
 
     private final IXORDecompressor xorDecompressor;
     private int lastBetaStar = Integer.MAX_VALUE;
@@ -38,6 +38,37 @@ public class SElfStarHuffmanDecompressor implements IDecompressor {
         root = huffmanEncode.hashMapToTree(huffmanCode);
         Arrays.fill(frequency, 0);
         return values;
+    }
+
+    /**
+     * used for transmit test, which decompress db one by one
+     * @param input bits for single db
+     * @return db decompressed
+     */
+    @Override
+    public double decompress(byte[] input) {
+        setBytes(input);
+        double value = nextValue();
+
+        return value;
+    }
+
+    /**
+     * used for transmit test, which decompress db one by one
+     * @param input bits for single db
+     * @return db decompressed
+     */
+    @Override
+    public double decompressLast(byte[] input) {
+        setBytes(input);
+        double value = nextValue();
+        nextValue();
+        frequency[17]--;
+        HuffmanEncode huffmanEncode = new HuffmanEncode(frequency);
+        Code[] huffmanCode = huffmanEncode.getHuffmanCodes();
+        root = huffmanEncode.hashMapToTree(huffmanCode);
+        Arrays.fill(frequency, 0);
+        return value;
     }
 
     @Override
