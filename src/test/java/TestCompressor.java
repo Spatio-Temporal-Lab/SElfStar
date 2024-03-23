@@ -259,24 +259,35 @@ public class TestCompressor {
                 new BaseCompressor(new ChimpXORCompressor()),
                 new BaseCompressor(new ChimpNXORCompressor(128)),
                 new BaseCompressor(new GorillaXORCompressor()),
+                new SBaseCompressor(new ChimpAdaXORCompressor()),
+                new SBaseCompressor(new ChimpNAdaXORCompressor(128)),
                 new ElfCompressor(new ElfXORCompressor()),
                 new ElfPlusCompressor(new ElfPlusXORCompressor()),
                 new ElfStarCompressor(new ElfStarXORCompressorAdaLead()),
                 new ElfStarCompressor(new ElfStarXORCompressorAdaLeadAdaTrail()),
                 new ElfStarCompressor(new ElfStarXORCompressor()),
+                new ElfStarCanonicalHuffmanCompressor(new ElfStarXORCompressor()),
+                new ElfStarHuffmanCompressor(new ElfStarXORCompressor()),
                 new SElfStarCompressor(new SElfXORCompressor()),
+                new SElfStarHuffmanCompressor(new SElfXORCompressor()),
         };
 
         IDecompressor[] decompressors = new IDecompressor[]{
                 new BaseDecompressor(new ChimpXORDecompressor()),
                 new BaseDecompressor(new ChimpNXORDecompressor(128)),
                 new BaseDecompressor(new GorillaXORDecompressor()),
+                new BaseDecompressor(new ChimpAdaXORDecompressor()),
+                new BaseDecompressor(new ChimpNAdaXORDecompressor(128)),
                 new ElfDecompressor(new ElfXORDecompressor()),
                 new ElfPlusDecompressor(new ElfPlusXORDecompressor()),
                 new ElfStarDecompressor(new ElfStarXORDecompressorAdaLead()),
                 new ElfStarDecompressor(new ElfStarXORDecompressorAdaLeadAdaTrail()),
                 new ElfStarDecompressor(new ElfStarXORDecompressor()),
-                new ElfStarDecompressor(new SElfStarXORDecompressor())
+                new ElfStarCanonicalHuffmanDecompressor(new ElfStarXORCanonicalHuffmanDecompressor()),
+                new ElfStarHuffmanDecompressor(new ElfStarXORDecompressor()),
+                new ElfStarDecompressor(new ElfStarXORDecompressor()),     // streaming version is the same
+                new SElfStarHuffmanDecompressor(new ElfStarXORDecompressor()),
+
         };
         boolean firstMethod = true;
         for (int i = 0; i < compressors.length; i++) {
@@ -305,7 +316,7 @@ public class TestCompressor {
                     start = System.nanoTime();
                     List<Double> deValues = decompressor.decompress();
                     decompressTime = (System.nanoTime() - start) / TIME_PRECISION;
-
+//
                     assertEquals(deValues.size(), floatings.size());
                     for (int j = 0; j < floatings.size(); j++) {
                         assertEquals(floatings.get(j), deValues.get(j));
@@ -327,6 +338,7 @@ public class TestCompressor {
                     decompressor.refresh();
                 }
             } catch (Exception e) {
+                e.printStackTrace();
                 throw new RuntimeException(fileName, e);
             }
             firstMethod = false;

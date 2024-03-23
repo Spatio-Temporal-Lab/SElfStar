@@ -191,4 +191,12 @@ public class Elf64Utils {
         return spAnd10iNFlag;
     }
 
+    public static int zEncode(int n) {
+        return ((n << 1) ^ (n >> 31)) - 1;
+    }
+
+    public static int zDecode(int n) {
+        return ((n + 1) >>> 1) ^ -((n + 1) & 1);
+    }
+
 }

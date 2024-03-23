@@ -2,22 +2,29 @@ package org.urbcomp.startdb.selfstar.decompressor;
 
 import org.urbcomp.startdb.selfstar.decompressor.xor.IXORDecompressor;
 import org.urbcomp.startdb.selfstar.utils.Elf64Utils;
+import org.urbcomp.startdb.selfstar.utils.Huffman.Code;
+import org.urbcomp.startdb.selfstar.utils.Huffman.HuffmanEncode;
+import org.urbcomp.startdb.selfstar.utils.Huffman.Node;
 import org.urbcomp.startdb.selfstar.utils.InputBitStream;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ElfPlusDecompressor implements IDecompressor {
+public class ElfStarHuffmanDecompressor implements IDecompressor {
+    private static Code[] huffmanCode = new Code[18];
     private final IXORDecompressor xorDecompressor;
     private int lastBetaStar = Integer.MAX_VALUE;
+    private Node root;
+    private final HuffmanEncode huffmanEncode = new HuffmanEncode(new int[18]);
 
-    public ElfPlusDecompressor(IXORDecompressor xorDecompressor) {
+    public ElfStarHuffmanDecompressor(IXORDecompressor xorDecompressor) {
         this.xorDecompressor = xorDecompressor;
     }
 
     public List<Double> decompress() {
         List<Double> values = new ArrayList<>(1024);
+        initHuffmanTree();
         Double value;
         while ((value = nextValue()) != null) {
             values.add(value);
@@ -25,10 +32,20 @@ public class ElfPlusDecompressor implements IDecompressor {
         return values;
     }
 
+    private void initHuffmanTree() {
+        for (int i = 0; i < huffmanCode.length; i++) {
+            int length = readInt(5);
+            long code = readInt(length);
+            huffmanCode[i] = new Code(code, length);
+        }
+        root = huffmanEncode.hashMapToTree(huffmanCode);
+    }
+
     @Override
     public void refresh() {
         lastBetaStar = Integer.MAX_VALUE;
         xorDecompressor.refresh();
+        huffmanCode = new Code[18];
     }
 
     @Override
@@ -39,14 +56,18 @@ public class ElfPlusDecompressor implements IDecompressor {
     @Override
     public Double nextValue() {
         Double v;
-
-        if (readInt(1) == 0) {
-            v = recoverVByBetaStar();               // case 0
-        } else if (readInt(1) == 0) {
-            v = xorDecompressor.readValue();        // case 10
-        } else {
-            lastBetaStar = readInt(4);          // case 11
-            v = recoverVByBetaStar();
+        Node current = root;
+        while (true) {
+            current = current.children[readInt(1)];
+            if (current.data != -Integer.MAX_VALUE) {
+                if (current.data != 17) {
+                    lastBetaStar = current.data;
+                    v = recoverVByBetaStar();
+                } else {
+                    v = xorDecompressor.readValue();
+                }
+                break;
+            }
         }
         return v;
     }
@@ -54,7 +75,7 @@ public class ElfPlusDecompressor implements IDecompressor {
     private Double recoverVByBetaStar() {
         double v;
         Double vPrime = xorDecompressor.readValue();
-        int sp = Elf64Utils.getSP(vPrime < 0 ? -vPrime : vPrime);
+        int sp = Elf64Utils.getSP(Math.abs(vPrime));
         if (lastBetaStar == 0) {
             v = Elf64Utils.get10iN(-sp - 1);
             if (vPrime < 0) {
@@ -75,5 +96,4 @@ public class ElfPlusDecompressor implements IDecompressor {
             throw new RuntimeException("IO error: " + e.getMessage());
         }
     }
-
 }

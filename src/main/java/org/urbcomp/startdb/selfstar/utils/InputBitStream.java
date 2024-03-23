@@ -1658,4 +1658,88 @@ public class InputBitStream implements BooleanIterator, Flushable, Closeable {
             length -= toRead;
         }
     }
+
+
+    private long initial;
+    private int remainBits;
+    private int initialSize;
+
+    public int readBufferInt(int len) {
+        if (remainBits == 0) {
+            try {
+                return readInt(len);
+            } catch (IOException e) {
+                throw new RuntimeException(e.getMessage());
+            }
+        }
+        int result;
+        if (len <= remainBits) {
+            // 如果 len 小于等于剩余的位数，只从已读取的数据中取位
+            result = ((int) initial & ((1 << remainBits) - 1)) >>> (remainBits - len);
+            remainBits -= len;
+        } else {
+            int additionalBitsNeeded = len - remainBits;
+            result = ((int) initial & ((1 << remainBits) - 1)) << additionalBitsNeeded;
+            try {
+                result |= readInt(additionalBitsNeeded);
+            } catch (IOException e) {
+                throw new RuntimeException(e.getMessage());
+            }
+            remainBits = 0;
+        }
+        return result;
+    }
+
+    public int readIntToBuffer(int len) {
+        long oldInitial = 0;
+        int fail = len;
+        if (remainBits > 0) {
+            oldInitial = initial & ((1L << remainBits) - 1); // 保存未使用的位
+            fail = len - remainBits;
+        }
+
+        try {
+            initial = readInt(fail); // 读取新的 initial
+            initialSize = len;
+        } catch (IOException e) {
+            throw new RuntimeException("IO error: " + e.getMessage());
+        }
+
+        // 如果有未使用的位，将它们合并到新的 initial 中
+        if (remainBits > 0) {
+            initial |= (oldInitial << fail); // 将未使用的位移动到正确的位置并合并
+        }
+        return (int) initial;
+    }
+
+    public void setRemainBits(int len) {
+        remainBits = initialSize - len;
+    }
+
+    public long readBufferLong(int len) {
+        long result;
+        if (remainBits == 0) {
+            try {
+                return readLong(len);
+            } catch (IOException e) {
+                throw new RuntimeException(e.getMessage());
+            }
+        }
+        if (len <= remainBits) {
+            // 如果 len 小于等于剩余的位数，只从已读取的数据中取位
+            result = (initial & ((1L << remainBits) - 1)) >>> (remainBits - len);
+            remainBits -= len;
+        } else {
+            // 如果 len 大于剩余的位数，先取完剩余的位，然后从流中读取更多位
+            int additionalBitsNeeded = len - remainBits;
+            result = (initial & ((1L << remainBits) - 1)) << additionalBitsNeeded;
+            try {
+                result |= readLong(additionalBitsNeeded);
+            } catch (IOException e) {
+                throw new RuntimeException(e.getMessage());
+            }
+            remainBits = 0;
+        }
+        return result;
+    }
 }
