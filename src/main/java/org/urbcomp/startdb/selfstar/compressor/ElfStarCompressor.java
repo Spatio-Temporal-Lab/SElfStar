@@ -25,10 +25,7 @@ public class ElfStarCompressor implements ICompressor {
     }
 
     public ElfStarCompressor(IXORCompressor xorCompressor) {
-        this.xorCompressor = xorCompressor;
-        this.os = xorCompressor.getOutputStream();
-        this.betaStarList = new int[1001];     // one for the end sign
-        this.vPrimeList = new long[1001];      // one for the end sign
+        this(xorCompressor, 1000);
     }
 
     public void addValue(double v) {
@@ -38,7 +35,7 @@ public class ElfStarCompressor implements ICompressor {
             vPrimeList[numberOfValues] = vLong;
             betaStarList[numberOfValues] = Integer.MAX_VALUE;
         } else if (Double.isNaN(v)) {
-            vPrimeList[numberOfValues] = 0xfff8000000000000L & vLong;
+            vPrimeList[numberOfValues] = 0x7ff8000000000000L;
             betaStarList[numberOfValues] = Integer.MAX_VALUE;
         } else {
             // C1: v is a normal or subnormal

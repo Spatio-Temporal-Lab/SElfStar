@@ -17,13 +17,6 @@ public class ElfStarCompressor32 implements ICompressor32 {
     private int lastBetaStar = Integer.MAX_VALUE;
     private int numberOfValues = 0;
 
-    public ElfStarCompressor32(IXORCompressor32 xorCompressor, int window) {
-        this.xorCompressor = xorCompressor;
-        this.os = xorCompressor.getOutputStream();
-        this.betaStarList = new int[window + 1];     // one for the end sign
-        this.vPrimeList = new int[window + 1];      // one for the end sign
-    }
-
     public ElfStarCompressor32(IXORCompressor32 xorCompressor) {
         this.xorCompressor = xorCompressor;
         this.os = xorCompressor.getOutputStream();
@@ -38,7 +31,7 @@ public class ElfStarCompressor32 implements ICompressor32 {
             vPrimeList[numberOfValues] = vInt;
             betaStarList[numberOfValues] = Integer.MAX_VALUE;
         } else if (Float.isNaN(v)) {
-            vPrimeList[numberOfValues] = 0xffc00000 & vInt;
+            vPrimeList[numberOfValues] = 0x7fc00000;
             betaStarList[numberOfValues] = Integer.MAX_VALUE;
         } else {
             // C1: v is a normal or subnormal
