@@ -49,9 +49,7 @@ public class ElfStarCompressor implements ICompressor {
             long mask = 0xffffffffffffffffL << eraseBits;
             long delta = (~mask) & vLong;
             if (delta != 0 && eraseBits > 4) {  // C2
-                if (alphaAndBetaStar[1] != lastBetaStar) {
-                    lastBetaStar = alphaAndBetaStar[1];
-                }
+                lastBetaStar = alphaAndBetaStar[1];
                 betaStarList[numberOfValues] = lastBetaStar;
                 vPrimeList[numberOfValues] = mask & vLong;
             } else {

@@ -21,33 +21,27 @@ public class SElfStarHuffmanCompressor implements ICompressor {
 
     private double storeCompressionRatio = 0;
 
-    private boolean isFirst = true;
+    private boolean isFirstBlock = true; // mark if it is the first block
 
     private Code[] huffmanCode;
-    private int[] frequency = new int[18];
 
-    private boolean init = true;
+    private final int[] frequency = new int[18];
 
     public SElfStarHuffmanCompressor(IXORCompressor xorCompressor) {
         this.xorCompressor = xorCompressor;
         os = xorCompressor.getOutputStream();
     }
 
+    @Override
     public void addValue(double v) {
-        if (init) {
-            HuffmanEncode huffmanEncode = new HuffmanEncode(frequency);
-            huffmanCode = huffmanEncode.getHuffmanCodes();
-            frequency = new int[18];
-            init = false;
-        }
-        if (isFirst) {
-            addValueFirst(v);
-        } else {
+        if (!isFirstBlock) {
             addValueHuffman(v);
+        } else {
+            addValueFirst(v);
         }
     }
 
-    public void addValueFirst(double v) {
+    private void addValueFirst(double v) {
         long vLong = Double.doubleToRawLongBits(v);
         long vPrimeLong;
         numberOfValues++;
@@ -86,7 +80,7 @@ public class SElfStarHuffmanCompressor implements ICompressor {
         compressedSizeInBits += xorCompressor.addValue(vPrimeLong);
     }
 
-    public void addValueHuffman(double v) {
+    private void addValueHuffman(double v) {
         long vLong = Double.doubleToRawLongBits(v);
         long vPrimeLong;
         numberOfValues++;
@@ -121,6 +115,7 @@ public class SElfStarHuffmanCompressor implements ICompressor {
         compressedSizeInBits += xorCompressor.addValue(vPrimeLong);
     }
 
+    @Override
     public double getCompressionRatio() {
         return compressedSizeInBits / (numberOfValues * 64.0);
     }
@@ -130,6 +125,7 @@ public class SElfStarHuffmanCompressor implements ICompressor {
         return compressedSizeInBits;
     }
 
+    @Override
     public byte[] getBytes() {
         int byteCount = (int) Math.ceil(compressedSizeInBits / 8.0);
         return Arrays.copyOf(xorCompressor.getOut(), byteCount);
@@ -140,7 +136,7 @@ public class SElfStarHuffmanCompressor implements ICompressor {
         // for streaming scenarios, we do nothing here
     }
 
-
+    @Override
     public void close() {
         double thisCompressionRatio = compressedSizeInBits / (numberOfValues * 64.0);
         if (storeCompressionRatio < thisCompressionRatio) {
@@ -149,20 +145,19 @@ public class SElfStarHuffmanCompressor implements ICompressor {
         storeCompressionRatio = thisCompressionRatio;
 
         // we write one more bit here, for marking an end of the stream.
-        if (isFirst) {
+        if (isFirstBlock) {
             compressedSizeInBits += os.writeInt(2, 2);  // case 10
+            isFirstBlock = false;
         } else {
             compressedSizeInBits += os.writeLong(huffmanCode[17].value, huffmanCode[17].length); // not erase
         }
+        HuffmanEncode huffmanEncode = new HuffmanEncode(frequency);
+        huffmanCode = huffmanEncode.getHuffmanCodes();
+        Arrays.fill(frequency, 0);
         compressedSizeInBits += xorCompressor.close();
-
     }
 
-
-    public String getKey() {
-        return getClass().getSimpleName();
-    }
-
+    @Override
     public void refresh() {
         compressedSizeInBits = 0;
         lastBetaStar = Integer.MAX_VALUE;
@@ -170,6 +165,5 @@ public class SElfStarHuffmanCompressor implements ICompressor {
 
         xorCompressor.refresh();        // note this refresh should be at the last
         os = xorCompressor.getOutputStream();
-        isFirst = false;
     }
 }

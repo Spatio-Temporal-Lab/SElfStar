@@ -2,6 +2,9 @@ package org.urbcomp.startdb.selfstar.compressor.xor;
 
 import org.urbcomp.startdb.selfstar.utils.Elf64Utils;
 import org.urbcomp.startdb.selfstar.utils.OutputBitStream;
+import org.urbcomp.startdb.selfstar.utils.PostOfficeSolver;
+
+import java.util.Arrays;
 
 /**
  * Implements the Chimp time series compression. Value compression
@@ -9,39 +12,47 @@ import org.urbcomp.startdb.selfstar.utils.OutputBitStream;
  *
  * @author Panagiotis Liakos
  */
-public class ChimpXORCompressor implements IXORCompressor {
+public class ChimpAdaXORCompressor implements IXORCompressor {
 
     private final static int THRESHOLD = 6;
-    private final static short[] leadingRepresentation = {0, 0, 0, 0, 0, 0, 0, 0,
-            1, 1, 1, 1, 2, 2, 2, 2,
-            3, 3, 4, 4, 5, 5, 6, 6,
-            7, 7, 7, 7, 7, 7, 7, 7,
-            7, 7, 7, 7, 7, 7, 7, 7,
-            7, 7, 7, 7, 7, 7, 7, 7,
-            7, 7, 7, 7, 7, 7, 7, 7,
-            7, 7, 7, 7, 7, 7, 7, 7
+    private final int[] leadingRepresentation = {
+        0, 0, 0, 0, 0, 0, 0, 0,
+        1, 1, 1, 1, 2, 2, 2, 2,
+        3, 3, 4, 4, 5, 5, 6, 6,
+        7, 7, 7, 7, 7, 7, 7, 7,
+        7, 7, 7, 7, 7, 7, 7, 7,
+        7, 7, 7, 7, 7, 7, 7, 7,
+        7, 7, 7, 7, 7, 7, 7, 7,
+        7, 7, 7, 7, 7, 7, 7, 7
     };
-    private final static short[] leadingRound = {0, 0, 0, 0, 0, 0, 0, 0,
-            8, 8, 8, 8, 12, 12, 12, 12,
-            16, 16, 18, 18, 20, 20, 22, 22,
-            24, 24, 24, 24, 24, 24, 24, 24,
-            24, 24, 24, 24, 24, 24, 24, 24,
-            24, 24, 24, 24, 24, 24, 24, 24,
-            24, 24, 24, 24, 24, 24, 24, 24,
-            24, 24, 24, 24, 24, 24, 24, 24
+    private final int[] leadingRound = {
+        0, 0, 0, 0, 0, 0, 0, 0,
+        8, 8, 8, 8, 12, 12, 12, 12,
+        16, 16, 18, 18, 20, 20, 22, 22,
+        24, 24, 24, 24, 24, 24, 24, 24,
+        24, 24, 24, 24, 24, 24, 24, 24,
+        24, 24, 24, 24, 24, 24, 24, 24,
+        24, 24, 24, 24, 24, 24, 24, 24,
+        24, 24, 24, 24, 24, 24, 24, 24
     };
+    private final int[] leadDistribution = new int[64];
     private final int capacity = 1000;
     private int storedLeadingZeros = Integer.MAX_VALUE;
     private long storedVal = 0;
     private boolean first = true;
+    private int[] leadPositions = {0, 8, 12, 16, 18, 20, 22, 24};
+    private boolean updatePositions = false;
     private OutputBitStream out;
 
+    private int leadingBitsPerValue = 3;
+
     // We should have access to the series?
-    public ChimpXORCompressor() {
+    public ChimpAdaXORCompressor() {
         out = new OutputBitStream(
                 new byte[(int) (((capacity + 1) * 8 + capacity / 8 + 1) * 1.2)]);
     }
 
+    @Override
     public OutputBitStream getOutputStream() {
         return this.out;
     }
@@ -51,14 +62,14 @@ public class ChimpXORCompressor implements IXORCompressor {
      *
      * @param value next floating point value in the series
      */
+    @Override
     public int addValue(long value) {
         if (first) {
-            return writeFirst(value);
+            return PostOfficeSolver.writePositions(leadPositions, out) + writeFirst(value);
         } else {
             return compressValue(value);
         }
     }
-
 
     private int writeFirst(long value) {
         first = false;
@@ -74,6 +85,11 @@ public class ChimpXORCompressor implements IXORCompressor {
     public int close() {
         int thisSize = addValue(Elf64Utils.END_SIGN) + out.writeBit(false);
         out.flush();
+        if (updatePositions) {
+            // we update distribution using the inner info
+            leadPositions = PostOfficeSolver.initRoundAndRepresentation(leadDistribution, leadingRepresentation, leadingRound);
+            leadingBitsPerValue = PostOfficeSolver.positionLength2Bits[leadPositions.length];
+        }
         return thisSize;
     }
 
@@ -88,14 +104,15 @@ public class ChimpXORCompressor implements IXORCompressor {
         } else {
             int leadingZeros = leadingRound[Long.numberOfLeadingZeros(xor)];
             int trailingZeros = Long.numberOfTrailingZeros(xor);
+            leadDistribution[Long.numberOfLeadingZeros(xor)]++;
 
             if (trailingZeros > THRESHOLD) {
                 int significantBits = 64 - leadingZeros - trailingZeros;
                 out.writeInt(1,2);
-                out.writeInt(leadingRepresentation[leadingZeros], 3);
+                out.writeInt(leadingRepresentation[leadingZeros], leadingBitsPerValue);
                 out.writeInt(significantBits, 6);
                 out.writeLong(xor >>> trailingZeros, significantBits); // Store the meaningful bits of XOR
-                thisSize += 11 + significantBits;
+                thisSize += 8 + leadingBitsPerValue + significantBits;
                 storedLeadingZeros = 65;
             } else if (leadingZeros == storedLeadingZeros) {
                 out.writeInt(2,2);
@@ -106,15 +123,16 @@ public class ChimpXORCompressor implements IXORCompressor {
                 storedLeadingZeros = leadingZeros;
                 int significantBits = 64 - leadingZeros;
                 out.writeInt(3,2);
-                out.writeInt(leadingRepresentation[leadingZeros], 3);
+                out.writeInt(leadingRepresentation[leadingZeros], leadingBitsPerValue);
                 out.writeLong(xor, significantBits);
-                thisSize += 5 + significantBits;
+                thisSize += 2 + leadingBitsPerValue + significantBits;
             }
         }
         storedVal = value;
         return thisSize;
     }
 
+    @Override
     public byte[] getOut() {
         return out.getBuffer();
     }
@@ -126,5 +144,12 @@ public class ChimpXORCompressor implements IXORCompressor {
         storedLeadingZeros = Integer.MAX_VALUE;
         storedVal = 0;
         first = true;
+        updatePositions = false;
+        Arrays.fill(leadDistribution, 0);
+    }
+
+    @Override
+    public void setDistribution(int[] leadDistributionIgnore, int[] trailDistributionIgnore) {
+        this.updatePositions = true;
     }
 }
