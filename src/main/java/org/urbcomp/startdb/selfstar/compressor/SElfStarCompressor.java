@@ -37,7 +37,7 @@ public class SElfStarCompressor implements ICompressor,INetCompressor {
             vPrimeLong = vLong;
         } else if (Double.isNaN(v)) {
             compressedSizeInBits += os.writeInt(2, 2); // case 10
-            vPrimeLong = 0xfff8000000000000L & vLong;
+            vPrimeLong = 0x7ff8000000000000L;
         } else {
             // C1: v is a normal or subnormal
             int[] alphaAndBetaStar = Elf64Utils.getAlphaAndBetaStar(v, lastBetaStar);
@@ -88,7 +88,6 @@ public class SElfStarCompressor implements ICompressor,INetCompressor {
     public void setDistribution(int[] leadDistribution, int[] trailDistribution) {
         // for streaming scenarios, we do nothing here
     }
-
 
     public void close() {
         double thisCompressionRatio = compressedSizeInBits / (numberOfValues * 64.0);

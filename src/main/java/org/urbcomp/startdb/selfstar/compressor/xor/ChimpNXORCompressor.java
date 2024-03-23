@@ -13,7 +13,7 @@ import java.util.Arrays;
  */
 public class ChimpNXORCompressor implements IXORCompressor {
 
-    public final static short[] leadingRepresentation = {0, 0, 0, 0, 0, 0, 0, 0,
+    private final static short[] leadingRepresentation = {0, 0, 0, 0, 0, 0, 0, 0,
             1, 1, 1, 1, 2, 2, 2, 2,
             3, 3, 4, 4, 5, 5, 6, 6,
             7, 7, 7, 7, 7, 7, 7, 7,
@@ -22,7 +22,7 @@ public class ChimpNXORCompressor implements IXORCompressor {
             7, 7, 7, 7, 7, 7, 7, 7,
             7, 7, 7, 7, 7, 7, 7, 7
     };
-    public final static short[] leadingRound = {0, 0, 0, 0, 0, 0, 0, 0,
+    private final static short[] leadingRound = {0, 0, 0, 0, 0, 0, 0, 0,
             8, 8, 8, 8, 12, 12, 12, 12,
             16, 16, 18, 18, 20, 20, 22, 22,
             24, 24, 24, 24, 24, 24, 24, 24,
@@ -38,7 +38,7 @@ public class ChimpNXORCompressor implements IXORCompressor {
     private final int[] indices;
     private final int flagOneSize;
     private final int flagZeroSize;
-    private final int capacity = 1000;
+    private final int capacity;
     private int storedLeadingZeros = Integer.MAX_VALUE;
     private boolean first = true;
     private OutputBitStream out;
@@ -47,7 +47,11 @@ public class ChimpNXORCompressor implements IXORCompressor {
 
     // We should have access to the series?
     public ChimpNXORCompressor(int previousValues) {
-//        out = output;
+        this(previousValues, 1000);
+    }
+
+    public ChimpNXORCompressor(int previousValues, int block) {
+        capacity = block;
         out = new OutputBitStream(
                 new byte[(int) (((capacity + 1) * 8 + capacity / 8 + 1) * 1.2)]);
         this.previousValues = previousValues;

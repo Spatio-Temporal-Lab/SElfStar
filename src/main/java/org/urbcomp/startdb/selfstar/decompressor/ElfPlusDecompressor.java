@@ -55,7 +55,7 @@ public class ElfPlusDecompressor implements IDecompressor, INetDecompressor {
     private Double recoverVByBetaStar() {
         double v;
         Double vPrime = xorDecompressor.readValue();
-        int sp = Elf64Utils.getSP(Math.abs(vPrime));
+        int sp = Elf64Utils.getSP(vPrime < 0 ? -vPrime : vPrime);
         if (lastBetaStar == 0) {
             v = Elf64Utils.get10iN(-sp - 1);
             if (vPrime < 0) {
