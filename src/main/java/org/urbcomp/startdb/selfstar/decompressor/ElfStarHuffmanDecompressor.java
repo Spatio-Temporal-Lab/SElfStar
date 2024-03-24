@@ -35,7 +35,7 @@ public class ElfStarHuffmanDecompressor implements IDecompressor {
     private void initHuffmanTree() {
         for (int i = 0; i < huffmanCode.length; i++) {
             int length = readInt(5);
-            long code = readInt(length);
+            int code = readInt(length);
             huffmanCode[i] = new Code(code, length);
         }
         root = huffmanEncode.hashMapToTree(huffmanCode);

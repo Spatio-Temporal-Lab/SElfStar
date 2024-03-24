@@ -37,7 +37,7 @@ public class HuffmanEncode {
         generateHuffmanCodes(nodePriorityQueue.peek(), 0, 0);
     }
 
-    private void generateHuffmanCodes(Node root, long code, int length) {
+    private void generateHuffmanCodes(Node root, int code, int length) {
         if (root != null) {
             if (root.data != -Integer.MAX_VALUE) {
                 huffmanCodes[root.data] = new Code(code, length);
@@ -79,7 +79,7 @@ public class HuffmanEncode {
         int thisSize = 0;
         for (Code huffmanCode : huffmanCodes) {
             thisSize += out.writeInt(huffmanCode.length, 5);
-            thisSize += out.writeLong(huffmanCode.value, huffmanCode.length);
+            thisSize += out.writeInt(huffmanCode.value, huffmanCode.length);
         }
         return thisSize;
     }
