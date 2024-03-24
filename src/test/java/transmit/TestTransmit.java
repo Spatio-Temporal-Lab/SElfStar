@@ -1,5 +1,7 @@
 package transmit;
 
+import com.github.Cwida.alp.ALPCompression;
+import com.github.Cwida.alp.ALPDecompression;
 import org.junit.jupiter.api.Test;
 import org.urbcomp.startdb.selfstar.compressor.*;
 import org.urbcomp.startdb.selfstar.compressor.xor.*;
@@ -10,11 +12,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Scanner;
+import java.util.*;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TestTransmit {
@@ -23,7 +23,6 @@ public class TestTransmit {
     private static final double DEFAULT_DIFF = 0.0001;
     private static final int port = 10240;
     private final String[] fileNames = {
-//            "demo.csv",
             "Air-pressure.csv",
             "Bird-migration.csv",
             "Bitcoin-price.csv",
@@ -42,11 +41,10 @@ public class TestTransmit {
     @Test
     public void mainTest() throws InterruptedException {
         System.out.println("MaxRate,File,Method,Time");
-        for (int maxRate = 1000; maxRate <= 1000; maxRate *= 2) {
+        for (int maxRate = 500; maxRate <= 1000; maxRate *= 2) {
             for (String fileName : fileNames) {
                 INetCompressor[] compressors = {
                         // Put your compressors here
-//                        new SElfStarHuffmanCompressor(new SElfXORCompressor()),
                         new SElfStarCompressor(new SElfXORCompressor()),
                         new ElfPlusCompressor(new ElfPlusXORCompressor()),
                         new ElfCompressor(new ElfXORCompressor()),
@@ -58,8 +56,7 @@ public class TestTransmit {
                 };
                 INetDecompressor[] decompressors = {
                         // And put your corresponding decompressors heres
-//                        new SElfStarHuffmanDecompressor(new ElfStarXORDecompressor()),
-                        new ElfStarDecompressor(new ElfStarXORDecompressor()),
+                        new ElfStarDecompressor(new SElfStarXORDecompressor()),
                         new ElfPlusDecompressor(new ElfPlusXORDecompressor()),
                         new ElfDecompressor(new ElfXORDecompressor()),
                         new BaseDecompressor(new ChimpXORDecompressor()),
@@ -87,7 +84,7 @@ public class TestTransmit {
     @Test
     public void HuffTest() throws InterruptedException {
         System.out.println("MaxRate,File,Method,Time");
-        for (int maxRate = 1000; maxRate <= 1000; maxRate *= 2) {
+        for (int maxRate = 500; maxRate <= 1000; maxRate *= 2) {
             for (String fileName : fileNames) {
                 INetCompressor[] compressors = {
                         // Put your compressors here
@@ -95,7 +92,7 @@ public class TestTransmit {
                 };
                 INetDecompressor[] decompressors = {
                         // And put your corresponding decompressors heres
-                        new SElfStarHuffmanDecompressor(new ElfStarXORDecompressor()),
+                        new SElfStarHuffmanDecompressor(new SElfStarXORDecompressor()),
                 };
 
                 for (int i = 0; i < compressors.length; i++) {
@@ -113,6 +110,34 @@ public class TestTransmit {
         }
     }
 
+    @Test
+    public void ALPTest() throws InterruptedException {
+        System.out.println("MaxRate,File,Method,Time");
+        for (int maxRate = 500; maxRate <= 1000; maxRate *= 2) {
+            for (String fileName : fileNames) {
+                INetCompressor[] compressors = {
+                        // Put your compressors here
+                        new ALPCompression(100),
+                };
+                INetDecompressor[] decompressors = {
+                        // And put your corresponding decompressors heres
+                        new ALPDecompression(),
+                };
+
+                for (int i = 0; i < compressors.length; i++) {
+                    ALPReceiverThread receiverThread = new ALPReceiverThread(maxRate, decompressors[i], port);
+                    ALPSenderThread senderThread = new ALPSenderThread(maxRate, fileName, compressors[i], port);
+                    receiverThread.start();
+                    senderThread.start();
+                    receiverThread.join();
+                    System.out.println(maxRate + "," + fileName + "," + compressors[i].getKey() + "," + receiverThread.getUsedTimeInMS());
+                    // Sleep for a second to wait system to close socket
+                    Thread.sleep(1000);
+                    System.gc();
+                }
+            }
+        }
+    }
 
     @Test
     public void correctnessTest() throws IOException {
@@ -132,7 +157,7 @@ public class TestTransmit {
             };
             INetDecompressor[] decompressors = {
 //                    new SElfStarHuffmanDecompressor(new ElfStarXORDecompressor()),
-                    new ElfStarDecompressor(new ElfStarXORDecompressor()),
+                    new ElfStarDecompressor(new SElfStarXORDecompressor()),
                     new ElfPlusDecompressor(new ElfPlusXORDecompressor()),
                     new ElfDecompressor(new ElfXORDecompressor()),
                     new BaseDecompressor(new ChimpXORDecompressor()),
@@ -178,7 +203,7 @@ public class TestTransmit {
                     new SElfStarHuffmanCompressor(new SElfXORCompressor()),
             };
             INetDecompressor[] decompressors = {
-                    new SElfStarHuffmanDecompressor(new ElfStarXORDecompressor()),
+                    new SElfStarHuffmanDecompressor(new SElfStarXORDecompressor()),
             };
             for (int i = 0; i < compressors.length; i++) {
                 Scanner scanner = new Scanner(new File(prefix + fileName));
@@ -203,6 +228,49 @@ public class TestTransmit {
                     }
                     assertTrue(Objects.equals(value, deValue) ); // Infinity and NaN use
                     cnt++;
+                }
+            }
+        }
+        System.out.println("Done!");
+    }
+
+    @Test
+    public void ALPCorrectnessTest() throws IOException {
+        int block = 100;
+        for (String fileName : fileNames) {
+            try (BlockReader br = new BlockReader(fileName, block)) {
+                List<List<List<Double>>> RowGroups = new ArrayList<>();
+                List<List<Double>> floatingsList = new ArrayList<>();
+                List<Double> floatings;
+                int RGsize = 100;
+                while ((floatings = br.nextBlock()) != null) {
+                    if (floatings.size() != block) {
+                        break;
+                    }
+                    floatingsList.add(new ArrayList<>(floatings));
+                    if (floatingsList.size() == RGsize) {
+                        RowGroups.add(new ArrayList<>(floatingsList));
+                        floatingsList.clear();
+                    }
+                }
+                if (!floatingsList.isEmpty()) {
+                    RowGroups.add(floatingsList);
+                }
+
+                byte[] result;
+
+                ALPCompression compressor = new ALPCompression(block);
+                ALPDecompression decompressor = new ALPDecompression();
+                for (List<List<Double>> rowGroup : RowGroups) {
+                    compressor.sample(rowGroup);
+                    for(List<Double> row : rowGroup){
+                        result = compressor.ALPNetCompress(row);
+                        double[] devalues = decompressor.ALPNetDecompress(Arrays.copyOfRange(result, 1, result.length));
+                        for(int i=0;i<row.size();i++) {
+                            assertEquals(row.get(i),devalues[i]);
+                        }
+                    }
+                    compressor.reset();
                 }
             }
         }
@@ -233,7 +301,7 @@ class SenderThread extends Thread {
             int cnt=1;
             while (scanner.hasNextDouble()) {
                 if(cnt % 1001==0) {
-                    compressor.close();
+//                    compressor.close();
                     compressor.refresh();
                 }
                 double doubleToCompSend = scanner.nextDouble();
@@ -242,6 +310,70 @@ class SenderThread extends Thread {
 //                bytesToSend[0] = (byte) (bytesToSend[0] | (((byte) bytesToSend.length) << 4));  4bits are not enough
                 localClient.send(bytesToSend);
                 cnt++;
+            }
+            localClient.send(new byte[]{(byte) 0});
+            localClient.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+class ALPSenderThread extends Thread {
+    private final int maxRate;
+    private final String dataPath;
+    private final INetCompressor compressor;
+    private final int port;
+
+    public ALPSenderThread(int maxRate, String dataPath, INetCompressor compressor, int port) {
+        super.setName("SenderThread");
+        this.maxRate = maxRate;
+        this.dataPath = dataPath;
+        this.compressor = compressor;
+        this.port = port;
+    }
+
+    @Override
+    public void run() {
+        super.run();
+        try {
+            Client localClient = new Client(maxRate, Optional.of(port));
+            int block = 100;
+            try (BlockReader br = new BlockReader(dataPath, block)) {
+                List<List<List<Double>>> RowGroups = new ArrayList<>();
+                List<List<Double>> floatingsList = new ArrayList<>();
+                List<Double> floatings;
+                int RGsize = 100;
+                while ((floatings = br.nextBlock()) != null) {
+                    if (floatings.size() != block) {
+                        break;
+                    }
+                    floatingsList.add(new ArrayList<>(floatings));
+                    if (floatingsList.size() == RGsize) {
+                        RowGroups.add(new ArrayList<>(floatingsList));
+                        floatingsList.clear();
+                    }
+                }
+                if (!floatingsList.isEmpty()) {
+                    RowGroups.add(floatingsList);
+                }
+
+                byte[] result;
+
+                ALPCompression compressor = new ALPCompression(block);
+                ALPDecompression decompressor = new ALPDecompression();
+                localClient.send(new byte[]{(byte) RowGroups.size()});
+                for (List<List<Double>> rowGroup : RowGroups) {
+                    compressor.sample(rowGroup);
+                    localClient.send(new byte[]{(byte) rowGroup.size()});
+                    for(List<Double> row : rowGroup){
+                        result = compressor.ALPNetCompress(row);
+                        result[0] = (byte) (result.length >> 8);
+                        result[1] = (byte) (result.length & 0xFF);
+                        localClient.send(result);
+                    }
+                    compressor.reset();
+                }
             }
             localClient.send(new byte[]{(byte) 0});
             localClient.close();
@@ -275,7 +407,7 @@ class HuffSenderThread extends Thread {
             while (scanner.hasNextDouble()) {
                 double value = scanner.nextDouble();
                 byte[] bytesToSend;
-                if (cnt % 1000 ==0){
+                if (cnt % 1001 ==0){
                     bytesToSend = compressor.compressAndClose(value);
                     compressor.refresh();
                 }else{
@@ -331,13 +463,56 @@ class ReceiverThread extends Thread {
                     startTime = System.nanoTime();
                     first = false;
                 }
-//                ByteBuffer buffer = ByteBuffer.allocate(byteCount - 1);
-//                buffer.put(header);
-//                buffer.put(receivedData);
-//                decompressor.decompress(buffer.array());
                 decompressor.decompress(receivedData);
                 cnt++;
             }
+            localServer.close();
+            usedTimeInMS = (endTime - startTime) / 1000_000.0; // ms
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    public double getUsedTimeInMS() {
+        return usedTimeInMS;
+    }
+}
+
+class ALPReceiverThread extends Thread {
+    private final int maxRate;
+    private final INetDecompressor decompressor;
+    private final int port;
+    private double usedTimeInMS;
+
+    public ALPReceiverThread(int maxRate, INetDecompressor decompressor, int port) {
+        super.setName("ReceiverThread");
+        this.maxRate = maxRate;
+        this.decompressor = decompressor;
+        this.port = port;
+    }
+
+    @Override
+    public void run() {
+        super.run();
+        try {
+            long startTime = 0;
+            long endTime;
+            Server localServer = new Server(maxRate, Optional.of(port));
+
+            int rowGroupCnt = localServer.receiveBytes(1)[0];
+            startTime = System.nanoTime();
+            for (int i=0; i<rowGroupCnt; i++){
+                int rowGroupSize = localServer.receiveBytes(1)[0];
+                for (int j=0; j<rowGroupSize; j++){
+                    byte high = localServer.receiveBytes(1)[0];
+                    byte low = localServer.receiveBytes(1)[0];
+                    int byteCnt = high << 8 | low & 0xFF;
+                    byte[] receivedData = localServer.receiveBytes(byteCnt-2);
+                    double[] devalues = decompressor.ALPNetDecompress(receivedData);
+                }
+            }
+            endTime = System.nanoTime();
             localServer.close();
             usedTimeInMS = (endTime - startTime) / 1000_000.0; // ms
         } catch (IOException e) {
@@ -386,7 +561,7 @@ class HuffReceiverThread extends Thread {
                     startTime = System.nanoTime();
                     first = false;
                 }
-                if(cnt % 1000==0) {
+                if(cnt % 1001==0) {
                     decompressor.decompressLast(receivedData);
                     decompressor.refresh();
                 }else{

@@ -1,12 +1,13 @@
 package com.github.Cwida.alp;
 
+import org.urbcomp.startdb.selfstar.decompressor.INetDecompressor;
 import org.urbcomp.startdb.selfstar.utils.InputBitStream;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ALPDecompression {
+public class ALPDecompression implements INetDecompressor {
     private static final double[] FRAC_ARR = {
             1.0,
             0.1,
@@ -30,7 +31,7 @@ public class ALPDecompression {
             0.0000000000000000001,
             0.00000000000000000001
     };
-    private final ALPrdDecompression ALPrdDe;
+    private ALPrdDecompression ALPrdDe;
     private long[] encodedValue;
     private int count;
     private byte vectorFactor;
@@ -39,9 +40,19 @@ public class ALPDecompression {
     private double[] exceptions;
     private short[] exceptionsPositions;
     private long frameOfReference;
-    private final InputBitStream in;
+    private InputBitStream in;
 
     public ALPDecompression(byte[] bs) {
+        in = new InputBitStream(bs);
+        this.ALPrdDe = new ALPrdDecompression(in);
+    }
+
+    public ALPDecompression() {
+        in = null;
+        this.ALPrdDe = null;
+    }
+
+    public void setBytes(byte[] bs) {
         in = new InputBitStream(bs);
         this.ALPrdDe = new ALPrdDecompression(in);
     }
@@ -109,4 +120,17 @@ public class ALPDecompression {
         }
         return result;
     }
+
+    public double[] ALPNetDecompress(byte[] bs) throws IOException {
+        setBytes(bs);
+        int useALP = in.readBit();
+        if (useALP == 1) {
+            deserialize();
+            return decompress();
+        } else {
+            ALPrdDe.deserialize();
+            return ALPrdDe.decompress();
+        }
+    }
+
 }

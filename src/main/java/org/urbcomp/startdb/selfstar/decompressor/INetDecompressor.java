@@ -1,9 +1,15 @@
 package org.urbcomp.startdb.selfstar.decompressor;
 
+import java.io.IOException;
+
 public interface INetDecompressor {
-    double decompress(byte[] input);
+    default double decompress(byte[] input){return 0;}
 
-    void refresh();
+    default void refresh(){}
 
-    default double decompressLast(byte[] input){ return 0;};
+    default double decompressLast(byte[] input){ return 0;}
+
+    default double[] ALPNetDecompress(byte[] receivedData) throws IOException {
+        return null;
+    }
 }
