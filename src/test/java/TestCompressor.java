@@ -285,8 +285,8 @@ public class TestCompressor {
                 new ElfStarDecompressor(new ElfStarXORDecompressor()),
                 new ElfStarCanonicalHuffmanDecompressor(new ElfStarXORCanonicalHuffmanDecompressor()),
                 new ElfStarHuffmanDecompressor(new ElfStarXORDecompressor()),
-                new ElfStarDecompressor(new ElfStarXORDecompressor()),     // streaming version is the same
-                new SElfStarHuffmanDecompressor(new ElfStarXORDecompressor()),
+                new ElfStarDecompressor(new SElfStarXORDecompressor()),     // streaming version is the same
+                new SElfStarHuffmanDecompressor(new SElfStarXORDecompressor()),
 
         };
         boolean firstMethod = true;
