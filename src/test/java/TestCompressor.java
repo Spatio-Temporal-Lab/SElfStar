@@ -120,7 +120,7 @@ public class TestCompressor {
             for (String fileName : fileNames) {
                 ICompressor[] compressors = new ICompressor[]{
                         new ElfStarCompressor(new ElfStarXORCompressor(window), window),
-                        new SElfStarCompressor(new SElfXORCompressor(window)),
+                        new SElfStarCompressor(new SElfStarXORCompressor(window)),
                 };
 
                 IDecompressor[] decompressors = new IDecompressor[]{
@@ -268,8 +268,8 @@ public class TestCompressor {
                 new ElfStarCompressor(new ElfStarXORCompressor()),
                 new ElfStarCanonicalHuffmanCompressor(new ElfStarXORCompressor()),
                 new ElfStarHuffmanCompressor(new ElfStarXORCompressor()),
-                new SElfStarCompressor(new SElfXORCompressor()),
-                new SElfStarHuffmanCompressor(new SElfXORCompressor()),
+                new SElfStarCompressor(new SElfStarXORCompressor()),
+                new SElfStarHuffmanCompressor(new SElfStarXORCompressor()),
         };
 
         IDecompressor[] decompressors = new IDecompressor[]{
@@ -316,7 +316,7 @@ public class TestCompressor {
                     start = System.nanoTime();
                     List<Double> deValues = decompressor.decompress();
                     decompressTime = (System.nanoTime() - start) / TIME_PRECISION;
-//
+
                     assertEquals(deValues.size(), floatings.size());
                     for (int j = 0; j < floatings.size(); j++) {
                         assertEquals(floatings.get(j), deValues.get(j));

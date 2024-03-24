@@ -90,7 +90,7 @@ public class TestSingleCompressor {
                 new ElfCompressor32(new ElfXORCompressor32()),
                 new ElfPlusCompressor32(new ElfPlusXORCompressor32()),
                 new ElfStarCompressor32(new ElfStarXORCompressor32()),
-                new SElfStarCompressor32(new SElfXORCompressor32()),
+                new SElfStarCompressor32(new SElfStarXORCompressor32()),
         };
 
         IDecompressor32[] decompressors = new IDecompressor32[]{

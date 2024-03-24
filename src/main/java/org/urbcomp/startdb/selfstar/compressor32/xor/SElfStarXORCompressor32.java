@@ -4,7 +4,7 @@ import org.urbcomp.startdb.selfstar.utils.*;
 
 import java.util.Arrays;
 
-public class SElfXORCompressor32 implements IXORCompressor32 {
+public class SElfStarXORCompressor32 implements IXORCompressor32 {
     private final int[] leadingRepresentation = {
             0, 0, 0, 0, 0, 0, 0, 0,
             1, 1, 1, 1, 2, 2, 2, 2,
@@ -48,14 +48,14 @@ public class SElfXORCompressor32 implements IXORCompressor32 {
     private int capacity = 1000;
 
 
-    public SElfXORCompressor32(int window) {
+    public SElfStarXORCompressor32(int window) {
         this.capacity = window;
         out = new OutputBitStream(
                 new byte[(int) (((capacity + 1) * 4 + capacity / 4 + 1) * 1.2)]);
 
     }
 
-    public SElfXORCompressor32() {
+    public SElfStarXORCompressor32() {
         out = new OutputBitStream(
                 new byte[(int) (((capacity + 1) * 4 + capacity / 4 + 1) * 1.2)]);
     }
