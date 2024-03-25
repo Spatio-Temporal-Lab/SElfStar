@@ -12,11 +12,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ElfStarHuffmanDecompressor implements IDecompressor {
-    private static Code[] huffmanCode = new Code[18];
+    private static Code[] huffmanCode = new Code[17];
     private final IXORDecompressor xorDecompressor;
     private int lastBetaStar = Integer.MAX_VALUE;
     private Node root;
-    private final HuffmanEncode huffmanEncode = new HuffmanEncode(new int[18]);
+    private final HuffmanEncode huffmanEncode = new HuffmanEncode(new int[17]);
 
     public ElfStarHuffmanDecompressor(IXORDecompressor xorDecompressor) {
         this.xorDecompressor = xorDecompressor;
@@ -45,7 +45,7 @@ public class ElfStarHuffmanDecompressor implements IDecompressor {
     public void refresh() {
         lastBetaStar = Integer.MAX_VALUE;
         xorDecompressor.refresh();
-        huffmanCode = new Code[18];
+        huffmanCode = new Code[17];
     }
 
     @Override
@@ -60,7 +60,7 @@ public class ElfStarHuffmanDecompressor implements IDecompressor {
         while (true) {
             current = current.children[readInt(1)];
             if (current.data != -Integer.MAX_VALUE) {
-                if (current.data != 17) {
+                if (current.data != 16) {
                     lastBetaStar = current.data;
                     v = recoverVByBetaStar();
                 } else {

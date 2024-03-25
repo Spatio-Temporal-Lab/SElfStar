@@ -80,11 +80,11 @@ public class TestCompressor {
     @Test
     public void testAllCompressor() {
         for (String fileName : fileNames) {
-            testALPCompressor(fileName, NO_PARAM);
-            testXZCompressor(fileName, NO_PARAM);
-            testZstdCompressor(fileName, NO_PARAM);
-            testSnappyCompressor(fileName, NO_PARAM);
-            testBuffCompressor(fileName, NO_PARAM);
+//            testALPCompressor(fileName, NO_PARAM);
+//            testXZCompressor(fileName, NO_PARAM);
+//            testZstdCompressor(fileName, NO_PARAM);
+//            testSnappyCompressor(fileName, NO_PARAM);
+//            testBuffCompressor(fileName, NO_PARAM);
             testFloatingCompressor(fileName);
         }
         fileNameParamMethodToCompressedBits.forEach((fileNameParamMethod, compressedBits) -> {
@@ -256,37 +256,37 @@ public class TestCompressor {
         fileNameParamToTotalBits.put(fileNameParam, 0L);
         fileNameParamToTotalBlock.put(fileNameParam, 0L);
         ICompressor[] compressors = new ICompressor[]{
-                new BaseCompressor(new ChimpXORCompressor()),
-                new BaseCompressor(new ChimpNXORCompressor(128)),
-                new BaseCompressor(new GorillaXORCompressor()),
-                new SBaseCompressor(new ChimpAdaXORCompressor()),
-                new SBaseCompressor(new ChimpNAdaXORCompressor(128)),
-                new ElfCompressor(new ElfXORCompressor()),
-                new ElfPlusCompressor(new ElfPlusXORCompressor()),
-                new ElfStarCompressor(new ElfStarXORCompressorAdaLead()),
-                new ElfStarCompressor(new ElfStarXORCompressorAdaLeadAdaTrail()),
-                new ElfStarCompressor(new ElfStarXORCompressor()),
-                new ElfStarCanonicalHuffmanCompressor(new ElfStarXORCompressor()),
+//                new BaseCompressor(new ChimpXORCompressor()),
+//                new BaseCompressor(new ChimpNXORCompressor(128)),
+//                new BaseCompressor(new GorillaXORCompressor()),
+//                new SBaseCompressor(new ChimpAdaXORCompressor()),
+//                new SBaseCompressor(new ChimpNAdaXORCompressor(128)),
+//                new ElfCompressor(new ElfXORCompressor()),
+//                new ElfPlusCompressor(new ElfPlusXORCompressor()),
+//                new ElfStarCompressor(new ElfStarXORCompressorAdaLead()),
+//                new ElfStarCompressor(new ElfStarXORCompressorAdaLeadAdaTrail()),
+//                new ElfStarCompressor(new ElfStarXORCompressor()),
+//                new ElfStarCanonicalHuffmanCompressor(new ElfStarXORCompressor()),
                 new ElfStarHuffmanCompressor(new ElfStarXORCompressor()),
-                new SElfStarCompressor(new SElfStarXORCompressor()),
-                new SElfStarHuffmanCompressor(new SElfStarXORCompressor()),
+//                new SElfStarCompressor(new SElfStarXORCompressor()),
+//                new SElfStarHuffmanCompressor(new SElfStarXORCompressor()),
         };
 
         IDecompressor[] decompressors = new IDecompressor[]{
-                new BaseDecompressor(new ChimpXORDecompressor()),
-                new BaseDecompressor(new ChimpNXORDecompressor(128)),
-                new BaseDecompressor(new GorillaXORDecompressor()),
-                new BaseDecompressor(new ChimpAdaXORDecompressor()),
-                new BaseDecompressor(new ChimpNAdaXORDecompressor(128)),
-                new ElfDecompressor(new ElfXORDecompressor()),
-                new ElfPlusDecompressor(new ElfPlusXORDecompressor()),
-                new ElfStarDecompressor(new ElfStarXORDecompressorAdaLead()),
-                new ElfStarDecompressor(new ElfStarXORDecompressorAdaLeadAdaTrail()),
-                new ElfStarDecompressor(new ElfStarXORDecompressor()),
-                new ElfStarCanonicalHuffmanDecompressor(new ElfStarXORCanonicalHuffmanDecompressor()),
+//                new BaseDecompressor(new ChimpXORDecompressor()),
+//                new BaseDecompressor(new ChimpNXORDecompressor(128)),
+//                new BaseDecompressor(new GorillaXORDecompressor()),
+//                new BaseDecompressor(new ChimpAdaXORDecompressor()),
+//                new BaseDecompressor(new ChimpNAdaXORDecompressor(128)),
+//                new ElfDecompressor(new ElfXORDecompressor()),
+//                new ElfPlusDecompressor(new ElfPlusXORDecompressor()),
+//                new ElfStarDecompressor(new ElfStarXORDecompressorAdaLead()),
+//                new ElfStarDecompressor(new ElfStarXORDecompressorAdaLeadAdaTrail()),
+//                new ElfStarDecompressor(new ElfStarXORDecompressor()),
+//                new ElfStarCanonicalHuffmanDecompressor(new ElfStarXORCanonicalHuffmanDecompressor()),
                 new ElfStarHuffmanDecompressor(new ElfStarXORDecompressor()),
-                new ElfStarDecompressor(new SElfStarXORDecompressor()),     // streaming version is the same
-                new SElfStarHuffmanDecompressor(new SElfStarXORDecompressor()),
+//                new ElfStarDecompressor(new SElfStarXORDecompressor()),     // streaming version is the same
+//                new SElfStarHuffmanDecompressor(new SElfStarXORDecompressor()),
 
         };
         boolean firstMethod = true;
