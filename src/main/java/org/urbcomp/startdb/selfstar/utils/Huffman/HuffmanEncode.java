@@ -6,7 +6,7 @@ import java.util.PriorityQueue;
 
 public class HuffmanEncode {
     // Map value -> <code, length>
-    private final Code[] huffmanCodes = new Code[18];
+    private final Code[] huffmanCodes = new Code[17];
 
     public HuffmanEncode(int[] frequencies) {
         buildHuffmanTreeAndConToHashMap(frequencies);

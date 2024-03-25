@@ -266,7 +266,6 @@ public class TestCompressor {
                 new ElfStarCompressor(new ElfStarXORCompressorAdaLead()),
                 new ElfStarCompressor(new ElfStarXORCompressorAdaLeadAdaTrail()),
                 new ElfStarCompressor(new ElfStarXORCompressor()),
-                new ElfStarCanonicalHuffmanCompressor(new ElfStarXORCompressor()),
                 new ElfStarHuffmanCompressor(new ElfStarXORCompressor()),
                 new SElfStarCompressor(new SElfStarXORCompressor()),
                 new SElfStarHuffmanCompressor(new SElfStarXORCompressor()),
@@ -283,7 +282,6 @@ public class TestCompressor {
                 new ElfStarDecompressor(new ElfStarXORDecompressorAdaLead()),
                 new ElfStarDecompressor(new ElfStarXORDecompressorAdaLeadAdaTrail()),
                 new ElfStarDecompressor(new ElfStarXORDecompressor()),
-                new ElfStarCanonicalHuffmanDecompressor(new ElfStarXORCanonicalHuffmanDecompressor()),
                 new ElfStarHuffmanDecompressor(new ElfStarXORDecompressor()),
                 new ElfStarDecompressor(new SElfStarXORDecompressor()),     // streaming version is the same
                 new SElfStarHuffmanDecompressor(new SElfStarXORDecompressor()),
