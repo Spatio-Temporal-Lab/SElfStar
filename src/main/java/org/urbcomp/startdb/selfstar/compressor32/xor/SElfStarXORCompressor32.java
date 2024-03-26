@@ -39,7 +39,7 @@ public class SElfStarXORCompressor32 implements IXORCompressor32 {
     private int[] trailPositions = {0, 16};
     private boolean updatePositions = false;
     private boolean writePositions = false;
-    private OutputBitStream out;
+    private final OutputBitStream out;
 
     private int leadingBitsPerValue = 2;
 
@@ -177,8 +177,7 @@ public class SElfStarXORCompressor32 implements IXORCompressor32 {
 
     @Override
     public void refresh() {
-        out = new OutputBitStream(
-                new byte[(int) (((capacity + 1) * 4 + capacity / 4 + 1) * 1.2)]);
+        out.refresh();
         first = true;
         updatePositions = false;
         Arrays.fill(leadDistribution, 0);

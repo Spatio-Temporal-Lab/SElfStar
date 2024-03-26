@@ -59,12 +59,12 @@ public class TestSingleCompressor {
     @Test
     public void testAllCompressor() {
         for (String fileName : fileNames) {
-            testFloatingCompressor(fileName);
             testALPCompressor(fileName);
             testBuffCompressor(fileName);
             testXZCompressor(fileName);
             testZstdCompressor(fileName);
             testSnappyCompressor(fileName);
+            testFloatingCompressor(fileName);
         }
 
         fileNameParamMethodToCompressedBits.forEach((fileNameParamMethod, compressedBits) -> {

@@ -4,14 +4,14 @@ import org.urbcomp.startdb.selfstar.utils.Elf32Utils;
 import org.urbcomp.startdb.selfstar.utils.OutputBitStream;
 
 public class GorillaXORCompressor32 implements IXORCompressor32 {
-    private final int capacity = 1000;
     private int storedLeadingZeros = Integer.MAX_VALUE;
     private int storedTrailingZeros = 0;
     private int storedVal = 0;
     private boolean first = true;
-    private OutputBitStream out;
+    private final OutputBitStream out;
 
     public GorillaXORCompressor32() {
+        int capacity = 1000;
         out = new OutputBitStream(
                 new byte[(int) (((capacity + 1) * 4 + capacity / 4 + 1) * 1.2)]);
     }
@@ -143,8 +143,7 @@ public class GorillaXORCompressor32 implements IXORCompressor32 {
 
     @Override
     public void refresh() {
-        out = new OutputBitStream(
-                new byte[(int) (((capacity + 1) * 4 + capacity / 4 + 1) * 1.2)]);
+        out.refresh();
         storedLeadingZeros = Integer.MAX_VALUE;
         storedTrailingZeros = 0;
         storedVal = 0;

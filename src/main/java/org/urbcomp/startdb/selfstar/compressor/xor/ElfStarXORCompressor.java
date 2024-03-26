@@ -18,22 +18,19 @@ public class ElfStarXORCompressor implements IXORCompressor {
     private int[] leadDistribution;
     private int[] trailDistribution;
 
-    private OutputBitStream out;
+    private final OutputBitStream out;
 
     private int leadingBitsPerValue;
 
     private int trailingBitsPerValue;
-
-    private final int capacity;
 
     public ElfStarXORCompressor() {
         this(1000);
     }
 
     public ElfStarXORCompressor(int window) {
-        this.capacity = window;
         out = new OutputBitStream(
-                new byte[(int) (((capacity + 1) * 8 + capacity / 8 + 1) * 1.2)]);
+                new byte[(int) (((window + 1) * 8 + window / 8 + 1) * 1.2)]);
     }
 
     @Override
@@ -148,8 +145,7 @@ public class ElfStarXORCompressor implements IXORCompressor {
 
     @Override
     public void refresh() {
-        out = new OutputBitStream(
-                new byte[(int) (((capacity + 1) * 8 + capacity / 8 + 1) * 1.2)]);
+        out.refresh();
         storedLeadingZeros = Integer.MAX_VALUE;
         storedTrailingZeros = Integer.MAX_VALUE;
         storedVal = 0;

@@ -1349,4 +1349,15 @@ public class OutputBitStream implements Flushable, Closeable {
     public byte[] getBuffer() {
         return buffer;
     }
+
+    /**
+     * Clear all bits stored in the buffer and refresh all state variables.
+     */
+    public void refresh() {
+        current = 0;
+        free = 8;
+        pos = 0;
+        avail = buffer.length;
+        writtenBits = 0;
+    }
 }

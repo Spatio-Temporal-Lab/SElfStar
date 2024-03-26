@@ -17,16 +17,16 @@ public class ElfXORCompressor32 implements IXORCompressor32 {
             16, 16, 18, 18, 20, 20, 20, 20,
             20, 20, 20, 20, 20, 20, 20, 20
     };
-    private final int capacity = 1000;
     private int storedLeadingZeros = Integer.MAX_VALUE;
     private int storedTrailingZeros = Integer.MAX_VALUE;
     private int storedVal = 0;
     //    public final static short FIRST_DELTA_BITS = 27;
     private boolean first = true;
-    private OutputBitStream out;
+    private final OutputBitStream out;
 
 
     public ElfXORCompressor32() {
+        int capacity = 1000;
         out = new OutputBitStream(
                 new byte[(int) (((capacity + 1) * 4 + capacity / 4 + 1) * 1.2)]);
     }
@@ -122,8 +122,7 @@ public class ElfXORCompressor32 implements IXORCompressor32 {
 
     @Override
     public void refresh() {
-        out = new OutputBitStream(
-                new byte[(int) (((capacity + 1) * 4 + capacity / 4 + 1) * 1.2)]);
+        out.refresh();
         storedLeadingZeros = Integer.MAX_VALUE;
 
         storedTrailingZeros = Integer.MAX_VALUE;

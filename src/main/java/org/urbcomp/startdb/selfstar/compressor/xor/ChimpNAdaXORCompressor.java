@@ -39,11 +39,10 @@ public class ChimpNAdaXORCompressor implements IXORCompressor {
     private final int[] indices;
     private final int flagOneSize;
     private final int flagZeroSize;
-    private final int capacity = 1000;
     private final int[] leadDistribution = new int[64];
     private int storedLeadingZeros = Integer.MAX_VALUE;
     private boolean first = true;
-    private OutputBitStream out;
+    private final OutputBitStream out;
     private int index = 0;
     private int current = 0;
     private int[] leadPositions = {0, 8, 12, 16, 18, 20, 22, 24};
@@ -53,7 +52,7 @@ public class ChimpNAdaXORCompressor implements IXORCompressor {
 
     // We should have access to the series?
     public ChimpNAdaXORCompressor(int previousValues) {
-//        out = output;
+        int capacity = 1000;
         out = new OutputBitStream(
                 new byte[(int) (((capacity + 1) * 8 + capacity / 8 + 1) * 1.2)]);
         this.previousValues = previousValues;
@@ -172,8 +171,7 @@ public class ChimpNAdaXORCompressor implements IXORCompressor {
 
     @Override
     public void refresh() {
-        out = new OutputBitStream(
-                new byte[(int) (((capacity + 1) * 8 + capacity / 8 + 1) * 1.2)]);
+        out.refresh();
         storedLeadingZeros = Integer.MAX_VALUE;
         first = true;
         index = 0;

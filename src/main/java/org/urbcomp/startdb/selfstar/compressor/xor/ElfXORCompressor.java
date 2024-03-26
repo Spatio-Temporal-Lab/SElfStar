@@ -22,18 +22,16 @@ public class ElfXORCompressor implements IXORCompressor {
             24, 24, 24, 24, 24, 24, 24, 24,
             24, 24, 24, 24, 24, 24, 24, 24
     };
-    private final int capacity;
     private int storedLeadingZeros = Integer.MAX_VALUE;
     private int storedTrailingZeros = Integer.MAX_VALUE;
     private long storedVal = 0;
     //    public final static short FIRST_DELTA_BITS = 27;
     private boolean first = true;
-    private OutputBitStream out;
+    private final OutputBitStream out;
 
     public ElfXORCompressor(int block) {
-        capacity = block;
         out = new OutputBitStream(
-                new byte[(int) (((capacity + 1) * 8 + capacity / 8 + 1) * 1.2)]);
+                new byte[(int) (((block + 1) * 8 + block / 8 + 1) * 1.2)]);
     }
 
     public ElfXORCompressor() {
@@ -134,8 +132,7 @@ public class ElfXORCompressor implements IXORCompressor {
 
     @Override
     public void refresh() {
-        out = new OutputBitStream(
-                new byte[(int) (((capacity + 1) * 8 + capacity / 8 + 1) * 1.2)]);
+        out.refresh();
         storedLeadingZeros = Integer.MAX_VALUE;
 
         storedTrailingZeros = Integer.MAX_VALUE;

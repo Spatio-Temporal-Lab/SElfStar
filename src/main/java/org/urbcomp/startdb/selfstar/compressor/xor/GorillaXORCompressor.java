@@ -4,21 +4,19 @@ import org.urbcomp.startdb.selfstar.utils.Elf64Utils;
 import org.urbcomp.startdb.selfstar.utils.OutputBitStream;
 
 public class GorillaXORCompressor implements IXORCompressor {
-    private final int capacity;
     private int storedLeadingZeros = Integer.MAX_VALUE;
     private int storedTrailingZeros = 0;
     private long storedVal = 0;
     private boolean first = true;
-    private OutputBitStream out;
+    private final OutputBitStream out;
 
     public GorillaXORCompressor() {
         this(1000);
     }
 
     public GorillaXORCompressor(int block) {
-        capacity = block;
         out = new OutputBitStream(
-                new byte[(int) (((capacity + 1) * 8 + capacity / 8 + 1) * 1.2)]);
+                new byte[(int) (((block + 1) * 8 + block / 8 + 1) * 1.2)]);
     }
 
     public OutputBitStream getOutputStream() {
@@ -148,8 +146,7 @@ public class GorillaXORCompressor implements IXORCompressor {
 
     @Override
     public void refresh() {
-        out = new OutputBitStream(
-                new byte[(int) (((capacity + 1) * 8 + capacity / 8 + 1) * 1.2)]);
+        out.refresh();
         storedLeadingZeros = Integer.MAX_VALUE;
         storedTrailingZeros = 0;
         storedVal = 0;
