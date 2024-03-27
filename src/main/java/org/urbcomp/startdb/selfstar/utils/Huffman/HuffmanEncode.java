@@ -1,23 +1,15 @@
 package org.urbcomp.startdb.selfstar.utils.Huffman;
 
+import org.urbcomp.startdb.selfstar.utils.InputBitStream;
 import org.urbcomp.startdb.selfstar.utils.OutputBitStream;
 
+import java.io.IOException;
 import java.util.PriorityQueue;
 
 public class HuffmanEncode {
-    // Map value -> <code, length>
-    private final Code[] huffmanCodes = new Code[17];
-
-    public HuffmanEncode(int[] frequencies) {
-        buildHuffmanTreeAndConToHashMap(frequencies);
-    }
-
-    public Code[] getHuffmanCodes(){
-        return huffmanCodes;
-    }
-
-    private void buildHuffmanTreeAndConToHashMap(int[] frequencies) {
-        PriorityQueue<Node> nodePriorityQueue = new PriorityQueue<>(huffmanCodes.length);
+    public static Code[] getHuffmanCodes(int[] frequencies){
+        Code[] huffmanCodes = new Code[frequencies.length];
+        PriorityQueue<Node> nodePriorityQueue = new PriorityQueue<>(frequencies.length);
 
         // Construct priorityQueue
         for (int i = 0; i < frequencies.length; i++) {
@@ -34,20 +26,24 @@ public class HuffmanEncode {
             newNode.children[1] = right;
             nodePriorityQueue.add(newNode);
         }
-        generateHuffmanCodes(nodePriorityQueue.peek(), 0, 0);
+
+        generateHuffmanCodes(huffmanCodes, nodePriorityQueue.peek(), 0, 0);
+
+        return huffmanCodes;
     }
 
-    private void generateHuffmanCodes(Node root, int code, int length) {
+
+    private static void generateHuffmanCodes(Code[] huffmanCodes, Node root, int code, int length) {
         if (root != null) {
             if (root.data != -Integer.MAX_VALUE) {
                 huffmanCodes[root.data] = new Code(code, length);
             }
-            generateHuffmanCodes(root.children[0], code << 1, length + 1);
-            generateHuffmanCodes(root.children[1], (code << 1) | 1, length + 1);
+            generateHuffmanCodes(huffmanCodes, root.children[0], code << 1, length + 1);
+            generateHuffmanCodes(huffmanCodes, root.children[1], (code << 1) | 1, length + 1);
         }
     }
 
-    public Node hashMapToTree(Code[] huffmanCodes) {
+    public static Node hashMapToTree(Code[] huffmanCodes) {
         Node root = new Node(-Integer.MAX_VALUE, 0);
         Node curNode = root;
         for (int value = 0; value < huffmanCodes.length; value++) {
@@ -68,12 +64,24 @@ public class HuffmanEncode {
         return root;
     }
 
-    public int writeHuffmanCodes(OutputBitStream out) {
+    public static int writeHuffmanCodes(OutputBitStream out, Code[] huffmanCodes) {
         int thisSize = 0;
         for (Code huffmanCode : huffmanCodes) {
-            thisSize += out.writeInt(huffmanCode.length, 5);
+            thisSize += out.writeInt(huffmanCode.length - 1, 4);       // minLength = 1, maxLength = 16, so 4 bits is enough
             thisSize += out.writeInt(huffmanCode.value, huffmanCode.length);
         }
         return thisSize;
+    }
+
+    public static void readHuffmanCodes(InputBitStream in, Code[] codes) {
+        try {
+            for (int i = 0; i < codes.length; i++) {
+                int length = in.readInt(4) + 1;     // we should add 1 here
+                int code = in.readInt(length);
+                codes[i] = new Code(code, length);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("IO error: " + e.getMessage());
+        }
     }
 }

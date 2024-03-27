@@ -151,8 +151,7 @@ public class SElfStarHuffmanCompressor implements ICompressor {
         } else {
             compressedSizeInBits += os.writeLong(huffmanCode[16].value, huffmanCode[16].length); // not erase
         }
-        HuffmanEncode huffmanEncode = new HuffmanEncode(frequency);
-        huffmanCode = huffmanEncode.getHuffmanCodes();
+        huffmanCode = HuffmanEncode.getHuffmanCodes(frequency);
         Arrays.fill(frequency, 0);
         compressedSizeInBits += xorCompressor.close();
     }

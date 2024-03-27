@@ -81,9 +81,8 @@ public class ElfStarHuffmanCompressor implements ICompressor {
     }
 
     private void compress() {
-        HuffmanEncode huffmanEncode = new HuffmanEncode(frequency);
-        huffmanCode = huffmanEncode.getHuffmanCodes();
-        compressedSizeInBits += huffmanEncode.writeHuffmanCodes(os);
+        huffmanCode = HuffmanEncode.getHuffmanCodes(frequency);
+        compressedSizeInBits += HuffmanEncode.writeHuffmanCodes(os, huffmanCode);
         xorCompressor.setDistribution(leadDistribution, trailDistribution);
         for (int i = 0; i < numberOfValues; i++) {
             if (betaStarList[i] == Integer.MAX_VALUE) {

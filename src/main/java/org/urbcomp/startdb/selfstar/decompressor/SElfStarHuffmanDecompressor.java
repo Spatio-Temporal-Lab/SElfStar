@@ -33,9 +33,8 @@ public class SElfStarHuffmanDecompressor implements IDecompressor {
             values.add(value);
         }
         frequency[16]--;
-        HuffmanEncode huffmanEncode = new HuffmanEncode(frequency);
-        Code[] huffmanCode = huffmanEncode.getHuffmanCodes();
-        root = huffmanEncode.hashMapToTree(huffmanCode);
+        Code[] huffmanCode = HuffmanEncode.getHuffmanCodes(frequency);
+        root = HuffmanEncode.hashMapToTree(huffmanCode);
         Arrays.fill(frequency, 0);
         return values;
     }

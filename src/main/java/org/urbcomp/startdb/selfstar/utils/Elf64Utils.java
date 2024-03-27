@@ -190,13 +190,4 @@ public class Elf64Utils {
         spAnd10iNFlag[1] = log10v == (long) log10v ? 1 : 0;
         return spAnd10iNFlag;
     }
-
-    public static int zEncode(int n) {
-        return ((n << 1) ^ (n >> 31)) - 1;
-    }
-
-    public static int zDecode(int n) {
-        return ((n + 1) >>> 1) ^ -((n + 1) & 1);
-    }
-
 }

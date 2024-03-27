@@ -16,7 +16,6 @@ public class ElfStarHuffmanDecompressor implements IDecompressor {
     private final IXORDecompressor xorDecompressor;
     private int lastBetaStar = Integer.MAX_VALUE;
     private Node root;
-    private final HuffmanEncode huffmanEncode = new HuffmanEncode(new int[17]);
 
     public ElfStarHuffmanDecompressor(IXORDecompressor xorDecompressor) {
         this.xorDecompressor = xorDecompressor;
@@ -33,12 +32,8 @@ public class ElfStarHuffmanDecompressor implements IDecompressor {
     }
 
     private void initHuffmanTree() {
-        for (int i = 0; i < huffmanCode.length; i++) {
-            int length = readInt(5);
-            int code = readInt(length);
-            huffmanCode[i] = new Code(code, length);
-        }
-        root = huffmanEncode.hashMapToTree(huffmanCode);
+        HuffmanEncode.readHuffmanCodes(xorDecompressor.getInputStream(), huffmanCode);
+        root = HuffmanEncode.hashMapToTree(huffmanCode);
     }
 
     @Override
@@ -88,6 +83,7 @@ public class ElfStarHuffmanDecompressor implements IDecompressor {
         return v;
     }
 
+    @SuppressWarnings("all")
     private int readInt(int len) {
         InputBitStream in = xorDecompressor.getInputStream();
         try {

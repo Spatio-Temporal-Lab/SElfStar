@@ -105,7 +105,7 @@ public class Elf32Utils {
         // There are some bugs for those with high significand, e.g., 0.23911204406033099
         // So we should further check
         if (temp / get10iP(i) != v) {
-            return 7;
+            return 8;
         } else {
             while (i > 0 && tempInt % 10 == 0) {
                 i--;
