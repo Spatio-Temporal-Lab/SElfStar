@@ -87,7 +87,6 @@ public class SElfStarHuffmanDecompressor implements IDecompressor {
                 if (current.data != 16) {
                     lastBetaStar = current.data;
                     v = recoverVByBetaStar();
-
                     frequency[lastBetaStar]++;
                 } else {
                     v = xorDecompressor.readValue();

@@ -51,22 +51,15 @@ public class HuffmanEncode {
         Node root = new Node(-Integer.MAX_VALUE, 0);
         Node curNode = root;
         for (int value = 0; value < huffmanCodes.length; value++) {
-            long code = huffmanCodes[value].value;
-            int length = huffmanCodes[value].length;
-            long signal;
-            while (length != 0) {
-                signal = (code >> (length - 1)) & 1;
-                if (signal == 0) {
-                    if (curNode.children[0] == null) {
-                        curNode.children[0] = new Node(-Integer.MAX_VALUE, 0);
-                    }
-                    curNode = curNode.children[0];
-                } else {
-                    if (curNode.children[1] == null) {
-                        curNode.children[1] = new Node(-Integer.MAX_VALUE, 0);
-                    }
-                    curNode = curNode.children[1];
+            int code = huffmanCodes[value].value;
+            int length = huffmanCodes[value].length - 1;
+            int signal;
+            while (length >= 0) {
+                signal = (code >> length) & 1;
+                if (curNode.children[signal] == null) {
+                    curNode.children[signal] = new Node(-Integer.MAX_VALUE, 0);
                 }
+                curNode = curNode.children[signal];
                 length -= 1;
             }
             curNode.data = value;
