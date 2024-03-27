@@ -86,12 +86,12 @@ public class SElfStarHuffmanCompressor implements ICompressor {
         numberOfValues++;
 
         if (v == 0.0 || Double.isInfinite(v)) {
-            compressedSizeInBits += os.writeLong(huffmanCode[16].value, huffmanCode[16].length); // not erase
+            compressedSizeInBits += os.writeLong(huffmanCode[16].code, huffmanCode[16].length); // not erase
             vPrimeLong = vLong;
             frequency[16]++;
         } else if (Double.isNaN(v)) {
-            compressedSizeInBits += os.writeLong(huffmanCode[16].value, huffmanCode[16].length); // not erase
-            vPrimeLong = 0xfff8000000000000L & vLong;
+            compressedSizeInBits += os.writeLong(huffmanCode[16].code, huffmanCode[16].length); // not erase
+            vPrimeLong = 0x7ff8000000000000L;
             frequency[16]++;
         } else {
             // C1: v is a normal or subnormal
@@ -102,12 +102,12 @@ public class SElfStarHuffmanCompressor implements ICompressor {
             long mask = 0xffffffffffffffffL << eraseBits;
             long delta = (~mask) & vLong;
             if (delta != 0 && eraseBits > 4) {  // C2
-                compressedSizeInBits += os.writeLong(huffmanCode[alphaAndBetaStar[1]].value, huffmanCode[alphaAndBetaStar[1]].length);  // case 11, 2 + 4 = 6
+                compressedSizeInBits += os.writeLong(huffmanCode[alphaAndBetaStar[1]].code, huffmanCode[alphaAndBetaStar[1]].length);  // case 11, 2 + 4 = 6
                 lastBetaStar = alphaAndBetaStar[1];
                 vPrimeLong = mask & vLong;
                 frequency[alphaAndBetaStar[1]]++;
             } else {
-                compressedSizeInBits += os.writeLong(huffmanCode[16].value, huffmanCode[16].length); // not erase
+                compressedSizeInBits += os.writeLong(huffmanCode[16].code, huffmanCode[16].length); // not erase
                 vPrimeLong = vLong;
                 frequency[16]++;
             }
@@ -149,7 +149,7 @@ public class SElfStarHuffmanCompressor implements ICompressor {
             compressedSizeInBits += os.writeInt(2, 2);  // case 10
             isFirstBlock = false;
         } else {
-            compressedSizeInBits += os.writeLong(huffmanCode[16].value, huffmanCode[16].length); // not erase
+            compressedSizeInBits += os.writeLong(huffmanCode[16].code, huffmanCode[16].length); // not erase
         }
         huffmanCode = HuffmanEncode.getHuffmanCodes(frequency);
         Arrays.fill(frequency, 0);

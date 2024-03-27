@@ -43,7 +43,7 @@ public class ElfStarHuffmanCompressor implements ICompressor {
             betaStarList[numberOfValues] = Integer.MAX_VALUE;
             frequency[16]++;
         } else if (Double.isNaN(v)) {
-            vPrimeList[numberOfValues] = 0xfff8000000000000L & vLong;
+            vPrimeList[numberOfValues] = 0x7ff8000000000000L;
             betaStarList[numberOfValues] = Integer.MAX_VALUE;
             frequency[16]++;
         } else {
@@ -86,9 +86,9 @@ public class ElfStarHuffmanCompressor implements ICompressor {
         xorCompressor.setDistribution(leadDistribution, trailDistribution);
         for (int i = 0; i < numberOfValues; i++) {
             if (betaStarList[i] == Integer.MAX_VALUE) {
-                compressedSizeInBits += os.writeLong(huffmanCode[16].value, huffmanCode[16].length); // not erase
+                compressedSizeInBits += os.writeLong(huffmanCode[16].code, huffmanCode[16].length); // not erase
             } else {
-                compressedSizeInBits += os.writeLong(huffmanCode[betaStarList[i]].value, huffmanCode[betaStarList[i]].length);  // case 11, 2 + 4 = 6
+                compressedSizeInBits += os.writeLong(huffmanCode[betaStarList[i]].code, huffmanCode[betaStarList[i]].length);  // case 11, 2 + 4 = 6
             }
             compressedSizeInBits += xorCompressor.addValue(vPrimeList[i]);
         }
@@ -112,7 +112,7 @@ public class ElfStarHuffmanCompressor implements ICompressor {
         calculateDistribution();
         compress();
         // we write one more bit here, for marking an end of the stream.
-        compressedSizeInBits += os.writeLong(huffmanCode[16].value, huffmanCode[16].length); // not erase
+        compressedSizeInBits += os.writeLong(huffmanCode[16].code, huffmanCode[16].length); // not erase
         compressedSizeInBits += xorCompressor.close();
     }
 

@@ -47,7 +47,7 @@ public class HuffmanEncode {
         Node root = new Node(-Integer.MAX_VALUE, 0);
         Node curNode = root;
         for (int value = 0; value < huffmanCodes.length; value++) {
-            int code = huffmanCodes[value].value;
+            int code = huffmanCodes[value].code;
             int length = huffmanCodes[value].length - 1;
             int signal;
             while (length >= 0) {
@@ -68,7 +68,7 @@ public class HuffmanEncode {
         int thisSize = 0;
         for (Code huffmanCode : huffmanCodes) {
             thisSize += out.writeInt(huffmanCode.length - 1, 4);       // minLength = 1, maxLength = 16, so 4 bits is enough
-            thisSize += out.writeInt(huffmanCode.value, huffmanCode.length);
+            thisSize += out.writeInt(huffmanCode.code, huffmanCode.length);
         }
         return thisSize;
     }
