@@ -21,8 +21,8 @@ public class HuffmanEncode {
             Node left = nodePriorityQueue.poll();
             Node right = nodePriorityQueue.poll();
             @SuppressWarnings("all")
-            int gens = left.gens > right.gens ? left.gens + 1 : right.gens + 1;
-            Node newNode = new Node(-1, left.frequency + right.frequency, gens);
+            int height = left.height > right.height ? left.height + 1 : right.height + 1;
+            Node newNode = new Node(-1, left.frequency + right.frequency, height);
             newNode.children[0] = left;
             newNode.children[1] = right;
             nodePriorityQueue.add(newNode);

@@ -4,17 +4,17 @@ public class Node implements Comparable<Node> {
     public int data;
     public int frequency;
     public Node[] children = new Node[2];
-    public int gens;  // leaf node is 0
+    public int height;  // leaf node is 0
 
     public Node(int data) {
         this.data = data;
     }
 
     // if data < 0, it means it is an internal node
-    public Node(int data, int frequency, int gens) {
+    public Node(int data, int frequency, int height) {
         this.data = data;
         this.frequency = frequency;
-        this.gens = gens;
+        this.height = height;
     }
 
     @Override
@@ -27,6 +27,6 @@ public class Node implements Comparable<Node> {
 
     @Override
     public int compareTo(Node o) {
-        return this.frequency != o.frequency ? this.frequency - o.frequency : this.gens - o.gens;
+        return this.frequency != o.frequency ? this.frequency - o.frequency : this.height - o.height;
     }
 }
