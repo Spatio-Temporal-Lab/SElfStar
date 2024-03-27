@@ -34,7 +34,7 @@ public class SElfStarHuffmanDecompressor implements IDecompressor {
         }
         frequency[16]--;
         Code[] huffmanCode = HuffmanEncode.getHuffmanCodes(frequency);
-        root = HuffmanEncode.hashMapToTree(huffmanCode);
+        root = HuffmanEncode.buildHuffmanTree(huffmanCode);
         Arrays.fill(frequency, 0);
         return values;
     }
@@ -82,7 +82,7 @@ public class SElfStarHuffmanDecompressor implements IDecompressor {
         Node current = root;
         while (true) {
             current = current.children[readInt(1)];
-            if (current.data != -Integer.MAX_VALUE) {
+            if (current.data >= 0) {
                 if (current.data != 16) {
                     lastBetaStar = current.data;
                     v = recoverVByBetaStar();

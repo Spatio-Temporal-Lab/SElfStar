@@ -13,7 +13,7 @@ public class HuffmanEncode {
 
         // Construct priorityQueue
         for (int i = 0; i < frequencies.length; i++) {
-            nodePriorityQueue.add(new Node(i, frequencies[i]));
+            nodePriorityQueue.add(new Node(i, frequencies[i], 0));
         }
 
         // Construct huffman tree
@@ -21,7 +21,8 @@ public class HuffmanEncode {
             Node left = nodePriorityQueue.poll();
             Node right = nodePriorityQueue.poll();
             @SuppressWarnings("all")
-            Node newNode = new Node(-Integer.MAX_VALUE, left.frequency + right.frequency);
+            int gens = left.gens > right.gens ? left.gens + 1 : right.gens + 1;
+            Node newNode = new Node(-1, left.frequency + right.frequency, gens);
             newNode.children[0] = left;
             newNode.children[1] = right;
             nodePriorityQueue.add(newNode);
@@ -35,7 +36,7 @@ public class HuffmanEncode {
 
     private static void generateHuffmanCodes(Code[] huffmanCodes, Node root, int code, int length) {
         if (root != null) {
-            if (root.data != -Integer.MAX_VALUE) {
+            if (root.data >= 0) {
                 huffmanCodes[root.data] = new Code(code, length);
             }
             generateHuffmanCodes(huffmanCodes, root.children[0], code << 1, length + 1);
@@ -43,8 +44,8 @@ public class HuffmanEncode {
         }
     }
 
-    public static Node hashMapToTree(Code[] huffmanCodes) {
-        Node root = new Node(-Integer.MAX_VALUE, 0);
+    public static Node buildHuffmanTree(Code[] huffmanCodes) {
+        Node root = new Node(-1);
         Node curNode = root;
         for (int value = 0; value < huffmanCodes.length; value++) {
             int code = huffmanCodes[value].code;
@@ -53,10 +54,10 @@ public class HuffmanEncode {
             while (length >= 0) {
                 signal = (code >> length) & 1;
                 if (curNode.children[signal] == null) {
-                    curNode.children[signal] = new Node(-Integer.MAX_VALUE, 0);
+                    curNode.children[signal] = new Node(-1);
                 }
                 curNode = curNode.children[signal];
-                length -= 1;
+                --length;
             }
             curNode.data = value;
             curNode = root;
