@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.util.PriorityQueue;
 
 public class HuffmanEncode {
-    public static Code[] getHuffmanCodes(int[] frequencies){
+    public static Code[] getHuffmanCodes(int[] frequencies) {
         Code[] huffmanCodes = new Code[frequencies.length];
         PriorityQueue<Node> nodePriorityQueue = new PriorityQueue<>(frequencies.length);
 
@@ -66,9 +66,15 @@ public class HuffmanEncode {
     }
 
     public static int writeHuffmanCodes(OutputBitStream out, Code[] huffmanCodes) {
-        int thisSize = 0;
+        int maxLen = 0;
+        for (Code code : huffmanCodes) {
+            maxLen = Math.max(code.length, maxLen);
+        }
+        int[] logMap = {0,1,2,2,3,3,3,3,4,4,4,4,4,4,4,4};  // minLength = 1, maxLength = 16, Math.ceil(log2{i})
+        int bitsForLen = logMap[maxLen - 1];
+        int thisSize = out.writeInt(bitsForLen, 3);    // 4 needs 4 bits
         for (Code huffmanCode : huffmanCodes) {
-            thisSize += out.writeInt(huffmanCode.length - 1, 4);       // minLength = 1, maxLength = 16, so 4 bits is enough
+            thisSize += out.writeInt(huffmanCode.length - 1, bitsForLen);
             thisSize += out.writeInt(huffmanCode.code, huffmanCode.length);
         }
         return thisSize;
@@ -76,8 +82,9 @@ public class HuffmanEncode {
 
     public static void readHuffmanCodes(InputBitStream in, Code[] codes) {
         try {
+            int bitsForLen = in.readInt(3);
             for (int i = 0; i < codes.length; i++) {
-                int length = in.readInt(4) + 1;     // we should add 1 here
+                int length = in.readInt(bitsForLen) + 1;     // we should add 1 here
                 int code = in.readInt(length);
                 codes[i] = new Code(code, length);
             }
