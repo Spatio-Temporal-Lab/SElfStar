@@ -6,6 +6,8 @@ import java.util.List;
 public interface INetCompressor {
     default byte[] compress(double v) throws IOException {return null;}
 
+    default byte[] compressMiniBatch(List<Double> dbs) throws IOException {return null;}
+
     default void refresh(){}
 
     default String getKey() {

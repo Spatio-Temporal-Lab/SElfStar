@@ -8,6 +8,7 @@ import org.urbcomp.startdb.selfstar.compressor.xor.*;
 import org.urbcomp.startdb.selfstar.decompressor.*;
 import org.urbcomp.startdb.selfstar.decompressor.xor.*;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -41,29 +42,29 @@ public class TestTransmit {
     @Test
     public void mainTest() throws InterruptedException {
         System.out.println("MaxRate,File,Method,Time");
-        for (int maxRate = 500; maxRate <= 1000; maxRate *= 2) {
+        for (int maxRate = 5000; maxRate <= 10000; maxRate *= 2) {
             for (String fileName : fileNames) {
                 INetCompressor[] compressors = {
                         // Put your compressors here
                         new SElfStarCompressor(new SElfXORCompressor()),
-                        new ElfPlusCompressor(new ElfPlusXORCompressor()),
-                        new ElfCompressor(new ElfXORCompressor()),
-                        new BaseCompressor(new ChimpXORCompressor()),
-                        new BaseCompressor(new ChimpNXORCompressor(128)),
-                        new BaseCompressor(new GorillaXORCompressor()),
-                        new SBaseCompressor(new ChimpAdaXORCompressor()),
-                        new SBaseCompressor(new ChimpNAdaXORCompressor(128)),
+//                        new ElfPlusCompressor(new ElfPlusXORCompressor()),
+//                        new ElfCompressor(new ElfXORCompressor()),
+//                        new BaseCompressor(new ChimpXORCompressor()),
+//                        new BaseCompressor(new ChimpNXORCompressor(128)),
+//                        new BaseCompressor(new GorillaXORCompressor()),
+//                        new SBaseCompressor(new ChimpAdaXORCompressor()),
+//                        new SBaseCompressor(new ChimpNAdaXORCompressor(128)),
                 };
                 INetDecompressor[] decompressors = {
                         // And put your corresponding decompressors heres
                         new ElfStarDecompressor(new SElfStarXORDecompressor()),
-                        new ElfPlusDecompressor(new ElfPlusXORDecompressor()),
-                        new ElfDecompressor(new ElfXORDecompressor()),
-                        new BaseDecompressor(new ChimpXORDecompressor()),
-                        new BaseDecompressor(new ChimpNXORDecompressor(128)),
-                        new BaseDecompressor(new GorillaXORDecompressor()),
-                        new BaseDecompressor(new ChimpAdaXORDecompressor()),
-                        new BaseDecompressor(new ChimpNAdaXORDecompressor(128)),
+//                        new ElfPlusDecompressor(new ElfPlusXORDecompressor()),
+//                        new ElfDecompressor(new ElfXORDecompressor()),
+//                        new BaseDecompressor(new ChimpXORDecompressor()),
+//                        new BaseDecompressor(new ChimpNXORDecompressor(128)),
+//                        new BaseDecompressor(new GorillaXORDecompressor()),
+//                        new BaseDecompressor(new ChimpAdaXORDecompressor()),
+//                        new BaseDecompressor(new ChimpNAdaXORDecompressor(128)),
                 };
 
                 for (int i = 0; i < compressors.length; i++) {
@@ -149,24 +150,24 @@ public class TestTransmit {
             INetCompressor[] compressors = {
 //                    new SElfStarHuffmanCompressor(new SElfXORCompressor()),
                     new SElfStarCompressor(new SElfXORCompressor()),
-                    new ElfPlusCompressor(new ElfPlusXORCompressor()),
-                    new ElfCompressor(new ElfXORCompressor()),
-                    new BaseCompressor(new ChimpXORCompressor()),
-                    new BaseCompressor(new ChimpNXORCompressor(128)),
-                    new BaseCompressor(new GorillaXORCompressor()),
-                    new SBaseCompressor(new ChimpAdaXORCompressor()),
-                    new SBaseCompressor(new ChimpNAdaXORCompressor(128)),
+//                    new ElfPlusCompressor(new ElfPlusXORCompressor()),
+//                    new ElfCompressor(new ElfXORCompressor()),
+//                    new BaseCompressor(new ChimpXORCompressor()),
+//                    new BaseCompressor(new ChimpNXORCompressor(128)),
+//                    new BaseCompressor(new GorillaXORCompressor()),
+//                    new SBaseCompressor(new ChimpAdaXORCompressor()),
+//                    new SBaseCompressor(new ChimpNAdaXORCompressor(128)),
             };
             INetDecompressor[] decompressors = {
 //                    new SElfStarHuffmanDecompressor(new ElfStarXORDecompressor()),
                     new ElfStarDecompressor(new SElfStarXORDecompressor()),
-                    new ElfPlusDecompressor(new ElfPlusXORDecompressor()),
-                    new ElfDecompressor(new ElfXORDecompressor()),
-                    new BaseDecompressor(new ChimpXORDecompressor()),
-                    new BaseDecompressor(new ChimpNXORDecompressor(128)),
-                    new BaseDecompressor(new GorillaXORDecompressor()),
-                    new BaseDecompressor(new ChimpAdaXORDecompressor()),
-                    new BaseDecompressor(new ChimpNAdaXORDecompressor(128)),
+//                    new ElfPlusDecompressor(new ElfPlusXORDecompressor()),
+//                    new ElfDecompressor(new ElfXORDecompressor()),
+//                    new BaseDecompressor(new ChimpXORDecompressor()),
+//                    new BaseDecompressor(new ChimpNXORDecompressor(128)),
+//                    new BaseDecompressor(new GorillaXORDecompressor()),
+//                    new BaseDecompressor(new ChimpAdaXORDecompressor()),
+//                    new BaseDecompressor(new ChimpNAdaXORDecompressor(128)),
             };
             for (int i = 0; i < compressors.length; i++) {
                 Scanner scanner = new Scanner(new File(prefix + fileName));
@@ -306,15 +307,31 @@ class SenderThread extends Thread {
                 if (floatings.size() != block) {
                     break;
                 }
-                for (int i = 0; i < floatings.size(); i++) {
-                    double doubleToCompSend = floatings.get(i);
-                    byte[] bytesToSend = compressor.compress(doubleToCompSend);
-                    bytesToSend[0] = (byte) bytesToSend.length;
+                // one by one
+//                for (int i = 0; i < floatings.size(); i++) {
+//                    double doubleToCompSend = floatings.get(i);
+//                    byte[] bytesToSend = compressor.compress(doubleToCompSend);
+//                    bytesToSend[0] = (byte) bytesToSend.length;
+//                    localClient.send(bytesToSend);
+//                }
+
+                // mini batch
+                int batchSize = 50;
+                for (int i = 0; i < floatings.size(); i+=batchSize) {
+                    List<Double> doubleToCompSend = floatings.subList(i,i+batchSize);
+                    byte[] bytesToSend = compressor.compressMiniBatch(doubleToCompSend);
+                    bytesToSend[0] = (byte) (bytesToSend.length>>8);
+                    bytesToSend[1] = (byte) (bytesToSend.length&0xFF);
                     localClient.send(bytesToSend);
                 }
                 compressor.refresh();
             }
-            localClient.send(new byte[]{(byte) 0});
+            // one by one
+//            localClient.send(new byte[]{(byte) 0});
+
+            // mini batch
+            localClient.send(new byte[]{(byte) 0,(byte)0});
+
             localClient.close();
         } catch (Exception e) {
             throw new RuntimeException(dataPath, e);
@@ -457,20 +474,36 @@ class ReceiverThread extends Thread {
                 if(cnt % 1000==0 && cnt!=0) {
                     decompressor.refresh();
                 }
-                byte header = localServer.receiveBytes(1)[0];
-                int byteCount = header;
-//                int byteCount = header >>> 4;
+                // one by one
+//                byte header = localServer.receiveBytes(1)[0];
+//                int byteCount = header;
+
+                // mini batch
+                byte high = localServer.receiveBytes(1)[0];
+                byte low = localServer.receiveBytes(1)[0];
+                int byteCount = high << 8 | low & 0xFF;
+
                 if (byteCount == 0) {
                     endTime = System.nanoTime();
                     break;
                 }
-                byte[] receivedData = localServer.receiveBytes(byteCount - 1);
+                // one by one
+//                byte[] receivedData = localServer.receiveBytes(byteCount - 1);
+
+                // mini batch
+                byte[] receivedData = localServer.receiveBytes(byteCount - 2);
+
                 if (first) {
                     startTime = System.nanoTime();
                     first = false;
                 }
-                decompressor.decompress(receivedData);
-                cnt++;
+                // one by one
+//                decompressor.decompress(receivedData);
+//                cnt++;
+
+                // mini batch
+                decompressor.decompressMiniBatch(receivedData,50);
+                cnt+=50;
             }
             localServer.close();
             usedTimeInMS = (endTime - startTime) / 1000_000.0; // ms

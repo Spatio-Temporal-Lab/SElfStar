@@ -87,4 +87,14 @@ public class ElfPlusDecompressor implements IDecompressor, INetDecompressor {
         setBytes(input);
         return nextValue();
     }
+
+    @Override
+    public List<Double> decompressMiniBatch(byte[] input, int batchSize) {
+        setBytes(input);
+        List<Double> values = new ArrayList<>(1024);
+        for (int i=0;i<batchSize;i++){
+            values.add(nextValue());
+        }
+        return values;
+    }
 }
