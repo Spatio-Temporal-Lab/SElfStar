@@ -265,7 +265,7 @@ public class TestTransmit {
                     compressor.sample(rowGroup);
                     for(List<Double> row : rowGroup){
                         result = compressor.ALPNetCompress(row);
-                        double[] devalues = decompressor.ALPNetDecompress(Arrays.copyOfRange(result, 1, result.length));
+                        double[] devalues = decompressor.ALPNetDecompress(Arrays.copyOfRange(result, 2, result.length));
                         for(int i=0;i<row.size();i++) {
                             assertEquals(row.get(i),devalues[i]);
                         }
