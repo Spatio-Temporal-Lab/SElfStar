@@ -68,7 +68,8 @@ public class TestTransmit {
 
                 for (int i = 0; i < compressors.length; i++) {
                     ReceiverThread receiverThread = new ReceiverThread(maxRate, decompressors[i], port);
-                    SenderThread senderThread = new SenderThread(maxRate, prefix + fileName, compressors[i], port);
+//                    SenderThread senderThread = new SenderThread(maxRate, prefix + fileName, compressors[i], port);
+                    SenderThread senderThread = new SenderThread(maxRate, fileName, compressors[i], port);
                     receiverThread.start();
                     senderThread.start();
                     receiverThread.join();
@@ -97,7 +98,8 @@ public class TestTransmit {
 
                 for (int i = 0; i < compressors.length; i++) {
                     HuffReceiverThread receiverThread = new HuffReceiverThread(maxRate, decompressors[i], port);
-                    HuffSenderThread senderThread = new HuffSenderThread(maxRate, prefix + fileName, compressors[i], port);
+//                    HuffSenderThread senderThread = new HuffSenderThread(maxRate, prefix + fileName, compressors[i], port);
+                    HuffSenderThread senderThread = new HuffSenderThread(maxRate, fileName, compressors[i], port);
                     receiverThread.start();
                     senderThread.start();
                     receiverThread.join();
@@ -212,7 +214,7 @@ public class TestTransmit {
                     double value = scanner.nextDouble();
                     double deValue;
                     byte[] bytes ;
-                    if (cnt % 1001 ==0){
+                    if (cnt % 1000 ==0 && cnt!=0){
                         bytes = compressors[i].compressAndClose(value);
                         deValue = decompressors[i].decompressLast(Arrays.copyOfRange(bytes, 1, bytes.length));
                         compressors[i].refresh();
@@ -297,24 +299,25 @@ class SenderThread extends Thread {
         super.run();
         try {
             Client localClient = new Client(maxRate, Optional.of(port));
-            Scanner scanner = new Scanner(new File(dataPath));
-            int cnt=1;
-            while (scanner.hasNextDouble()) {
-                if(cnt % 1001==0) {
-//                    compressor.close();
-                    compressor.refresh();
+            int block = 1000;
+            BlockReader br = new BlockReader(dataPath, block);
+            List<Double> floatings;
+            while ((floatings = br.nextBlock()) != null) {
+                if (floatings.size() != block) {
+                    break;
                 }
-                double doubleToCompSend = scanner.nextDouble();
-                byte[] bytesToSend = compressor.compress(doubleToCompSend);
-                bytesToSend[0] = (byte)bytesToSend.length;
-//                bytesToSend[0] = (byte) (bytesToSend[0] | (((byte) bytesToSend.length) << 4));  4bits are not enough
-                localClient.send(bytesToSend);
-                cnt++;
+                for (int i = 0; i < floatings.size(); i++) {
+                    double doubleToCompSend = floatings.get(i);
+                    byte[] bytesToSend = compressor.compress(doubleToCompSend);
+                    bytesToSend[0] = (byte) bytesToSend.length;
+                    localClient.send(bytesToSend);
+                }
+                compressor.refresh();
             }
             localClient.send(new byte[]{(byte) 0});
             localClient.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            throw new RuntimeException(dataPath, e);
         }
     }
 }
@@ -402,25 +405,28 @@ class HuffSenderThread extends Thread {
         super.run();
         try {
             Client localClient = new Client(maxRate, Optional.of(port));
-            Scanner scanner = new Scanner(new File(dataPath));
-            int cnt=1;
-            while (scanner.hasNextDouble()) {
-                double value = scanner.nextDouble();
-                byte[] bytesToSend;
-                if (cnt % 1001 ==0){
-                    bytesToSend = compressor.compressAndClose(value);
-                    compressor.refresh();
-                }else{
-                    bytesToSend = compressor.compress(value);
+            int block = 1000;
+            BlockReader br = new BlockReader(dataPath, block);
+            List<Double> floatings;
+            while ((floatings = br.nextBlock()) != null) {
+                if (floatings.size() != block) {
+                    break;
                 }
-                bytesToSend[0] = (byte)bytesToSend.length;
+                for (int i = 0; i < floatings.size() - 1; i++) {
+                    double doubleToCompSend = floatings.get(i);
+                    byte[] bytesToSend = compressor.compress(doubleToCompSend);
+                    bytesToSend[0] = (byte) bytesToSend.length;
+                    localClient.send(bytesToSend);
+                }
+                byte[] bytesToSend = compressor.compressAndClose(floatings.get(floatings.size() - 1));
+                compressor.refresh();
+                bytesToSend[0] = (byte) bytesToSend.length;
                 localClient.send(bytesToSend);
-                cnt++;
             }
             localClient.send(new byte[]{(byte) 0});
             localClient.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            throw new RuntimeException(dataPath, e);
         }
     }
 }
@@ -446,9 +452,9 @@ class ReceiverThread extends Thread {
             long startTime = 0;
             long endTime;
             Server localServer = new Server(maxRate, Optional.of(port));
-            int cnt=1;
+            int cnt= 0 ;
             while (true) {
-                if(cnt % 1001==0) {
+                if(cnt % 1000==0 && cnt!=0) {
                     decompressor.refresh();
                 }
                 byte header = localServer.receiveBytes(1)[0];
@@ -561,7 +567,7 @@ class HuffReceiverThread extends Thread {
                     startTime = System.nanoTime();
                     first = false;
                 }
-                if(cnt % 1001==0) {
+                if(cnt % 1000==0) {
                     decompressor.decompressLast(receivedData);
                     decompressor.refresh();
                 }else{
