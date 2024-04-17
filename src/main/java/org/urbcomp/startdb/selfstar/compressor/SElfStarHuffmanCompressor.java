@@ -8,6 +8,7 @@ import org.urbcomp.startdb.selfstar.utils.OutputBitStream;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 
 public class SElfStarHuffmanCompressor implements ICompressor, INetCompressor {
     private final IXORCompressor xorCompressor;
@@ -184,10 +185,27 @@ public class SElfStarHuffmanCompressor implements ICompressor, INetCompressor {
         return getSingleBytes();
     }
 
+    public byte[] compressMiniBatch(List<Double> dbs) throws IOException {
+        compressedSizeInBits += os.writeInt(0,16);  // prepared for byteCnt in transmit test
+        for (double db:dbs){
+            addValue(db);
+        }
+        return getSingleBytes();
+    }
+
     @Override
     public byte[] compressAndClose(double v) throws IOException {
         compressedSizeInBits += os.writeInt(0,8);   // prepared for byteCnt in transmit test
         addValue(v);
+        close();
+        return getSingleBytes();
+    }
+
+    public byte[] compressLastMiniBatch(List<Double> dbs) throws IOException {
+        compressedSizeInBits += os.writeInt(0,16);  // prepared for byteCnt in transmit test
+        for (double db:dbs){
+            addValue(db);
+        }
         close();
         return getSingleBytes();
     }

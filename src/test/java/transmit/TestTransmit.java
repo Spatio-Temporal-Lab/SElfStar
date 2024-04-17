@@ -425,22 +425,48 @@ class HuffSenderThread extends Thread {
             int block = 1000;
             BlockReader br = new BlockReader(dataPath, block);
             List<Double> floatings;
+            int cnt=0;
             while ((floatings = br.nextBlock()) != null) {
                 if (floatings.size() != block) {
                     break;
                 }
-                for (int i = 0; i < floatings.size() - 1; i++) {
-                    double doubleToCompSend = floatings.get(i);
-                    byte[] bytesToSend = compressor.compress(doubleToCompSend);
-                    bytesToSend[0] = (byte) bytesToSend.length;
+                // one by one
+//                for (int i = 0; i < floatings.size() - 1; i++) {
+//                    double doubleToCompSend = floatings.get(i);
+//                    byte[] bytesToSend = compressor.compress(doubleToCompSend);
+//                    bytesToSend[0] = (byte) bytesToSend.length;
+//                    localClient.send(bytesToSend);
+//                }
+//                byte[] bytesToSend = compressor.compressAndClose(floatings.get(floatings.size() - 1));
+//                bytesToSend[0] = (byte) bytesToSend.length;
+//                localClient.send(bytesToSend);
+
+                // mini batch
+                int batchSize = 50;
+                for (int i=0;i<floatings.size()-batchSize;i+=batchSize){
+                    List<Double> doubleToCompSend = floatings.subList(i,i+batchSize);
+                    byte[] bytesToSend = compressor.compressMiniBatch(doubleToCompSend);
+                    bytesToSend[0] = (byte) (bytesToSend.length>>8);
+                    bytesToSend[1] = (byte) (bytesToSend.length&0xFF);
                     localClient.send(bytesToSend);
+                    cnt+=batchSize;
                 }
-                byte[] bytesToSend = compressor.compressAndClose(floatings.get(floatings.size() - 1));
-                compressor.refresh();
-                bytesToSend[0] = (byte) bytesToSend.length;
+                List<Double> tmp = floatings.subList(floatings.size()-batchSize,floatings.size());
+                byte[] bytesToSend = compressor.compressLastMiniBatch(floatings.subList(floatings.size()-batchSize,floatings.size()));
+                bytesToSend[0] = (byte) (bytesToSend.length>>8);
+                bytesToSend[1] = (byte) (bytesToSend.length&0xFF);
                 localClient.send(bytesToSend);
+                cnt+=batchSize;
+
+                compressor.refresh();
+
             }
-            localClient.send(new byte[]{(byte) 0});
+            // one by one
+//            localClient.send(new byte[]{(byte) 0});
+
+            // mini batch
+            localClient.send((new byte[]{(byte)0, (byte)0}));
+
             localClient.close();
         } catch (Exception e) {
             throw new RuntimeException(dataPath, e);
@@ -586,28 +612,53 @@ class HuffReceiverThread extends Thread {
             long startTime = 0;
             long endTime;
             Server localServer = new Server(maxRate, Optional.of(port));
-            int cnt=1;
+            int cnt=0;
+            int batchSize = 50;
             while (true) {
-                byte header = localServer.receiveBytes(1)[0];
-                int byteCount = header;
-//                int byteCount = header >>> 4;
+                // one by one
+//                byte header = localServer.receiveBytes(1)[0];
+//                int byteCount = header;
+
+                // mini batch
+                byte high = localServer.receiveBytes(1)[0];
+                byte low = localServer.receiveBytes(1)[0];
+                int byteCount = high << 8 | low & 0xFF;
+
                 if (byteCount == 0) {
                     endTime = System.nanoTime();
                     break;
                 }
-                byte[] receivedData = localServer.receiveBytes(byteCount - 1);
+
+                // one by one
+//                byte[] receivedData = localServer.receiveBytes(byteCount - 1);
+
+                // mini batch
+                byte[] receivedData = localServer.receiveBytes(byteCount - 2);
+
                 if (first) {
                     startTime = System.nanoTime();
                     first = false;
                 }
-                if(cnt % 1000==0) {
-                    decompressor.decompressLast(receivedData);
+
+                // one by one
+//                if((cnt+1) % 1000==0) {
+//                    decompressor.decompressLast(receivedData);
+//                    decompressor.refresh();
+//                }else{
+//                    decompressor.decompress(receivedData);
+//                }
+//                cnt++;
+
+                // mini batch
+                if ((cnt+batchSize)%1000==0 ){
+                    decompressor.decompressLastMiniBatch(receivedData,batchSize);
                     decompressor.refresh();
                 }else{
-                    decompressor.decompress(receivedData);
+                    decompressor.decompressMiniBatch(receivedData,batchSize);
                 }
-                cnt++;
+                cnt+=batchSize;
             }
+
             localServer.close();
             usedTimeInMS = (endTime - startTime) / 1000_000.0; // ms
         } catch (IOException e) {

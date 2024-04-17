@@ -8,6 +8,8 @@ public interface INetDecompressor {
 
     default List<Double> decompressMiniBatch(byte[] input,int batchSize){return null;}
 
+    default List<Double> decompressLastMiniBatch(byte[] input,int batchSize){return null;}
+
     default void refresh(){}
 
     default double decompressLast(byte[] input){ return 0;}

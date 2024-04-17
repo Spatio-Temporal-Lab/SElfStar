@@ -53,6 +53,15 @@ public class SElfStarHuffmanDecompressor implements IDecompressor, INetDecompres
         return value;
     }
 
+    public List<Double> decompressMiniBatch(byte[] input, int batchSize) {
+        setBytes(input);
+        List<Double> values = new ArrayList<>(batchSize);
+        for (int i=0;i<batchSize;i++){
+            values.add(nextValue());
+        }
+        return values;
+    }
+
     /**
      * used for transmit test, which decompress db one by one
      * @param input bits for single db
@@ -69,6 +78,20 @@ public class SElfStarHuffmanDecompressor implements IDecompressor, INetDecompres
         root = huffmanEncode.hashMapToTree(huffmanCode);
         Arrays.fill(frequency, 0);
         return value;
+    }
+
+    public List<Double> decompressLastMiniBatch(byte[] input, int batchSize) {
+        setBytes(input);
+        List<Double> values = new ArrayList<>(batchSize);
+        for (int i=0;i<batchSize;i++){
+            values.add(nextValue());
+        }
+        frequency[17]--;
+        HuffmanEncode huffmanEncode = new HuffmanEncode(frequency);
+        Code[] huffmanCode = huffmanEncode.getHuffmanCodes();
+        root = huffmanEncode.hashMapToTree(huffmanCode);
+        Arrays.fill(frequency, 0);
+        return values;
     }
 
     @Override

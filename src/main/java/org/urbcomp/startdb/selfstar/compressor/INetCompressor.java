@@ -8,6 +8,8 @@ public interface INetCompressor {
 
     default byte[] compressMiniBatch(List<Double> dbs) throws IOException {return null;}
 
+    default byte[] compressLastMiniBatch(List<Double> dbs) throws IOException {return null;}
+
     default void refresh(){}
 
     default String getKey() {
