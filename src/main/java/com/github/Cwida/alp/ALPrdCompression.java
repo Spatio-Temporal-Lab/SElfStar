@@ -11,6 +11,7 @@ public class ALPrdCompression {
     private long size;
 
     public void reset() {
+        size = 0;
         state.reset();
     }
 

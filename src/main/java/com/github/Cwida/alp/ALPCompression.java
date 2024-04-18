@@ -65,12 +65,12 @@ public class ALPCompression implements INetCompressor {
     private long size;
     private int byteCnt;
 
-    public void reset(){
+    public void reset() {
         state.reset();
         aLPrd.reset();
     }
 
-    public long getSize(){
+    public long getSize() {
         return size;
     }
 
@@ -124,7 +124,7 @@ public class ALPCompression implements INetCompressor {
         for (int i = 0; i < nValues; i++) {
             double decodedValue = tmpDecodedValues.get(i);
             double actualValue = inputVector.get(i);
-            boolean isException = (decodedValue != actualValue) || Double.doubleToRawLongBits(actualValue)==-9223372036854775808L;  // 将-0.00归为异常值
+            boolean isException = (decodedValue != actualValue) || Double.doubleToRawLongBits(actualValue) == -9223372036854775808L;  // 将-0.00归为异常值
             if (isException)
                 exceptionsPositions.add((short) i);
         }
@@ -205,7 +205,7 @@ public class ALPCompression implements INetCompressor {
     public byte[] getRowBytes() throws IOException {
         out.align();
         int preByteCnt = byteCnt;
-        byteCnt += (int)Math.ceil(size / 8.0);
+        byteCnt += (int) Math.ceil(size / 8.0);
         size = 0;
         return Arrays.copyOfRange(out.getBuffer(), preByteCnt, byteCnt);
     }
@@ -255,10 +255,10 @@ public class ALPCompression implements INetCompressor {
     }
 
     public byte[] ALPNetCompress(List<Double> row) throws IOException {
-        size += out.writeInt(0,16); // prepared for byteCnt
+        size += out.writeInt(0, 16); // prepared for byteCnt
         if (!state.useALP) {
             // use ALPrd
-                aLPrd.entry(row);
+            aLPrd.entry(row);
             size += aLPrd.getSize();
         } else {
             // use ALP
@@ -271,7 +271,7 @@ public class ALPCompression implements INetCompressor {
         return getRowBytes();
     }
 
-    public void sample(List<List<Double>> rowGroup){
+    public void sample(List<List<Double>> rowGroup) {
         List<List<Double>> vectorsSampled = new ArrayList<>();
         int idxIncrements = Math.max(1, (int) Math.ceil((double) rowGroup.size() / ALPConstants.RG_SAMPLES)); // 用于行组采样的向量下标增量
         for (int i = 0; i < rowGroup.size(); i += idxIncrements) {
