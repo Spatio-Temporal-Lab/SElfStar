@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.sql.SQLOutput;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -171,16 +172,16 @@ public class TestTransmit {
             };
             for (int i = 0; i < compressors.length; i++) {
                 Scanner scanner = new Scanner(new File(prefix + fileName));
-                int cnt=1;
+                int cnt = 1;
                 while (scanner.hasNextDouble()) {
-                    if(cnt % 1001==0) {
+                    if (cnt % 1001 == 0) {
 //                        compressors[i].close();
                         compressors[i].refresh();
                         decompressors[i].refresh();
                     }
                     double value = scanner.nextDouble();
                     double deValue;
-                    byte[] bytes ;//= compressors[i].compress(value);
+                    byte[] bytes;//= compressors[i].compress(value);
                     bytes = compressors[i].compress(value);
                     deValue = decompressors[i].decompress(Arrays.copyOfRange(bytes, 1, bytes.length));
 
@@ -188,7 +189,7 @@ public class TestTransmit {
                     if (value != deValue) {
                         System.out.println(compressors[i].getKey() + " " + fileName + " origin: " + value + " result: " + deValue);
                     }
-                    assertTrue(Objects.equals(value, deValue) ); // Infinity and NaN use
+                    assertTrue(Objects.equals(value, deValue)); // Infinity and NaN use
                     cnt++;
                 }
             }
@@ -210,18 +211,18 @@ public class TestTransmit {
             };
             for (int i = 0; i < compressors.length; i++) {
                 Scanner scanner = new Scanner(new File(prefix + fileName));
-                int cnt=1;
+                int cnt = 1;
                 while (scanner.hasNextDouble()) {
                     double value = scanner.nextDouble();
                     double deValue;
-                    byte[] bytes ;
-                    if (cnt % 1000 ==0 && cnt!=0){
+                    byte[] bytes;
+                    if (cnt % 1000 == 0 && cnt != 0) {
                         bytes = compressors[i].compressAndClose(value);
                         deValue = decompressors[i].decompressLast(Arrays.copyOfRange(bytes, 1, bytes.length));
                         compressors[i].refresh();
                         decompressors[i].refresh();
 
-                    }else{
+                    } else {
                         bytes = compressors[i].compress(value);
                         deValue = decompressors[i].decompress(Arrays.copyOfRange(bytes, 1, bytes.length));
                     }
@@ -229,7 +230,7 @@ public class TestTransmit {
                     if (value != deValue) {
                         System.out.println(compressors[i].getKey() + " " + fileName + " origin: " + value + " result: " + deValue);
                     }
-                    assertTrue(Objects.equals(value, deValue) ); // Infinity and NaN use
+                    assertTrue(Objects.equals(value, deValue)); // Infinity and NaN use
                     cnt++;
                 }
             }
@@ -266,11 +267,11 @@ public class TestTransmit {
                 ALPDecompression decompressor = new ALPDecompression();
                 for (List<List<Double>> rowGroup : RowGroups) {
                     compressor.sample(rowGroup);
-                    for(List<Double> row : rowGroup){
+                    for (List<Double> row : rowGroup) {
                         result = compressor.ALPNetCompress(row);
                         double[] devalues = decompressor.ALPNetDecompress(Arrays.copyOfRange(result, 2, result.length));
-                        for(int i=0;i<row.size();i++) {
-                            assertEquals(row.get(i),devalues[i]);
+                        for (int i = 0; i < row.size(); i++) {
+                            assertEquals(row.get(i), devalues[i]);
                         }
                     }
                     compressor.reset();
@@ -317,11 +318,11 @@ class SenderThread extends Thread {
 
                 // mini batch
                 int batchSize = 50;
-                for (int i = 0; i < floatings.size(); i+=batchSize) {
-                    List<Double> doubleToCompSend = floatings.subList(i,i+batchSize);
+                for (int i = 0; i < floatings.size(); i += batchSize) {
+                    List<Double> doubleToCompSend = floatings.subList(i, i + batchSize);
                     byte[] bytesToSend = compressor.compressMiniBatch(doubleToCompSend);
-                    bytesToSend[0] = (byte) (bytesToSend.length>>8);
-                    bytesToSend[1] = (byte) (bytesToSend.length&0xFF);
+                    bytesToSend[0] = (byte) (bytesToSend.length >> 8);
+                    bytesToSend[1] = (byte) (bytesToSend.length & 0xFF);
                     localClient.send(bytesToSend);
                 }
                 compressor.refresh();
@@ -330,7 +331,7 @@ class SenderThread extends Thread {
 //            localClient.send(new byte[]{(byte) 0});
 
             // mini batch
-            localClient.send(new byte[]{(byte) 0,(byte)0});
+            localClient.send(new byte[]{(byte) 0, (byte) 0});
 
             localClient.close();
         } catch (Exception e) {
@@ -386,7 +387,7 @@ class ALPSenderThread extends Thread {
                 for (List<List<Double>> rowGroup : RowGroups) {
                     compressor.sample(rowGroup);
                     localClient.send(new byte[]{(byte) rowGroup.size()});
-                    for(List<Double> row : rowGroup){
+                    for (List<Double> row : rowGroup) {
                         result = compressor.ALPNetCompress(row);
                         result[0] = (byte) (result.length >> 8);
                         result[1] = (byte) (result.length & 0xFF);
@@ -425,7 +426,7 @@ class HuffSenderThread extends Thread {
             int block = 1000;
             BlockReader br = new BlockReader(dataPath, block);
             List<Double> floatings;
-            int cnt=0;
+            int cnt = 0;
             while ((floatings = br.nextBlock()) != null) {
                 if (floatings.size() != block) {
                     break;
@@ -443,20 +444,20 @@ class HuffSenderThread extends Thread {
 
                 // mini batch
                 int batchSize = 50;
-                for (int i=0;i<floatings.size()-batchSize;i+=batchSize){
-                    List<Double> doubleToCompSend = floatings.subList(i,i+batchSize);
+                for (int i = 0; i < floatings.size() - batchSize; i += batchSize) {
+                    List<Double> doubleToCompSend = floatings.subList(i, i + batchSize);
                     byte[] bytesToSend = compressor.compressMiniBatch(doubleToCompSend);
-                    bytesToSend[0] = (byte) (bytesToSend.length>>8);
-                    bytesToSend[1] = (byte) (bytesToSend.length&0xFF);
+                    bytesToSend[0] = (byte) (bytesToSend.length >> 8);
+                    bytesToSend[1] = (byte) (bytesToSend.length & 0xFF);
                     localClient.send(bytesToSend);
-                    cnt+=batchSize;
+                    cnt += batchSize;
                 }
-                List<Double> tmp = floatings.subList(floatings.size()-batchSize,floatings.size());
-                byte[] bytesToSend = compressor.compressLastMiniBatch(floatings.subList(floatings.size()-batchSize,floatings.size()));
-                bytesToSend[0] = (byte) (bytesToSend.length>>8);
-                bytesToSend[1] = (byte) (bytesToSend.length&0xFF);
+                List<Double> tmp = floatings.subList(floatings.size() - batchSize, floatings.size());
+                byte[] bytesToSend = compressor.compressLastMiniBatch(floatings.subList(floatings.size() - batchSize, floatings.size()));
+                bytesToSend[0] = (byte) (bytesToSend.length >> 8);
+                bytesToSend[1] = (byte) (bytesToSend.length & 0xFF);
                 localClient.send(bytesToSend);
-                cnt+=batchSize;
+                cnt += batchSize;
 
                 compressor.refresh();
 
@@ -465,7 +466,7 @@ class HuffSenderThread extends Thread {
 //            localClient.send(new byte[]{(byte) 0});
 
             // mini batch
-            localClient.send((new byte[]{(byte)0, (byte)0}));
+            localClient.send((new byte[]{(byte) 0, (byte) 0}));
 
             localClient.close();
         } catch (Exception e) {
@@ -495,9 +496,9 @@ class ReceiverThread extends Thread {
             long startTime = 0;
             long endTime;
             Server localServer = new Server(maxRate, Optional.of(port));
-            int cnt= 0 ;
+            int cnt = 0;
             while (true) {
-                if(cnt % 1000==0 && cnt!=0) {
+                if (cnt % 1000 == 0 && cnt != 0) {
                     decompressor.refresh();
                 }
                 // one by one
@@ -528,8 +529,8 @@ class ReceiverThread extends Thread {
 //                cnt++;
 
                 // mini batch
-                decompressor.decompressMiniBatch(receivedData,50);
-                cnt+=50;
+                decompressor.decompressMiniBatch(receivedData, 50);
+                cnt += 50;
             }
             localServer.close();
             usedTimeInMS = (endTime - startTime) / 1000_000.0; // ms
@@ -567,13 +568,13 @@ class ALPReceiverThread extends Thread {
 
             int rowGroupCnt = localServer.receiveBytes(1)[0];
             startTime = System.nanoTime();
-            for (int i=0; i<rowGroupCnt; i++){
+            for (int i = 0; i < rowGroupCnt; i++) {
                 int rowGroupSize = localServer.receiveBytes(1)[0];
-                for (int j=0; j<rowGroupSize; j++){
+                for (int j = 0; j < rowGroupSize; j++) {
                     byte high = localServer.receiveBytes(1)[0];
                     byte low = localServer.receiveBytes(1)[0];
                     int byteCnt = high << 8 | low & 0xFF;
-                    byte[] receivedData = localServer.receiveBytes(byteCnt-2);
+                    byte[] receivedData = localServer.receiveBytes(byteCnt - 2);
                     double[] devalues = decompressor.ALPNetDecompress(receivedData);
                 }
             }
@@ -612,7 +613,7 @@ class HuffReceiverThread extends Thread {
             long startTime = 0;
             long endTime;
             Server localServer = new Server(maxRate, Optional.of(port));
-            int cnt=0;
+            int cnt = 0;
             int batchSize = 50;
             while (true) {
                 // one by one
@@ -650,13 +651,14 @@ class HuffReceiverThread extends Thread {
 //                cnt++;
 
                 // mini batch
-                if ((cnt+batchSize)%1000==0 ){
-                    decompressor.decompressLastMiniBatch(receivedData,batchSize);
+                if ((cnt + batchSize) % 1000 == 0) {
+                    decompressor.decompressLastMiniBatch(receivedData, batchSize);
                     decompressor.refresh();
-                }else{
-                    decompressor.decompressMiniBatch(receivedData,batchSize);
+                } else {
+                    decompressor.decompressMiniBatch(receivedData, batchSize);
+
                 }
-                cnt+=batchSize;
+                cnt += batchSize;
             }
 
             localServer.close();
