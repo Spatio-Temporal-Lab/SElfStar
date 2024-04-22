@@ -12,7 +12,7 @@ public interface INetDecompressor {
 
     default void refresh(){}
 
-    default double decompressLast(byte[] input){ return 0;}
+    default double decompressLast(byte[] input){ return decompress(input);}
 
     default double[] ALPNetDecompress(byte[] receivedData) throws IOException {
         return null;

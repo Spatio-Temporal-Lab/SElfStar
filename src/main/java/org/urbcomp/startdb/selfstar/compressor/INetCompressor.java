@@ -18,7 +18,7 @@ public interface INetCompressor {
 
     default void close(){}
 
-    default byte[] compressAndClose(double v) throws IOException { return null;}
+    default byte[] compressAndClose(double v) throws IOException { return compress(v);}
 
     default byte[] ALPNetCompress(List<Double> row) throws IOException {return null;}
 

@@ -3,10 +3,14 @@ package transmit;
 import com.github.Cwida.alp.ALPCompression;
 import com.github.Cwida.alp.ALPDecompression;
 import org.junit.jupiter.api.Test;
-import org.urbcomp.startdb.selfstar.compressor.*;
-import org.urbcomp.startdb.selfstar.compressor.xor.*;
-import org.urbcomp.startdb.selfstar.decompressor.*;
-import org.urbcomp.startdb.selfstar.decompressor.xor.*;
+import org.urbcomp.startdb.selfstar.compressor.INetCompressor;
+import org.urbcomp.startdb.selfstar.compressor.SElfStarCompressor;
+import org.urbcomp.startdb.selfstar.compressor.SElfStarHuffmanCompressor;
+import org.urbcomp.startdb.selfstar.compressor.xor.SElfXORCompressor;
+import org.urbcomp.startdb.selfstar.decompressor.ElfStarDecompressor;
+import org.urbcomp.startdb.selfstar.decompressor.INetDecompressor;
+import org.urbcomp.startdb.selfstar.decompressor.SElfStarHuffmanDecompressor;
+import org.urbcomp.startdb.selfstar.decompressor.xor.SElfStarXORDecompressor;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,7 +19,7 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class TestTransmit {
+public class TestTransmitMiniBatch {
     private static final String prefix = "src/main/resources/floating/";
     private static final double[] MAX_DIFF = new double[]{1.0E-1, 0.5, 1.0E-2, 1.0E-3, 1.0E-4, 1.0E-5, 1.0E-6, 1.0E-7, 1.0E-8};
     private static final double DEFAULT_DIFF = 0.0001;
@@ -280,13 +284,133 @@ public class TestTransmit {
     }
 }
 
-class SenderThread extends Thread {
+class ALPSenderThread extends Thread {
     private final int maxRate;
     private final String dataPath;
     private final INetCompressor compressor;
     private final int port;
 
-    public SenderThread(int maxRate, String dataPath, INetCompressor compressor, int port) {
+    public ALPSenderThread(int maxRate, String dataPath, INetCompressor compressor, int port) {
+        super.setName("SenderThread");
+        this.maxRate = maxRate;
+        this.dataPath = dataPath;
+        this.compressor = compressor;
+        this.port = port;
+    }
+
+    @Override
+    public void run() {
+        super.run();
+        try {
+            Client localClient = new Client(maxRate, Optional.of(port));
+            int block = 50;
+            try (BlockReader br = new BlockReader(dataPath, block)) {
+                List<List<List<Double>>> RowGroups = new ArrayList<>();
+                List<List<Double>> floatingsList = new ArrayList<>();
+                List<Double> floatings;
+                int RGsize = 20;
+                while ((floatings = br.nextBlock()) != null) {
+                    if (floatings.size() != block) {
+                        break;
+                    }
+                    floatingsList.add(new ArrayList<>(floatings));
+                    if (floatingsList.size() == RGsize) {
+                        RowGroups.add(new ArrayList<>(floatingsList));
+                        floatingsList.clear();
+                    }
+                }
+                if (!floatingsList.isEmpty()) {
+                    RowGroups.add(floatingsList);
+                }
+
+                byte[] result;
+
+                ALPCompression compressor = new ALPCompression(block);
+                ALPDecompression decompressor = new ALPDecompression();
+                localClient.send(new byte[]{(byte) RowGroups.size()});
+                for (List<List<Double>> rowGroup : RowGroups) {
+                    compressor.sample(rowGroup);
+                    localClient.send(new byte[]{(byte) rowGroup.size()});
+                    for (List<Double> row : rowGroup) {
+                        result = compressor.ALPNetCompress(row);
+                        result[0] = (byte) (result.length >> 8);
+                        result[1] = (byte) (result.length & 0xFF);
+                        localClient.send(result);
+                    }
+                    compressor.reset();
+                }
+            }
+            localClient.send(new byte[]{(byte) 0});
+            localClient.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+class ALPReceiverThread extends Thread {
+    private final int maxRate;
+    private final INetDecompressor decompressor;
+    private final int port;
+    private double usedTimeInMS;
+
+    public ALPReceiverThread(int maxRate, INetDecompressor decompressor, int port) {
+        super.setName("ReceiverThread");
+        this.maxRate = maxRate;
+        this.decompressor = decompressor;
+        this.port = port;
+    }
+
+    @Override
+    public void run() {
+        super.run();
+        try {
+            long startTime = 0;
+            long endTime;
+            Server localServer = new Server(maxRate, Optional.of(port));
+
+            int rowGroupCnt = localServer.receiveBytes(1)[0];
+            startTime = System.nanoTime();
+            for (int i = 0; i < rowGroupCnt; i++) {
+                int rowGroupSize = localServer.receiveBytes(1)[0];
+                for (int j = 0; j < rowGroupSize; j++) {
+                    byte high = localServer.receiveBytes(1)[0];
+                    byte low = localServer.receiveBytes(1)[0];
+                    int byteCnt = high << 8 | low & 0xFF;
+                    byte[] receivedData = localServer.receiveBytes(byteCnt - 2);
+                    double[] devalues = decompressor.ALPNetDecompress(receivedData);
+                }
+            }
+            endTime = System.nanoTime();
+            localServer.close();
+            usedTimeInMS = (endTime - startTime) / 1000_000.0; // ms
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public double getUsedTimeInMS() {
+        return usedTimeInMS;
+    }
+}
+
+class SenderMiniBatchThread extends Thread {
+    private int batchSize;
+    private final int maxRate;
+    private final String dataPath;
+    private final INetCompressor compressor;
+    private final int port;
+
+    public SenderMiniBatchThread(int batchSize, int maxRate, String dataPath, INetCompressor compressor, int port) {
+        super.setName("SenderThread");
+        this.batchSize = batchSize;
+        this.maxRate = maxRate;
+        this.dataPath = dataPath;
+        this.compressor = compressor;
+        this.port = port;
+    }
+
+    public SenderMiniBatchThread(int maxRate, String dataPath, INetCompressor compressor, int port) {
         super.setName("SenderThread");
         this.maxRate = maxRate;
         this.dataPath = dataPath;
@@ -306,20 +430,19 @@ class SenderThread extends Thread {
                 if (floatings.size() != block) {
                     break;
                 }
-                // one by one
-                for (int i = 0; i < floatings.size() - 1; i++) {
-                    double doubleToCompSend = floatings.get(i);
-                    byte[] bytesToSend = compressor.compress(doubleToCompSend);
-                    bytesToSend[0] = (byte) bytesToSend.length;
+                // mini batch
+                for (int i = 0; i < floatings.size(); i += batchSize) {
+                    List<Double> doubleToCompSend = floatings.subList(i, i + batchSize);
+                    byte[] bytesToSend = compressor.compressMiniBatch(doubleToCompSend);
+                    bytesToSend[0] = (byte) (bytesToSend.length >> 8);
+                    bytesToSend[1] = (byte) (bytesToSend.length & 0xFF);
                     localClient.send(bytesToSend);
                 }
-                byte[] bytesToSend = compressor.compressAndClose(floatings.get(floatings.size() - 1));
-                bytesToSend[0] = (byte) bytesToSend.length;
-                localClient.send(bytesToSend);
                 compressor.refresh();
             }
-            // one by one
-            localClient.send(new byte[]{(byte) 0});
+            // mini batch
+            localClient.send(new byte[]{(byte) 0, (byte) 0});
+
             localClient.close();
         } catch (Exception e) {
             throw new RuntimeException(dataPath, e);
@@ -327,14 +450,24 @@ class SenderThread extends Thread {
     }
 }
 
-class ReceiverThread extends Thread {
+class ReceiverMiniBatchThread extends Thread {
+    private int batchSize;
     private final int maxRate;
     private final INetDecompressor decompressor;
     private final int port;
     private double usedTimeInMS;
 
-    public ReceiverThread(int maxRate, INetDecompressor decompressor, int port) {
+    public ReceiverMiniBatchThread(int batchSize, int maxRate, INetDecompressor decompressor, int port) {
         super.setName("ReceiverThread");
+        this.batchSize = batchSize;
+        this.maxRate = maxRate;
+        this.decompressor = decompressor;
+        this.port = port;
+    }
+
+    public ReceiverMiniBatchThread(int maxRate, INetDecompressor decompressor, int port) {
+        super.setName("ReceiverThread");
+        this.batchSize = 50;
         this.maxRate = maxRate;
         this.decompressor = decompressor;
         this.port = port;
@@ -350,31 +483,30 @@ class ReceiverThread extends Thread {
             Server localServer = new Server(maxRate, Optional.of(port));
             int cnt = 0;
             while (true) {
-
-                // one by one
-                int byteCount = localServer.receiveBytes(1)[0];
+                if (cnt % 1000 == 0 && cnt != 0) {
+                    decompressor.refresh();
+                }
+                // mini batch
+                byte high = localServer.receiveBytes(1)[0];
+                byte low = localServer.receiveBytes(1)[0];
+                int byteCount = high << 8 | low & 0xFF;
 
                 if (byteCount == 0) {
                     endTime = System.nanoTime();
                     break;
                 }
 
-                // one by one
-                byte[] receivedData = localServer.receiveBytes(byteCount - 1);
+                // mini batch
+                byte[] receivedData = localServer.receiveBytes(byteCount - 2);
 
                 if (first) {
                     startTime = System.nanoTime();
                     first = false;
                 }
-                // one by one
-                if ((cnt + 1) % 1000 == 0) {
-                    decompressor.decompressLast(receivedData);
-                    decompressor.refresh();
-                } else {
-                    decompressor.decompress(receivedData);
-                }
-                cnt++;
 
+                // mini batch
+                decompressor.decompressMiniBatch(receivedData, batchSize);
+                cnt += batchSize;
             }
             localServer.close();
             usedTimeInMS = (endTime - startTime) / 1000_000.0; // ms
@@ -389,13 +521,13 @@ class ReceiverThread extends Thread {
     }
 }
 
-class HuffSenderThread extends Thread {
+class HuffSenderMiniBatchThread extends Thread {
     private final int maxRate;
     private final String dataPath;
     private final INetCompressor compressor;
     private final int port;
 
-    public HuffSenderThread(int maxRate, String dataPath, INetCompressor compressor, int port) {
+    public HuffSenderMiniBatchThread(int maxRate, String dataPath, INetCompressor compressor, int port) {
         super.setName("SenderThread");
         this.maxRate = maxRate;
         this.dataPath = dataPath;
@@ -411,25 +543,35 @@ class HuffSenderThread extends Thread {
             int block = 1000;
             BlockReader br = new BlockReader(dataPath, block);
             List<Double> floatings;
+            int cnt = 0;
             while ((floatings = br.nextBlock()) != null) {
                 if (floatings.size() != block) {
                     break;
                 }
-                // one by one
-                for (int i = 0; i < floatings.size() - 1; i++) {
-                    double doubleToCompSend = floatings.get(i);
-                    byte[] bytesToSend = compressor.compress(doubleToCompSend);
-                    bytesToSend[0] = (byte) bytesToSend.length;
+                // mini batch
+                int batchSize = 50;
+                for (int i = 0; i < floatings.size() - batchSize; i += batchSize) {
+                    List<Double> doubleToCompSend = floatings.subList(i, i + batchSize);
+                    byte[] bytesToSend = compressor.compressMiniBatch(doubleToCompSend);
+                    bytesToSend[0] = (byte) (bytesToSend.length >> 8);
+                    bytesToSend[1] = (byte) (bytesToSend.length & 0xFF);
                     localClient.send(bytesToSend);
+                    cnt += batchSize;
                 }
-                byte[] bytesToSend = compressor.compressAndClose(floatings.get(floatings.size() - 1));
-                bytesToSend[0] = (byte) bytesToSend.length;
+                List<Double> tmp = floatings.subList(floatings.size() - batchSize, floatings.size());
+                byte[] bytesToSend = compressor.compressLastMiniBatch(floatings.subList(floatings.size() - batchSize, floatings.size()));
+                bytesToSend[0] = (byte) (bytesToSend.length >> 8);
+                bytesToSend[1] = (byte) (bytesToSend.length & 0xFF);
                 localClient.send(bytesToSend);
+                cnt += batchSize;
 
                 compressor.refresh();
+
             }
-            // one by one
-            localClient.send(new byte[]{(byte) 0});
+
+            // mini batch
+            localClient.send((new byte[]{(byte) 0, (byte) 0}));
+
             localClient.close();
         } catch (Exception e) {
             throw new RuntimeException(dataPath, e);
@@ -437,13 +579,13 @@ class HuffSenderThread extends Thread {
     }
 }
 
-class HuffReceiverThread extends Thread {
+class HuffReceiverMiniBatchThread extends Thread {
     private final int maxRate;
     private final INetDecompressor decompressor;
     private final int port;
     private double usedTimeInMS;
 
-    public HuffReceiverThread(int maxRate, INetDecompressor decompressor, int port) {
+    public HuffReceiverMiniBatchThread(int maxRate, INetDecompressor decompressor, int port) {
         super.setName("ReceiverThread");
         this.maxRate = maxRate;
         this.decompressor = decompressor;
@@ -459,32 +601,35 @@ class HuffReceiverThread extends Thread {
             long endTime;
             Server localServer = new Server(maxRate, Optional.of(port));
             int cnt = 0;
+            int batchSize = 50;
             while (true) {
-                // one by one
-                int byteCount = localServer.receiveBytes(1)[0];
+
+                // mini batch
+                byte high = localServer.receiveBytes(1)[0];
+                byte low = localServer.receiveBytes(1)[0];
+                int byteCount = high << 8 | low & 0xFF;
 
                 if (byteCount == 0) {
                     endTime = System.nanoTime();
                     break;
                 }
 
-                // one by one
-                byte[] receivedData = localServer.receiveBytes(byteCount - 1);
-
+                // mini batch
+                byte[] receivedData = localServer.receiveBytes(byteCount - 2);
 
                 if (first) {
                     startTime = System.nanoTime();
                     first = false;
                 }
 
-                // one by one
-                if ((cnt + 1) % 1000 == 0) {
-                    decompressor.decompressLast(receivedData);
+                // mini batch
+                if ((cnt + batchSize) % 1000 == 0) {
+                    decompressor.decompressLastMiniBatch(receivedData, batchSize);
                     decompressor.refresh();
                 } else {
-                    decompressor.decompress(receivedData);
+                    decompressor.decompressMiniBatch(receivedData, batchSize);
                 }
-                cnt++;
+                cnt += batchSize;
             }
 
             localServer.close();
@@ -499,4 +644,3 @@ class HuffReceiverThread extends Thread {
         return usedTimeInMS;
     }
 }
-
