@@ -2,19 +2,14 @@ package transmit;
 
 import com.github.Cwida.alp.ALPCompression;
 import com.github.Cwida.alp.ALPDecompression;
-import com.google.common.math.LinearTransformation;
 import org.junit.jupiter.api.Test;
 import org.urbcomp.startdb.selfstar.compressor.*;
 import org.urbcomp.startdb.selfstar.compressor.xor.*;
 import org.urbcomp.startdb.selfstar.decompressor.*;
 import org.urbcomp.startdb.selfstar.decompressor.xor.*;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.sql.SQLOutput;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

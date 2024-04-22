@@ -49,9 +49,8 @@ public class SElfStarHuffmanDecompressor implements IDecompressor, INetDecompres
     @Override
     public double decompress(byte[] input) {
         setBytes(input);
-        double value = nextValue();
 
-        return value;
+        return nextValue();
     }
 
     public List<Double> decompressMiniBatch(byte[] input, int batchSize) {
