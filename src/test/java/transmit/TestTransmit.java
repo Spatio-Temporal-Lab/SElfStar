@@ -79,7 +79,6 @@ public class TestTransmit {
     @Test
     public void correctnessTest() throws IOException {
         // The same as above
-//        for (double maxDiff : MAX_DIFF) {
         for (String fileName : fileNames) {
             INetCompressor[] compressors = {
 //                    new SElfStarHuffmanCompressor(new SElfXORCompressor()),
@@ -114,11 +113,10 @@ public class TestTransmit {
                     }
                     double value = scanner.nextDouble();
                     double deValue;
-                    byte[] bytes;//= compressors[i].compress(value);
+                    byte[] bytes;
                     bytes = compressors[i].compress(value);
                     deValue = decompressors[i].decompress(Arrays.copyOfRange(bytes, 1, bytes.length));
 
-//                    if (Math.abs(value - deValue) > maxDiff) {
                     if (value != deValue) {
                         System.out.println(compressors[i].getKey() + " " + fileName + " origin: " + value + " result: " + deValue);
                     }
@@ -127,7 +125,6 @@ public class TestTransmit {
                 }
             }
         }
-//        }
         System.out.println("Done!");
     }
 
