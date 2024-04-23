@@ -72,10 +72,9 @@ public class SElfStarHuffmanDecompressor implements IDecompressor, INetDecompres
         setBytes(input);
         double value = nextValue();
         nextValue();
-        frequency[17]--;
-        HuffmanEncode huffmanEncode = new HuffmanEncode(frequency);
-        Code[] huffmanCode = huffmanEncode.getHuffmanCodes();
-        root = huffmanEncode.hashMapToTree(huffmanCode);
+        frequency[16]--;
+        Code[] huffmanCode = HuffmanEncode.getHuffmanCodes(frequency);
+        root = HuffmanEncode.buildHuffmanTree(huffmanCode);
         Arrays.fill(frequency, 0);
         return value;
     }
@@ -87,10 +86,9 @@ public class SElfStarHuffmanDecompressor implements IDecompressor, INetDecompres
             values.add(nextValue());
         }
         nextValue();
-        frequency[17]--;
-        HuffmanEncode huffmanEncode = new HuffmanEncode(frequency);
-        Code[] huffmanCode = huffmanEncode.getHuffmanCodes();
-        root = huffmanEncode.hashMapToTree(huffmanCode);
+        frequency[16]--;
+        Code[] huffmanCode = HuffmanEncode.getHuffmanCodes(frequency);
+        root = HuffmanEncode.buildHuffmanTree(huffmanCode);
         Arrays.fill(frequency, 0);
         return values;
     }

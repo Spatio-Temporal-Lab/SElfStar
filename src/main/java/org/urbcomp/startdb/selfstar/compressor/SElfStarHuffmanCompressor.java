@@ -25,7 +25,6 @@ public class SElfStarHuffmanCompressor implements ICompressor, INetCompressor {
 
     private int byteCount = 0;
 
-    private boolean isFirst = true;
     private boolean isFirstBlock = true; // mark if it is the first block
 
     private Code[] huffmanCode;

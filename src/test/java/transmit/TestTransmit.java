@@ -2,7 +2,7 @@ package transmit;
 
 import org.junit.jupiter.api.Test;
 import org.urbcomp.startdb.selfstar.compressor.*;
-import org.urbcomp.startdb.selfstar.compressor.xor.*;
+import org.urbcomp.startdb.selfstar.compressor.xor.SElfStarXORCompressor;
 import org.urbcomp.startdb.selfstar.decompressor.*;
 import org.urbcomp.startdb.selfstar.decompressor.xor.*;
 
@@ -40,8 +40,8 @@ public class TestTransmit {
             for (String fileName : fileNames) {
                 INetCompressor[] compressors = {
                         // Put your compressors here
-                        new SElfStarCompressor(new SElfXORCompressor()),
-                        new SElfStarHuffmanCompressor(new SElfXORCompressor()),
+                        new SElfStarCompressor(new SElfStarXORCompressor()),
+                        new SElfStarHuffmanCompressor(new SElfStarXORCompressor()),
 //                        new ElfPlusCompressor(new ElfPlusXORCompressor()),
 //                        new ElfCompressor(new ElfXORCompressor()),
 //                        new BaseCompressor(new ChimpXORCompressor()),
@@ -85,7 +85,7 @@ public class TestTransmit {
         for (String fileName : fileNames) {
             INetCompressor[] compressors = {
 //                    new SElfStarHuffmanCompressor(new SElfXORCompressor()),
-                    new SElfStarCompressor(new SElfXORCompressor()),
+                    new SElfStarCompressor(new SElfStarXORCompressor()),
 //                    new ElfPlusCompressor(new ElfPlusXORCompressor()),
 //                    new ElfCompressor(new ElfXORCompressor()),
 //                    new BaseCompressor(new ChimpXORCompressor()),

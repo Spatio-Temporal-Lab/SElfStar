@@ -6,23 +6,18 @@ import org.junit.jupiter.api.Test;
 import org.urbcomp.startdb.selfstar.compressor.INetCompressor;
 import org.urbcomp.startdb.selfstar.compressor.SElfStarCompressor;
 import org.urbcomp.startdb.selfstar.compressor.SElfStarHuffmanCompressor;
-import org.urbcomp.startdb.selfstar.compressor.xor.SElfXORCompressor;
+import org.urbcomp.startdb.selfstar.compressor.xor.SElfStarXORCompressor;
 import org.urbcomp.startdb.selfstar.decompressor.ElfStarDecompressor;
 import org.urbcomp.startdb.selfstar.decompressor.INetDecompressor;
 import org.urbcomp.startdb.selfstar.decompressor.SElfStarHuffmanDecompressor;
 import org.urbcomp.startdb.selfstar.decompressor.xor.SElfStarXORDecompressor;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TestTransmitMiniBatch {
-    private static final String prefix = "src/main/resources/floating/";
-    private static final double[] MAX_DIFF = new double[]{1.0E-1, 0.5, 1.0E-2, 1.0E-3, 1.0E-4, 1.0E-5, 1.0E-6, 1.0E-7, 1.0E-8};
-    private static final double DEFAULT_DIFF = 0.0001;
     private static final int port = 10240;
     private final String[] fileNames = {
             "Air-pressure.csv",
@@ -47,8 +42,8 @@ public class TestTransmitMiniBatch {
             for (String fileName : fileNames) {
                 INetCompressor[] compressors = {
                         // Put your compressors here
-                        new SElfStarCompressor(new SElfXORCompressor()),
-                        new SElfStarHuffmanCompressor(new SElfXORCompressor()),
+                        new SElfStarCompressor(new SElfStarXORCompressor()),
+                        new SElfStarHuffmanCompressor(new SElfStarXORCompressor()),
 //                        new ElfPlusCompressor(new ElfPlusXORCompressor()),
 //                        new ElfCompressor(new ElfXORCompressor()),
 //                        new BaseCompressor(new ChimpXORCompressor()),
@@ -162,14 +157,12 @@ public class TestTransmitMiniBatch {
 class ALPSenderThread extends Thread {
     private final int maxRate;
     private final String dataPath;
-    private final INetCompressor compressor;
     private final int port;
 
-    public ALPSenderThread(int maxRate, String dataPath, INetCompressor compressor, int port) {
+    public ALPSenderThread(int maxRate, String dataPath, int port) {
         super.setName("SenderThread");
         this.maxRate = maxRate;
         this.dataPath = dataPath;
-        this.compressor = compressor;
         this.port = port;
     }
 
@@ -201,7 +194,6 @@ class ALPSenderThread extends Thread {
                 byte[] result;
 
                 ALPCompression compressor = new ALPCompression(block);
-                ALPDecompression decompressor = new ALPDecompression();
                 localClient.send(new byte[]{(byte) RowGroups.size()});
                 for (List<List<Double>> rowGroup : RowGroups) {
                     compressor.sample(rowGroup);
@@ -240,7 +232,7 @@ class ALPReceiverThread extends Thread {
     public void run() {
         super.run();
         try {
-            long startTime = 0;
+            long startTime;
             long endTime;
             Server localServer = new Server(maxRate, Optional.of(port));
 
@@ -253,7 +245,7 @@ class ALPReceiverThread extends Thread {
                     byte low = localServer.receiveBytes(1)[0];
                     int byteCnt = high << 8 | low & 0xFF;
                     byte[] receivedData = localServer.receiveBytes(byteCnt - 2);
-                    double[] devalues = decompressor.ALPNetDecompress(receivedData);
+                    decompressor.ALPNetDecompress(receivedData);
                 }
             }
             endTime = System.nanoTime();
