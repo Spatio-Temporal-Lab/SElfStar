@@ -6,7 +6,7 @@ import org.urbcomp.startdb.selfstar.utils.PostOfficeSolver;
 
 import java.util.Arrays;
 
-public class SElfXORCompressor implements IXORCompressor {
+public class SElfStarXORCompressor implements IXORCompressor {
     private final int[] leadingRepresentation = {
             0, 0, 0, 0, 0, 0, 0, 0,
             1, 1, 1, 1, 2, 2, 2, 2,
@@ -57,23 +57,20 @@ public class SElfXORCompressor implements IXORCompressor {
     private int[] trailPositions = {0, 22, 28, 32, 36, 40, 42, 46};
     private boolean updatePositions = false;
     private boolean writePositions = false;
-    private OutputBitStream out;
+    private final OutputBitStream out;
 
     private int leadingBitsPerValue = 3;
 
     private int trailingBitsPerValue = 3;
 
-    private final int capacity;
 
-
-    public SElfXORCompressor(int window) {
-        this.capacity = window;
+    public SElfStarXORCompressor(int window) {
         out = new OutputBitStream(
-                new byte[(int) (((capacity + 1) * 8 + capacity / 8 + 1) * 1.2)]);
+                new byte[(int) (((window + 1) * 8 + window / 8 + 1) * 1.2)]);
 
     }
 
-    public SElfXORCompressor() {
+    public SElfStarXORCompressor() {
         this(1000);
     }
 
@@ -194,8 +191,7 @@ public class SElfXORCompressor implements IXORCompressor {
 
     @Override
     public void refresh() {
-        out = new OutputBitStream(
-                new byte[(int) (((capacity + 1) * 8 + capacity / 8 + 1) * 1.2)]);
+        out.refresh();
         first = true;
         updatePositions = false;
         Arrays.fill(leadDistribution, 0);

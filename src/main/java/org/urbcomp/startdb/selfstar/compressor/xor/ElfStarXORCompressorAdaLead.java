@@ -9,16 +9,16 @@ import java.util.Arrays;
 public class ElfStarXORCompressorAdaLead implements IXORCompressor {
     private final int[] leadingRepresentation = new int[64];
     private final int[] leadingRound = new int[64];
-    private final int capacity = 1000;
     private int storedLeadingZeros = Integer.MAX_VALUE;
     private int storedTrailingZeros = Integer.MAX_VALUE;
     private long storedVal = 0;
     private boolean first = true;
     private int[] leadDistribution;
-    private OutputBitStream out;
+    private final OutputBitStream out;
     private int leadingBitsPerValue;
 
     public ElfStarXORCompressorAdaLead() {
+        int capacity = 1000;
         out = new OutputBitStream(
                 new byte[(int) (((capacity + 1) * 8 + capacity / 8 + 1) * 1.2)]);
     }
@@ -118,8 +118,7 @@ public class ElfStarXORCompressorAdaLead implements IXORCompressor {
 
     @Override
     public void refresh() {
-        out = new OutputBitStream(
-                new byte[(int) (((capacity + 1) * 8 + capacity / 8 + 1) * 1.2)]);
+        out.refresh();
         storedLeadingZeros = Integer.MAX_VALUE;
 
         storedTrailingZeros = Integer.MAX_VALUE;

@@ -59,12 +59,12 @@ public class TestSingleCompressor {
     @Test
     public void testAllCompressor() {
         for (String fileName : fileNames) {
-            testFloatingCompressor(fileName);
             testALPCompressor(fileName);
             testBuffCompressor(fileName);
             testXZCompressor(fileName);
             testZstdCompressor(fileName);
             testSnappyCompressor(fileName);
+            testFloatingCompressor(fileName);
         }
 
         fileNameParamMethodToCompressedBits.forEach((fileNameParamMethod, compressedBits) -> {
@@ -90,7 +90,7 @@ public class TestSingleCompressor {
                 new ElfCompressor32(new ElfXORCompressor32()),
                 new ElfPlusCompressor32(new ElfPlusXORCompressor32()),
                 new ElfStarCompressor32(new ElfStarXORCompressor32()),
-                new SElfStarCompressor32(new SElfXORCompressor32()),
+                new SElfStarCompressor32(new SElfStarXORCompressor32()),
         };
 
         IDecompressor32[] decompressors = new IDecompressor32[]{

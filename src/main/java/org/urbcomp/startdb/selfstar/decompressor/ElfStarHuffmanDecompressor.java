@@ -12,11 +12,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ElfStarHuffmanDecompressor implements IDecompressor {
-    private static Code[] huffmanCode = new Code[18];
+    private static Code[] huffmanCode = new Code[17];
     private final IXORDecompressor xorDecompressor;
     private int lastBetaStar = Integer.MAX_VALUE;
     private Node root;
-    private final HuffmanEncode huffmanEncode = new HuffmanEncode(new int[18]);
 
     public ElfStarHuffmanDecompressor(IXORDecompressor xorDecompressor) {
         this.xorDecompressor = xorDecompressor;
@@ -33,19 +32,15 @@ public class ElfStarHuffmanDecompressor implements IDecompressor {
     }
 
     private void initHuffmanTree() {
-        for (int i = 0; i < huffmanCode.length; i++) {
-            int length = readInt(5);
-            long code = readInt(length);
-            huffmanCode[i] = new Code(code, length);
-        }
-        root = huffmanEncode.hashMapToTree(huffmanCode);
+        HuffmanEncode.readHuffmanCodes(xorDecompressor.getInputStream(), huffmanCode);
+        root = HuffmanEncode.buildHuffmanTree(huffmanCode);
     }
 
     @Override
     public void refresh() {
         lastBetaStar = Integer.MAX_VALUE;
         xorDecompressor.refresh();
-        huffmanCode = new Code[18];
+        huffmanCode = new Code[17];
     }
 
     @Override
@@ -59,8 +54,8 @@ public class ElfStarHuffmanDecompressor implements IDecompressor {
         Node current = root;
         while (true) {
             current = current.children[readInt(1)];
-            if (current.data != -Integer.MAX_VALUE) {
-                if (current.data != 17) {
+            if (current.data >= 0) {
+                if (current.data != 16) {
                     lastBetaStar = current.data;
                     v = recoverVByBetaStar();
                 } else {
@@ -88,6 +83,7 @@ public class ElfStarHuffmanDecompressor implements IDecompressor {
         return v;
     }
 
+    @SuppressWarnings("all")
     private int readInt(int len) {
         InputBitStream in = xorDecompressor.getInputStream();
         try {

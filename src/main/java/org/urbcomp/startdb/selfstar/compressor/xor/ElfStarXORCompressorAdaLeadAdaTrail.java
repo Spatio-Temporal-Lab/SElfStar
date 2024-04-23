@@ -11,18 +11,18 @@ public class ElfStarXORCompressorAdaLeadAdaTrail implements IXORCompressor {
     private final int[] leadingRound = new int[64];
     private final int[] trailingRepresentation = new int[64];
     private final int[] trailingRound = new int[64];
-    private final int capacity = 1000;
     private int storedLeadingZeros = Integer.MAX_VALUE;
     private int storedTrailingZeros = Integer.MAX_VALUE;
     private long storedVal = 0;
     private boolean first = true;
     private int[] leadDistribution;
     private int[] trailDistribution;
-    private OutputBitStream out;
+    private final OutputBitStream out;
     private int leadingBitsPerValue;
     private int trailingBitsPerValue;
 
     public ElfStarXORCompressorAdaLeadAdaTrail() {
+        int capacity = 1000;
         out = new OutputBitStream(
                 new byte[(int) (((capacity + 1) * 8 + capacity / 8 + 1) * 1.2)]);
     }
@@ -141,8 +141,7 @@ public class ElfStarXORCompressorAdaLeadAdaTrail implements IXORCompressor {
 
     @Override
     public void refresh() {
-        out = new OutputBitStream(
-                new byte[(int) (((capacity + 1) * 8 + capacity / 8 + 1) * 1.2)]);
+        out.refresh();
         storedLeadingZeros = Integer.MAX_VALUE;
         storedTrailingZeros = Integer.MAX_VALUE;
         storedVal = 0;

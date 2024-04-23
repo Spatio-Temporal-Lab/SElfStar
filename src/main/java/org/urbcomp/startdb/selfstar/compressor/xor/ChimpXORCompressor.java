@@ -30,11 +30,10 @@ public class ChimpXORCompressor implements IXORCompressor {
             24, 24, 24, 24, 24, 24, 24, 24,
             24, 24, 24, 24, 24, 24, 24, 24
     };
-    private final int capacity;
     private int storedLeadingZeros = Integer.MAX_VALUE;
     private long storedVal = 0;
     private boolean first = true;
-    private OutputBitStream out;
+    private final OutputBitStream out;
 
     // We should have access to the series?
     public ChimpXORCompressor() {
@@ -42,9 +41,8 @@ public class ChimpXORCompressor implements IXORCompressor {
     }
 
     public ChimpXORCompressor(int block) {
-        capacity = block;
         out = new OutputBitStream(
-                new byte[(int) (((capacity + 1) * 8 + capacity / 8 + 1) * 1.2)]);
+                new byte[(int) (((block + 1) * 8 + block / 8 + 1) * 1.2)]);
     }
 
     public OutputBitStream getOutputStream() {
@@ -126,8 +124,7 @@ public class ChimpXORCompressor implements IXORCompressor {
 
     @Override
     public void refresh() {
-        out = new OutputBitStream(
-                new byte[(int) (((capacity + 1) * 8 + capacity / 8 + 1) * 1.2)]);
+        out.refresh();
         storedLeadingZeros = Integer.MAX_VALUE;
         storedVal = 0;
         first = true;

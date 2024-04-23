@@ -30,14 +30,14 @@ public class ChimpXORCompressor32 implements IXORCompressor32 {
             24, 24, 24, 24, 24, 24, 24, 24,
             24, 24, 24, 24, 24, 24, 24, 24
     };
-    private final int capacity = 1000;
     private int storedLeadingZeros = Integer.MAX_VALUE;
     private int storedVal = 0;
     private boolean first = true;
-    private OutputBitStream out;
+    private final OutputBitStream out;
 
     // We should have access to the series?
     public ChimpXORCompressor32() {
+        int capacity = 1000;
         out = new OutputBitStream(
                 new byte[(int) (((capacity + 1) * 4 + capacity / 4 + 1) * 1.2)]);
     }
@@ -126,8 +126,7 @@ public class ChimpXORCompressor32 implements IXORCompressor32 {
 
     @Override
     public void refresh() {
-        out = new OutputBitStream(
-                new byte[(int) (((capacity + 1) * 4 + capacity / 4 + 1) * 1.2)]);
+        out.refresh();
         storedLeadingZeros = Integer.MAX_VALUE;
         storedVal = 0;
         first = true;

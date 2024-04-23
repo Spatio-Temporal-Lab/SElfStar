@@ -21,7 +21,7 @@ public class ElfPlusXORCompressor32 implements IXORCompressor32 {
     private int storedTrailingZeros = Integer.MAX_VALUE;
     private int storedVal = 0;
     private boolean first = true;
-    private OutputBitStream out;
+    private final OutputBitStream out;
 
     private int capacity = 1000;
 
@@ -129,9 +129,7 @@ public class ElfPlusXORCompressor32 implements IXORCompressor32 {
 
     @Override
     public void refresh() {
-
-        out = new OutputBitStream(
-                new byte[(int) (((capacity + 1) * 4 + capacity / 4 + 1) * 1.2)]);
+        out.refresh();
         storedLeadingZeros = Integer.MAX_VALUE;
 
         storedTrailingZeros = Integer.MAX_VALUE;

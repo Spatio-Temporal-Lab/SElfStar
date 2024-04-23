@@ -28,16 +28,13 @@ public class ElfPlusXORCompressor implements IXORCompressor {
     private int storedTrailingZeros = Integer.MAX_VALUE;
     private long storedVal = 0;
     private boolean first = true;
-    private OutputBitStream out;
-
-    private final int capacity;
+    private final OutputBitStream out;
 
     public ElfPlusXORCompressor() {
         this(1000);
     }
 
     public ElfPlusXORCompressor(int capacity) {
-        this.capacity = capacity;
         out = new OutputBitStream(
                 new byte[(int) (((capacity + 1) * 8 + capacity / 8 + 1) * 1.2)]);
     }
@@ -136,8 +133,7 @@ public class ElfPlusXORCompressor implements IXORCompressor {
     @Override
     public void refresh() {
 
-        out = new OutputBitStream(
-                new byte[(int) (((capacity + 1) * 8 + capacity / 8 + 1) * 1.2)]);
+        out.refresh();
         storedLeadingZeros = Integer.MAX_VALUE;
 
         storedTrailingZeros = Integer.MAX_VALUE;

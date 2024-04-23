@@ -18,7 +18,7 @@ public class SElfStarHuffmanDecompressor implements IDecompressor, INetDecompres
     private final IXORDecompressor xorDecompressor;
     private int lastBetaStar = Integer.MAX_VALUE;
 
-    private final int[] frequency = new int[18];
+    private final int[] frequency = new int[17];
     private boolean isFirst = true;
     private Node root;
 
@@ -32,10 +32,9 @@ public class SElfStarHuffmanDecompressor implements IDecompressor, INetDecompres
         while ((value = nextValue()) != null) {
             values.add(value);
         }
-        frequency[17]--;
-        HuffmanEncode huffmanEncode = new HuffmanEncode(frequency);
-        Code[] huffmanCode = huffmanEncode.getHuffmanCodes();
-        root = huffmanEncode.hashMapToTree(huffmanCode);
+        frequency[16]--;
+        Code[] huffmanCode = HuffmanEncode.getHuffmanCodes(frequency);
+        root = HuffmanEncode.buildHuffmanTree(huffmanCode);
         Arrays.fill(frequency, 0);
         return values;
     }
@@ -125,7 +124,7 @@ public class SElfStarHuffmanDecompressor implements IDecompressor, INetDecompres
             frequency[lastBetaStar]++;
         } else if (readInt(1) == 0) {
             v = xorDecompressor.readValue();        // case 10
-            frequency[17]++;
+            frequency[16]++;
         } else {
             lastBetaStar = readInt(4);          // case 11
             v = recoverVByBetaStar();
@@ -139,15 +138,14 @@ public class SElfStarHuffmanDecompressor implements IDecompressor, INetDecompres
         Node current = root;
         while (true) {
             current = current.children[readInt(1)];
-            if (current.data != -Integer.MAX_VALUE) {
-                if (current.data != 17) {
+            if (current.data >= 0) {
+                if (current.data != 16) {
                     lastBetaStar = current.data;
                     v = recoverVByBetaStar();
-
                     frequency[lastBetaStar]++;
                 } else {
                     v = xorDecompressor.readValue();
-                    frequency[17]++;
+                    frequency[16]++;
                 }
                 break;
             }
