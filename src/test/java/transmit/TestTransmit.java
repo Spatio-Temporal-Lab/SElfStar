@@ -7,6 +7,7 @@ import org.urbcomp.startdb.selfstar.decompressor.*;
 import org.urbcomp.startdb.selfstar.decompressor.xor.*;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
 
@@ -14,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TestTransmit {
     private static final String prefix = "src/main/resources/floating/";
+    private static final String STORE_FILE = "src/test/resources/result/resultTransmit.csv";
     private static final int port = 10240;
     private final String[] fileNames = {
             "Air-pressure.csv",
@@ -67,6 +69,7 @@ public class TestTransmit {
                     receiverThread.start();
                     senderThread.start();
                     receiverThread.join();
+                    logResults(STORE_FILE, maxRate, fileName, compressors[i].getKey(), receiverThread.getUsedTimeInMS());
                     System.out.println(maxRate + "," + fileName + "," + compressors[i].getKey() + "," + receiverThread.getUsedTimeInMS());
                     // Sleep for a second to wait system to close socket
                     Thread.sleep(1000);
@@ -126,6 +129,15 @@ public class TestTransmit {
             }
         }
         System.out.println("Done!");
+    }
+
+    public static void logResults(String filePath, double maxRate, String fileName, String compressorKeys, double usedTimeInMS) {
+        try (FileWriter fileWriter = new FileWriter(filePath, true)) {
+            String dataLine = maxRate + "," + fileName + "," + compressorKeys + "," + usedTimeInMS + "\n";
+            fileWriter.append(dataLine);
+        } catch (IOException e) {
+            System.err.println("Error writing to file: " + e.getMessage());
+        }
     }
 
 }
