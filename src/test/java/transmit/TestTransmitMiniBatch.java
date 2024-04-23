@@ -97,7 +97,7 @@ public class TestTransmitMiniBatch {
 
                 for (int i = 0; i < compressors.length; i++) {
                     ALPReceiverThread receiverThread = new ALPReceiverThread(maxRate, decompressors[i], port);
-                    ALPSenderThread senderThread = new ALPSenderThread(maxRate, fileName, compressors[i], port);
+                    ALPSenderThread senderThread = new ALPSenderThread(maxRate, fileName, port);
                     receiverThread.start();
                     senderThread.start();
                     receiverThread.join();
