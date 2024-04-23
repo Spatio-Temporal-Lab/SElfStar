@@ -242,7 +242,7 @@ public class ALPCompression implements INetCompressor {
                 aLPrd.entry(row);
             }
 
-            size = aLPrd.getSize();
+            size += aLPrd.getSize();
         } else {
             // use ALP
             for (List<Double> row : rowGroup) {  // 逐行处理
