@@ -2,7 +2,7 @@ package transmit;
 
 import org.junit.jupiter.api.Test;
 import org.urbcomp.startdb.selfstar.compressor.*;
-import org.urbcomp.startdb.selfstar.compressor.xor.SElfStarXORCompressor;
+import org.urbcomp.startdb.selfstar.compressor.xor.*;
 import org.urbcomp.startdb.selfstar.decompressor.*;
 import org.urbcomp.startdb.selfstar.decompressor.xor.*;
 
@@ -36,31 +36,31 @@ public class TestTransmit {
     @Test
     public void mainTest() throws InterruptedException {
         System.out.println("MaxRate,File,Method,Time");
-        for (int maxRate = 500; maxRate <= 1000; maxRate *= 2) {
+        for (int maxRate = 100; maxRate <= 1000; maxRate +=100) {
             for (String fileName : fileNames) {
                 INetCompressor[] compressors = {
                         // Put your compressors here
                         new SElfStarCompressor(new SElfStarXORCompressor()),
                         new SElfStarHuffmanCompressor(new SElfStarXORCompressor()),
-//                        new ElfPlusCompressor(new ElfPlusXORCompressor()),
-//                        new ElfCompressor(new ElfXORCompressor()),
-//                        new BaseCompressor(new ChimpXORCompressor()),
-//                        new BaseCompressor(new ChimpNXORCompressor(128)),
-//                        new BaseCompressor(new GorillaXORCompressor()),
-//                        new SBaseCompressor(new ChimpAdaXORCompressor()),
-//                        new SBaseCompressor(new ChimpNAdaXORCompressor(128)),
+                        new ElfPlusCompressor(new ElfPlusXORCompressor()),
+                        new ElfCompressor(new ElfXORCompressor()),
+                        new BaseCompressor(new ChimpXORCompressor()),
+                        new BaseCompressor(new ChimpNXORCompressor(128)),
+                        new BaseCompressor(new GorillaXORCompressor()),
+                        new SBaseCompressor(new ChimpAdaXORCompressor()),
+                        new SBaseCompressor(new ChimpNAdaXORCompressor(128)),
                 };
                 INetDecompressor[] decompressors = {
                         // And put your corresponding decompressors heres
                         new ElfStarDecompressor(new SElfStarXORDecompressor()),
                         new SElfStarHuffmanDecompressor(new SElfStarXORDecompressor()),
-//                        new ElfPlusDecompressor(new ElfPlusXORDecompressor()),
-//                        new ElfDecompressor(new ElfXORDecompressor()),
-//                        new BaseDecompressor(new ChimpXORDecompressor()),
-//                        new BaseDecompressor(new ChimpNXORDecompressor(128)),
-//                        new BaseDecompressor(new GorillaXORDecompressor()),
-//                        new BaseDecompressor(new ChimpAdaXORDecompressor()),
-//                        new BaseDecompressor(new ChimpNAdaXORDecompressor(128)),
+                        new ElfPlusDecompressor(new ElfPlusXORDecompressor()),
+                        new ElfDecompressor(new ElfXORDecompressor()),
+                        new BaseDecompressor(new ChimpXORDecompressor()),
+                        new BaseDecompressor(new ChimpNXORDecompressor(128)),
+                        new BaseDecompressor(new GorillaXORDecompressor()),
+                        new BaseDecompressor(new ChimpAdaXORDecompressor()),
+                        new BaseDecompressor(new ChimpNAdaXORDecompressor(128)),
                 };
 
                 for (int i = 0; i < compressors.length; i++) {

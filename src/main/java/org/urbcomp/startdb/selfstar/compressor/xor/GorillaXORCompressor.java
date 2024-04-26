@@ -18,7 +18,7 @@ public class GorillaXORCompressor implements IXORCompressor {
     public GorillaXORCompressor(int block) {
         capacity = block;
         out = new OutputBitStream(
-                new byte[(int) (((block + 1) * 8 + block / 8 + 1) * 1.2)]);
+                new byte[(int) (((block + 1) * 8 + block / 8 + 1) * 2)]);
     }
 
     public OutputBitStream getOutputStream() {
