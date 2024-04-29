@@ -1,17 +1,12 @@
 package org.urbcomp.startdb.selfstar.compressor32;
 
-import org.urbcomp.startdb.selfstar.compressor.ICompressor;
-import org.urbcomp.startdb.selfstar.compressor.INetCompressor;
-import org.urbcomp.startdb.selfstar.compressor.xor.IXORCompressor;
 import org.urbcomp.startdb.selfstar.compressor32.xor.IXORCompressor32;
 import org.urbcomp.startdb.selfstar.utils.Elf32Utils;
 import org.urbcomp.startdb.selfstar.utils.Huffman.Code;
 import org.urbcomp.startdb.selfstar.utils.Huffman.HuffmanEncode;
 import org.urbcomp.startdb.selfstar.utils.OutputBitStream;
 
-import java.io.IOException;
 import java.util.Arrays;
-import java.util.List;
 
 public class SElfStarHuffmanCompressor32 implements ICompressor32 {
     private final IXORCompressor32 xorCompressor;
@@ -25,8 +20,6 @@ public class SElfStarHuffmanCompressor32 implements ICompressor32 {
     private int numberOfValues = 0;
 
     private double storeCompressionRatio = 0;
-
-    private int byteCount = 0;
 
     private boolean isFirstBlock = true; // mark if it is the first block
 
@@ -176,7 +169,6 @@ public class SElfStarHuffmanCompressor32 implements ICompressor32 {
         compressedSizeInBits = 0;
         lastBetaStar = Integer.MAX_VALUE;
         numberOfValues = 0;
-        byteCount = 0;
 
         xorCompressor.refresh();        // note this refresh should be at the last
         os = xorCompressor.getOutputStream();

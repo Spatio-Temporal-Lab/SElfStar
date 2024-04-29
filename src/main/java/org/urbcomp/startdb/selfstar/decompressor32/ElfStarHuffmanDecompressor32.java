@@ -1,10 +1,7 @@
 package org.urbcomp.startdb.selfstar.decompressor32;
 
-import org.urbcomp.startdb.selfstar.decompressor.IDecompressor;
-import org.urbcomp.startdb.selfstar.decompressor.xor.IXORDecompressor;
 import org.urbcomp.startdb.selfstar.decompressor32.xor.IXORDecompressor32;
 import org.urbcomp.startdb.selfstar.utils.Elf32Utils;
-import org.urbcomp.startdb.selfstar.utils.Elf64Utils;
 import org.urbcomp.startdb.selfstar.utils.Huffman.Code;
 import org.urbcomp.startdb.selfstar.utils.Huffman.HuffmanEncode;
 import org.urbcomp.startdb.selfstar.utils.Huffman.Node;

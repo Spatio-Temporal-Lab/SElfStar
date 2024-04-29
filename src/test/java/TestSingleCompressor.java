@@ -59,11 +59,11 @@ public class TestSingleCompressor {
     @Test
     public void testAllCompressor() {
         for (String fileName : fileNames) {
-//            testALPCompressor(fileName);
-//            testBuffCompressor(fileName);
-//            testXZCompressor(fileName);
-//            testZstdCompressor(fileName);
-//            testSnappyCompressor(fileName);
+            testALPCompressor(fileName);
+            testBuffCompressor(fileName);
+            testXZCompressor(fileName);
+            testZstdCompressor(fileName);
+            testSnappyCompressor(fileName);
             testFloatingCompressor(fileName);
         }
 
