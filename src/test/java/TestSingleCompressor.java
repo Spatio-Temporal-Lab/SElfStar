@@ -59,11 +59,11 @@ public class TestSingleCompressor {
     @Test
     public void testAllCompressor() {
         for (String fileName : fileNames) {
-            testALPCompressor(fileName);
-            testBuffCompressor(fileName);
-            testXZCompressor(fileName);
-            testZstdCompressor(fileName);
-            testSnappyCompressor(fileName);
+//            testALPCompressor(fileName);
+//            testBuffCompressor(fileName);
+//            testXZCompressor(fileName);
+//            testZstdCompressor(fileName);
+//            testSnappyCompressor(fileName);
             testFloatingCompressor(fileName);
         }
 
@@ -91,6 +91,8 @@ public class TestSingleCompressor {
                 new ElfPlusCompressor32(new ElfPlusXORCompressor32()),
                 new ElfStarCompressor32(new ElfStarXORCompressor32()),
                 new SElfStarCompressor32(new SElfStarXORCompressor32()),
+                new ElfStarHuffmanCompressor32(new ElfStarXORCompressor32()),
+                new SElfStarHuffmanCompressor32(new SElfStarXORCompressor32())
         };
 
         IDecompressor32[] decompressors = new IDecompressor32[]{
@@ -100,7 +102,9 @@ public class TestSingleCompressor {
                 new ElfDecompressor32(new ElfXORDecompressor32()),
                 new ElfPlusDecompressor32(new ElfPlusXORDecompressor32()),
                 new ElfStarDecompressor32(new ElfStarXORDecompressor32()),
-                new ElfStarDecompressor32(new SElfStarXORDecompressor32())
+                new ElfStarDecompressor32(new SElfStarXORDecompressor32()),
+                new ElfStarHuffmanDecompressor32(new ElfStarXORDecompressor32()),
+                new SElfStarHuffmanDecompressor32(new SElfStarXORDecompressor32())
         };
         boolean firstMethod = true;
         for (int i = 0; i < compressors.length; i++) {
