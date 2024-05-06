@@ -4,12 +4,12 @@ import com.github.Cwida.alp.ALPCompression;
 import com.github.Cwida.alp.ALPDecompression;
 import org.junit.jupiter.api.Test;
 import org.urbcomp.startdb.selfstar.compressor.INetCompressor;
+import org.urbcomp.startdb.selfstar.compressor.SElfStarCompressorNoHuff;
 import org.urbcomp.startdb.selfstar.compressor.SElfStarCompressor;
-import org.urbcomp.startdb.selfstar.compressor.SElfStarHuffmanCompressor;
 import org.urbcomp.startdb.selfstar.compressor.xor.SElfStarXORCompressor;
-import org.urbcomp.startdb.selfstar.decompressor.ElfStarDecompressor;
+import org.urbcomp.startdb.selfstar.decompressor.ElfStarDecompressorNoHuff;
 import org.urbcomp.startdb.selfstar.decompressor.INetDecompressor;
-import org.urbcomp.startdb.selfstar.decompressor.SElfStarHuffmanDecompressor;
+import org.urbcomp.startdb.selfstar.decompressor.SElfStarDecompressor;
 import org.urbcomp.startdb.selfstar.decompressor.xor.SElfStarXORDecompressor;
 
 import java.io.IOException;
@@ -42,8 +42,8 @@ public class TestTransmitMiniBatch {
             for (String fileName : fileNames) {
                 INetCompressor[] compressors = {
                         // Put your compressors here
+                        new SElfStarCompressorNoHuff(new SElfStarXORCompressor()),
                         new SElfStarCompressor(new SElfStarXORCompressor()),
-                        new SElfStarHuffmanCompressor(new SElfStarXORCompressor()),
 //                        new ElfPlusCompressor(new ElfPlusXORCompressor()),
 //                        new ElfCompressor(new ElfXORCompressor()),
 //                        new BaseCompressor(new ChimpXORCompressor()),
@@ -54,8 +54,8 @@ public class TestTransmitMiniBatch {
                 };
                 INetDecompressor[] decompressors = {
                         // And put your corresponding decompressors heres
-                        new ElfStarDecompressor(new SElfStarXORDecompressor()),
-                        new SElfStarHuffmanDecompressor(new SElfStarXORDecompressor()),
+                        new ElfStarDecompressorNoHuff(new SElfStarXORDecompressor()),
+                        new SElfStarDecompressor(new SElfStarXORDecompressor()),
 //                        new ElfPlusDecompressor(new ElfPlusXORDecompressor()),
 //                        new ElfDecompressor(new ElfXORDecompressor()),
 //                        new BaseDecompressor(new ChimpXORDecompressor()),

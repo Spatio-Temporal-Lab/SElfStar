@@ -40,8 +40,8 @@ public class TestTransmit {
             for (String fileName : fileNames) {
                 INetCompressor[] compressors = {
                         // Put your compressors here
+                        new SElfStarCompressorNoHuff(new SElfStarXORCompressor()),
                         new SElfStarCompressor(new SElfStarXORCompressor()),
-                        new SElfStarHuffmanCompressor(new SElfStarXORCompressor()),
                         new ElfPlusCompressor(new ElfPlusXORCompressor()),
                         new ElfCompressor(new ElfXORCompressor()),
                         new BaseCompressor(new ChimpXORCompressor()),
@@ -52,8 +52,8 @@ public class TestTransmit {
                 };
                 INetDecompressor[] decompressors = {
                         // And put your corresponding decompressors heres
-                        new ElfStarDecompressor(new SElfStarXORDecompressor()),
-                        new SElfStarHuffmanDecompressor(new SElfStarXORDecompressor()),
+                        new ElfStarDecompressorNoHuff(new SElfStarXORDecompressor()),
+                        new SElfStarDecompressor(new SElfStarXORDecompressor()),
                         new ElfPlusDecompressor(new ElfPlusXORDecompressor()),
                         new ElfDecompressor(new ElfXORDecompressor()),
                         new BaseDecompressor(new ChimpXORDecompressor()),
@@ -85,7 +85,7 @@ public class TestTransmit {
         for (String fileName : fileNames) {
             INetCompressor[] compressors = {
 //                    new SElfStarHuffmanCompressor(new SElfXORCompressor()),
-                    new SElfStarCompressor(new SElfStarXORCompressor()),
+                    new SElfStarCompressorNoHuff(new SElfStarXORCompressor()),
 //                    new ElfPlusCompressor(new ElfPlusXORCompressor()),
 //                    new ElfCompressor(new ElfXORCompressor()),
 //                    new BaseCompressor(new ChimpXORCompressor()),
@@ -96,7 +96,7 @@ public class TestTransmit {
             };
             INetDecompressor[] decompressors = {
 //                    new SElfStarHuffmanDecompressor(new ElfStarXORDecompressor()),
-                    new ElfStarDecompressor(new SElfStarXORDecompressor()),
+                    new ElfStarDecompressorNoHuff(new SElfStarXORDecompressor()),
 //                    new ElfPlusDecompressor(new ElfPlusXORDecompressor()),
 //                    new ElfDecompressor(new ElfXORDecompressor()),
 //                    new BaseDecompressor(new ChimpXORDecompressor()),

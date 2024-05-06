@@ -1,5 +1,6 @@
 package org.urbcomp.startdb.selfstar.decompressor32;
 
+
 import org.urbcomp.startdb.selfstar.decompressor32.xor.IXORDecompressor32;
 import org.urbcomp.startdb.selfstar.utils.Elf32Utils;
 import org.urbcomp.startdb.selfstar.utils.Huffman.Code;
@@ -9,38 +10,41 @@ import org.urbcomp.startdb.selfstar.utils.InputBitStream;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-public class ElfStarHuffmanDecompressor32 implements IDecompressor32 {
-    private static Code[] huffmanCode = new Code[9];
+public class SElfStarDecompressor32 implements IDecompressor32 {
+
     private final IXORDecompressor32 xorDecompressor;
     private int lastBetaStar = Integer.MAX_VALUE;
+
+    private final int[] frequency = new int[9];
+    private boolean isFirst = true;
     private Node root;
 
-    public ElfStarHuffmanDecompressor32(IXORDecompressor32 xorDecompressor) {
+    public SElfStarDecompressor32(IXORDecompressor32 xorDecompressor) {
         this.xorDecompressor = xorDecompressor;
     }
 
     public List<Float> decompress() {
         List<Float> values = new ArrayList<>(1024);
-        initHuffmanTree();
         Float value;
         while ((value = nextValue()) != null) {
             values.add(value);
         }
+        frequency[8]--;
+        Code[] huffmanCode = HuffmanEncode.getHuffmanCodes(frequency);
+        root = HuffmanEncode.buildHuffmanTree(huffmanCode);
+        Arrays.fill(frequency, 0);
         return values;
     }
 
-    private void initHuffmanTree() {
-        HuffmanEncode.readHuffmanCodes(xorDecompressor.getInputStream(), huffmanCode);
-        root = HuffmanEncode.buildHuffmanTree(huffmanCode);
-    }
 
     @Override
     public void refresh() {
         lastBetaStar = Integer.MAX_VALUE;
         xorDecompressor.refresh();
-        huffmanCode = new Code[9];
+        isFirst = false;
     }
 
     @Override
@@ -50,6 +54,31 @@ public class ElfStarHuffmanDecompressor32 implements IDecompressor32 {
 
     @Override
     public Float nextValue() {
+        if (!isFirst) {
+            return nextValueHuffman();
+        } else {
+            return nextValueFirst();
+        }
+    }
+
+
+    public Float nextValueFirst() {
+        Float v;
+        if (readInt(1) == 0) {
+            v = recoverVByBetaStar();               // case 0
+            frequency[lastBetaStar]++;
+        } else if (readInt(1) == 0) {
+            v = xorDecompressor.readValue();        // case 10
+            frequency[8]++;
+        } else {
+            lastBetaStar = readInt(3);          // case 11
+            v = recoverVByBetaStar();
+            frequency[lastBetaStar]++;
+        }
+        return v;
+    }
+
+    public Float nextValueHuffman() {
         Float v;
         Node current = root;
         while (true) {
@@ -58,8 +87,10 @@ public class ElfStarHuffmanDecompressor32 implements IDecompressor32 {
                 if (current.data != 8) {
                     lastBetaStar = current.data;
                     v = recoverVByBetaStar();
+                    frequency[lastBetaStar]++;
                 } else {
                     v = xorDecompressor.readValue();
+                    frequency[8]++;
                 }
                 break;
             }
@@ -70,7 +101,7 @@ public class ElfStarHuffmanDecompressor32 implements IDecompressor32 {
     private Float recoverVByBetaStar() {
         float v;
         Float vPrime = xorDecompressor.readValue();
-        int sp = Elf32Utils.getSP(vPrime < 0 ? -vPrime : vPrime);
+        int sp = Elf32Utils.getSP(Math.abs(vPrime));
         if (lastBetaStar == 0) {
             v = Elf32Utils.get10iN(-sp - 1);
             if (vPrime < 0) {
@@ -83,7 +114,6 @@ public class ElfStarHuffmanDecompressor32 implements IDecompressor32 {
         return v;
     }
 
-    @SuppressWarnings("all")
     private int readInt(int len) {
         InputBitStream in = xorDecompressor.getInputStream();
         try {

@@ -13,7 +13,7 @@ import java.util.Arrays;
 import java.util.List;
 
 // all ElfStar (batch and stream) share the same decompressor
-public class SElfStarHuffmanDecompressor implements IDecompressor, INetDecompressor {
+public class SElfStarDecompressor implements IDecompressor, INetDecompressor {
 
     private final IXORDecompressor xorDecompressor;
     private int lastBetaStar = Integer.MAX_VALUE;
@@ -22,7 +22,7 @@ public class SElfStarHuffmanDecompressor implements IDecompressor, INetDecompres
     private boolean isFirst = true;
     private Node root;
 
-    public SElfStarHuffmanDecompressor(IXORDecompressor xorDecompressor) {
+    public SElfStarDecompressor(IXORDecompressor xorDecompressor) {
         this.xorDecompressor = xorDecompressor;
     }
 

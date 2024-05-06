@@ -26,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class TestCompressor {
 
     private static final String STORE_FILE = "src/test/resources/result/result.csv";
-    private static final String STORE_PRUNING_FILE = "src/test/resources/result/resultPruning.csv";
+    private static final String STORE_PRUNING_FILE = "src/test/resources/result/resultPruningTime.csv";
     private static final String STORE_WINDOW_FILE = "src/test/resources/result/resultWindow.csv";
     private static final String STORE_BLOCK_FILE = "src/test/resources/result/resultBlock.csv";
     private static final double TIME_PRECISION = 1000.0;
@@ -80,11 +80,11 @@ public class TestCompressor {
     @Test
     public void testAllCompressor() {
         for (String fileName : fileNames) {
-            testALPCompressor(fileName, NO_PARAM);
-            testXZCompressor(fileName, NO_PARAM);
-            testZstdCompressor(fileName, NO_PARAM);
-            testSnappyCompressor(fileName, NO_PARAM);
-            testBuffCompressor(fileName, NO_PARAM);
+//            testALPCompressor(fileName, NO_PARAM);
+//            testXZCompressor(fileName, NO_PARAM);
+//            testZstdCompressor(fileName, NO_PARAM);
+//            testSnappyCompressor(fileName, NO_PARAM);
+//            testBuffCompressor(fileName, NO_PARAM);
             testFloatingCompressor(fileName);
         }
         fileNameParamMethodToCompressedBits.forEach((fileNameParamMethod, compressedBits) -> {
@@ -99,7 +99,7 @@ public class TestCompressor {
 
     //In this experiment, we implement window by block.
     @Test
-    public void testPruningCompressor()  {
+    public void testPruningCompressor() {
         for (String fileName : fileNames) {
             testPruningFloatingCompressor(fileName);
         }
@@ -119,17 +119,17 @@ public class TestCompressor {
         for (int window : windowSizes) {
             for (String fileName : fileNames) {
                 ICompressor[] compressors = new ICompressor[]{
-                        new ElfStarCompressor(new ElfStarXORCompressor(window),window),
-                        new ElfStarHuffmanCompressor(new ElfStarXORCompressor(window),window),
+                        new ElfStarCompressorNoHuff(new ElfStarXORCompressor(window), window),
+                        new ElfStarCompressor(new ElfStarXORCompressor(window), window),
+                        new SElfStarCompressorNoHuff(new SElfStarXORCompressor(window)),
                         new SElfStarCompressor(new SElfStarXORCompressor(window)),
-                        new SElfStarHuffmanCompressor(new SElfStarXORCompressor(window)),
                 };
 
                 IDecompressor[] decompressors = new IDecompressor[]{
+                        new ElfStarDecompressorNoHuff(new ElfStarXORDecompressor()),
                         new ElfStarDecompressor(new ElfStarXORDecompressor()),
-                        new ElfStarHuffmanDecompressor(new ElfStarXORDecompressor()),
-                        new ElfStarDecompressor(new SElfStarXORDecompressor()),     // streaming version is the same
-                        new SElfStarHuffmanDecompressor(new SElfStarXORDecompressor()),
+                        new ElfStarDecompressorNoHuff(new SElfStarXORDecompressor()),     // streaming version is the same
+                        new SElfStarDecompressor(new SElfStarXORDecompressor()),
                 };
                 testParamCompressor(fileName, window, compressors, decompressors);
             }
@@ -155,9 +155,9 @@ public class TestCompressor {
                         new BaseCompressor(new GorillaXORCompressor(block)),
                         new ElfCompressor(new ElfXORCompressor(block)),
                         new ElfPlusCompressor(new ElfPlusXORCompressor(block)),
-                        new ElfStarCompressor(new ElfStarXORCompressor(block),block),
-                        new ElfStarHuffmanCompressor(new ElfStarXORCompressor(block),block),
-                        new SElfStarHuffmanCompressor(new SElfStarXORCompressor(block)),
+                        new ElfStarCompressorNoHuff(new ElfStarXORCompressor(block), block),
+                        new ElfStarCompressor(new ElfStarXORCompressor(block), block),
+                        new SElfStarCompressor(new SElfStarXORCompressor(block)),
                 };
 
                 IDecompressor[] decompressors = new IDecompressor[]{
@@ -166,9 +166,9 @@ public class TestCompressor {
                         new BaseDecompressor(new GorillaXORDecompressor()),
                         new ElfDecompressor(new ElfXORDecompressor()),
                         new ElfPlusDecompressor(new ElfPlusXORDecompressor()),
+                        new ElfStarDecompressorNoHuff(new ElfStarXORDecompressor()),
                         new ElfStarDecompressor(new ElfStarXORDecompressor()),
-                        new ElfStarHuffmanDecompressor(new ElfStarXORDecompressor()),
-                        new SElfStarHuffmanDecompressor(new SElfStarXORDecompressor()),
+                        new SElfStarDecompressor(new SElfStarXORDecompressor()),
                 };
                 testALPCompressor(fileName, block);
                 testBuffCompressor(fileName, block);
@@ -188,7 +188,7 @@ public class TestCompressor {
         writeResult(STORE_BLOCK_FILE, fileNameParamMethodToCompressedRatio, fileNameParamMethodToCompressTime, fileNameParamMethodToDecompressTime, fileNameParamToTotalBlock);
     }
 
-    private void  testPruningFloatingCompressor(String fileName) {
+    private void testPruningFloatingCompressor(String fileName) {
         String fileNameParam = fileName + "," + NO_PARAM;
         fileNameParamToTotalBits.put(fileNameParam, 0L);
         fileNameParamToTotalBlock.put(fileNameParam, 0L);
@@ -273,12 +273,12 @@ public class TestCompressor {
                 new SBaseCompressor(new ChimpNAdaXORCompressor(128)),
                 new ElfCompressor(new ElfXORCompressor()),
                 new ElfPlusCompressor(new ElfPlusXORCompressor()),
-                new ElfStarCompressor(new ElfStarXORCompressorAdaLead()),
-                new ElfStarCompressor(new ElfStarXORCompressorAdaLeadAdaTrail()),
+                new ElfStarCompressorNoHuff(new ElfStarXORCompressorAdaLead()),
+                new ElfStarCompressorNoHuff(new ElfStarXORCompressorAdaLeadAdaTrail()),
+                new ElfStarCompressorNoHuff(new ElfStarXORCompressor()),
                 new ElfStarCompressor(new ElfStarXORCompressor()),
-                new ElfStarHuffmanCompressor(new ElfStarXORCompressor()),
+                new SElfStarCompressorNoHuff(new SElfStarXORCompressor()),
                 new SElfStarCompressor(new SElfStarXORCompressor()),
-                new SElfStarHuffmanCompressor(new SElfStarXORCompressor()),
         };
 
         IDecompressor[] decompressors = new IDecompressor[]{
@@ -289,12 +289,12 @@ public class TestCompressor {
                 new BaseDecompressor(new ChimpNAdaXORDecompressor(128)),
                 new ElfDecompressor(new ElfXORDecompressor()),
                 new ElfPlusDecompressor(new ElfPlusXORDecompressor()),
-                new ElfStarDecompressor(new ElfStarXORDecompressorAdaLead()),
-                new ElfStarDecompressor(new ElfStarXORDecompressorAdaLeadAdaTrail()),
+                new ElfStarDecompressorNoHuff(new ElfStarXORDecompressorAdaLead()),
+                new ElfStarDecompressorNoHuff(new ElfStarXORDecompressorAdaLeadAdaTrail()),
+                new ElfStarDecompressorNoHuff(new ElfStarXORDecompressor()),
                 new ElfStarDecompressor(new ElfStarXORDecompressor()),
-                new ElfStarHuffmanDecompressor(new ElfStarXORDecompressor()),
-                new ElfStarDecompressor(new SElfStarXORDecompressor()),     // streaming version is the same
-                new SElfStarHuffmanDecompressor(new SElfStarXORDecompressor()),
+                new ElfStarDecompressorNoHuff(new SElfStarXORDecompressor()),     // streaming version is the same
+                new SElfStarDecompressor(new SElfStarXORDecompressor()),
 
         };
         boolean firstMethod = true;
@@ -429,7 +429,8 @@ public class TestCompressor {
             int RGsize = 100;
             while ((floatings = br.nextBlock()) != null) {
                 if (floatings.size() != block) {
-                 }
+                    break;
+                }
                 floatingsList.add(new ArrayList<>(floatings));
                 fileNameParamToTotalBits.put(fileNameParam, fileNameParamToTotalBits.get(fileNameParam) + floatings.size() * 64L);
                 if (floatingsList.size() == RGsize) {
@@ -486,21 +487,6 @@ public class TestCompressor {
             }
 
         } catch (Exception e) {
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
             throw new RuntimeException(fileName, e);
