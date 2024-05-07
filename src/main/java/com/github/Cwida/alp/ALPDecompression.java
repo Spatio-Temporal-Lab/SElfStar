@@ -1,13 +1,12 @@
 package com.github.Cwida.alp;
 
-import org.urbcomp.startdb.selfstar.decompressor.INetDecompressor;
 import org.urbcomp.startdb.selfstar.utils.InputBitStream;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ALPDecompression implements INetDecompressor {
+public class ALPDecompression {
     private static final double[] FRAC_ARR = {
             1.0,
             0.1,
@@ -119,18 +118,6 @@ public class ALPDecompression implements INetDecompressor {
             }
         }
         return result;
-    }
-
-    public double[] ALPNetDecompress(byte[] bs) throws IOException {
-        setBytes(bs);
-        int useALP = in.readBit();
-        if (useALP == 1) {
-            deserialize();
-            return decompress();
-        } else {
-            ALPrdDe.deserialize();
-            return ALPrdDe.decompress();
-        }
     }
 
 }

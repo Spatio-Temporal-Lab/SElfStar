@@ -6,9 +6,8 @@ import org.urbcomp.startdb.selfstar.utils.OutputBitStream;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.List;
 
-public class SElfStarCompressorNoHuff implements ICompressor,INetCompressor {
+public class SElfStarCompressorNoHuff implements ICompressor, INetCompressor {
     private final IXORCompressor xorCompressor;
 
     private OutputBitStream os;
@@ -81,8 +80,8 @@ public class SElfStarCompressorNoHuff implements ICompressor,INetCompressor {
         xorCompressor.getOutputStream().align();
         int preByteCnt = byteCount;
         byteCount += (int) Math.ceil(compressedSizeInBits / 8.0);
-        compressedSizeInBits=0;
-        return Arrays.copyOfRange(xorCompressor.getOut(),preByteCnt,byteCount);
+        compressedSizeInBits = 0;
+        return Arrays.copyOfRange(xorCompressor.getOut(), preByteCnt, byteCount);
     }
 
     @Override
@@ -105,17 +104,8 @@ public class SElfStarCompressorNoHuff implements ICompressor,INetCompressor {
 
     @Override
     public byte[] compress(double v) throws IOException {
-        compressedSizeInBits += os.writeInt(0,8);   // prepared for byteCnt in transmit test
+        compressedSizeInBits += os.writeInt(0, 8);   // prepared for byteCnt in transmit test
         addValue(v);
-        return getSingleBytes();
-    }
-
-    @Override
-    public byte[] compressMiniBatch(List<Double> dbs) throws IOException {
-        compressedSizeInBits += os.writeInt(0, 16);   // prepared for byteCnt in transmit test
-        for (double db:dbs) {
-            addValue(db);
-        }
         return getSingleBytes();
     }
 
@@ -127,7 +117,7 @@ public class SElfStarCompressorNoHuff implements ICompressor,INetCompressor {
         compressedSizeInBits = 0;
         lastBetaStar = Integer.MAX_VALUE;
         numberOfValues = 0;
-        byteCount=0;
+        byteCount = 0;
 
         xorCompressor.refresh();        // note this refresh should be at the last
         os = xorCompressor.getOutputStream();

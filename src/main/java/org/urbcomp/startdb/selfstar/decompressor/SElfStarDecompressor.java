@@ -52,47 +52,6 @@ public class SElfStarDecompressor implements IDecompressor, INetDecompressor {
         return nextValue();
     }
 
-    public List<Double> decompressMiniBatch(byte[] input, int batchSize) {
-        setBytes(input);
-        List<Double> values = new ArrayList<>(batchSize);
-        for (int i = 0; i < batchSize; i++) {
-            values.add(nextValue());
-        }
-        return values;
-    }
-
-    /**
-     * used for transmit test, which decompress db one by one
-     *
-     * @param input bits for single db
-     * @return db decompressed
-     */
-    @Override
-    public double decompressLast(byte[] input) {
-        setBytes(input);
-        double value = nextValue();
-        nextValue();
-        frequency[16]--;
-        Code[] huffmanCode = HuffmanEncode.getHuffmanCodes(frequency);
-        root = HuffmanEncode.buildHuffmanTree(huffmanCode);
-        Arrays.fill(frequency, 0);
-        return value;
-    }
-
-    public List<Double> decompressLastMiniBatch(byte[] input, int batchSize) {
-        setBytes(input);
-        List<Double> values = new ArrayList<>(batchSize);
-        for (int i = 0; i < batchSize; i++) {
-            values.add(nextValue());
-        }
-        nextValue();
-        frequency[16]--;
-        Code[] huffmanCode = HuffmanEncode.getHuffmanCodes(frequency);
-        root = HuffmanEncode.buildHuffmanTree(huffmanCode);
-        Arrays.fill(frequency, 0);
-        return values;
-    }
-
     @Override
     public void refresh() {
         lastBetaStar = Integer.MAX_VALUE;

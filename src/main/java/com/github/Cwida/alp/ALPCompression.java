@@ -1,12 +1,11 @@
 package com.github.Cwida.alp;
 
-import org.urbcomp.startdb.selfstar.compressor.INetCompressor;
 import org.urbcomp.startdb.selfstar.utils.OutputBitStream;
 
 import java.io.IOException;
 import java.util.*;
 
-public class ALPCompression implements INetCompressor {
+public class ALPCompression {
     static final double MAGIC_NUMBER = Math.pow(2, 51) + Math.pow(2, 52); // 对应文章中的sweet值，用于消除小数部分
     static final byte MAX_EXPONENT = 18;
     static final byte EXACT_TYPE_BIT_SIZE = Double.SIZE;
@@ -202,13 +201,6 @@ public class ALPCompression implements INetCompressor {
         return Arrays.copyOf(out.getBuffer(), byteCount);
     }
 
-    public byte[] getRowBytes() throws IOException {
-        out.align();
-        int preByteCnt = byteCnt;
-        byteCnt += (int) Math.ceil(size / 8.0);
-        size = 0;
-        return Arrays.copyOfRange(out.getBuffer(), preByteCnt, byteCnt);
-    }
 
     public void close() {
         try {
@@ -252,35 +244,6 @@ public class ALPCompression implements INetCompressor {
                 compress(row, row.size(), state);
             }
         }
-    }
-
-    public byte[] ALPNetCompress(List<Double> row) throws IOException {
-        size += out.writeInt(0, 16); // prepared for byteCnt
-        if (!state.useALP) {
-            // use ALPrd
-            aLPrd.entry(row);
-            size += aLPrd.getSize();
-        } else {
-            // use ALP
-            // 第二级采样，获取最佳组合
-            findBestFactorAndExponent(row, row.size(), state);
-            // 压缩处理
-            compress(row, row.size(), state);
-        }
-
-        return getRowBytes();
-    }
-
-    public void sample(List<List<Double>> rowGroup) {
-        List<List<Double>> vectorsSampled = new ArrayList<>();
-        int idxIncrements = Math.max(1, (int) Math.ceil((double) rowGroup.size() / ALPConstants.RG_SAMPLES)); // 用于行组采样的向量下标增量
-        for (int i = 0; i < rowGroup.size(); i += idxIncrements) {
-            vectorsSampled.add(rowGroup.get(i));
-        }
-        // 第一级采样
-        findTopKCombinations(vectorsSampled);
-//        size += out.writeLong(rowGroup.size(), 8);
-//        return  new byte[]{(byte) rowGroup.size()};
     }
 
     // 第一级采样

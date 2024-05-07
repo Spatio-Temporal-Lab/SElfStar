@@ -70,7 +70,7 @@ public class HuffmanEncode {
         for (Code code : huffmanCodes) {
             maxLen = Math.max(code.length, maxLen);
         }
-        int[] logMap = {0,1,2,2,3,3,3,3,4,4,4,4,4,4,4,4};  // minLength = 1, maxLength = 16, Math.ceil(log2{i})
+        int[] logMap = {0, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4};  // minLength = 1, maxLength = 16, Math.ceil(log2{i})
         int bitsForLen = logMap[maxLen - 1];
         int thisSize = out.writeInt(bitsForLen, 3);    // 4 needs 4 bits
         for (Code huffmanCode : huffmanCodes) {
