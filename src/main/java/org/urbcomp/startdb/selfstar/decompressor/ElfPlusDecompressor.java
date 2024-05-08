@@ -1,6 +1,5 @@
 package org.urbcomp.startdb.selfstar.decompressor;
 
-import org.urbcomp.startdb.selfstar.compressor.INetCompressor;
 import org.urbcomp.startdb.selfstar.decompressor.xor.IXORDecompressor;
 import org.urbcomp.startdb.selfstar.utils.Elf64Utils;
 import org.urbcomp.startdb.selfstar.utils.InputBitStream;
@@ -9,7 +8,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ElfPlusDecompressor implements IDecompressor, INetDecompressor {
+public class ElfPlusDecompressor implements IDecompressor {
     private final IXORDecompressor xorDecompressor;
     private int lastBetaStar = Integer.MAX_VALUE;
 
@@ -77,24 +76,4 @@ public class ElfPlusDecompressor implements IDecompressor, INetDecompressor {
         }
     }
 
-    /**
-     * used for transmit test, which decompress db one by one
-     * @param input bits for single db
-     * @return db decompressed
-     */
-    @Override
-    public double decompress(byte[] input) {
-        setBytes(input);
-        return nextValue();
-    }
-
-    @Override
-    public List<Double> decompressMiniBatch(byte[] input, int batchSize) {
-        setBytes(input);
-        List<Double> values = new ArrayList<>(batchSize);
-        for (int i=0;i<batchSize;i++){
-            values.add(nextValue());
-        }
-        return values;
-    }
 }
