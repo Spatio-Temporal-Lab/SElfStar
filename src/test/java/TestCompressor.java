@@ -266,35 +266,37 @@ public class TestCompressor {
         fileNameParamToTotalBits.put(fileNameParam, 0L);
         fileNameParamToTotalBlock.put(fileNameParam, 0L);
         ICompressor[] compressors = new ICompressor[]{
-                new BaseCompressor(new ChimpXORCompressor()),
-                new BaseCompressor(new ChimpNXORCompressor(128)),
-                new BaseCompressor(new GorillaXORCompressor()),
-                new SBaseCompressor(new ChimpAdaXORCompressor()),
-                new SBaseCompressor(new ChimpNAdaXORCompressor(128)),
-                new ElfCompressor(new ElfXORCompressor()),
-                new ElfPlusCompressor(new ElfPlusXORCompressor()),
-                new ElfStarCompressorNoHuff(new ElfStarXORCompressorAdaLead()),
-                new ElfStarCompressorNoHuff(new ElfStarXORCompressorAdaLeadAdaTrail()),
-                new ElfStarCompressorNoHuff(new ElfStarXORCompressor()),
-                new ElfStarCompressor(new ElfStarXORCompressor()),
-                new SElfStarCompressorNoHuff(new SElfStarXORCompressor()),
-                new SElfStarCompressor(new SElfStarXORCompressor()),
+                new SElfStarCompressor(new SElfStarXORHuffmanCompressor())
+//                new BaseCompressor(new ChimpXORCompressor()),
+//                new BaseCompressor(new ChimpNXORCompressor(128)),
+//                new BaseCompressor(new GorillaXORCompressor()),
+//                new SBaseCompressor(new ChimpAdaXORCompressor()),
+//                new SBaseCompressor(new ChimpNAdaXORCompressor(128)),
+//                new ElfCompressor(new ElfXORCompressor()),
+//                new ElfPlusCompressor(new ElfPlusXORCompressor()),
+//                new ElfStarCompressorNoHuff(new ElfStarXORCompressorAdaLead()),
+//                new ElfStarCompressorNoHuff(new ElfStarXORCompressorAdaLeadAdaTrail()),
+//                new ElfStarCompressorNoHuff(new ElfStarXORCompressor()),
+//                new ElfStarCompressor(new ElfStarXORCompressor()),
+//                new SElfStarCompressorNoHuff(new SElfStarXORCompressor()),
+//                new SElfStarCompressor(new SElfStarXORCompressor()),
         };
 
         IDecompressor[] decompressors = new IDecompressor[]{
-                new BaseDecompressor(new ChimpXORDecompressor()),
-                new BaseDecompressor(new ChimpNXORDecompressor(128)),
-                new BaseDecompressor(new GorillaXORDecompressor()),
-                new BaseDecompressor(new ChimpAdaXORDecompressor()),
-                new BaseDecompressor(new ChimpNAdaXORDecompressor(128)),
-                new ElfDecompressor(new ElfXORDecompressor()),
-                new ElfPlusDecompressor(new ElfPlusXORDecompressor()),
-                new ElfStarDecompressorNoHuff(new ElfStarXORDecompressorAdaLead()),
-                new ElfStarDecompressorNoHuff(new ElfStarXORDecompressorAdaLeadAdaTrail()),
-                new ElfStarDecompressorNoHuff(new ElfStarXORDecompressor()),
-                new ElfStarDecompressor(new ElfStarXORDecompressor()),
-                new ElfStarDecompressorNoHuff(new SElfStarXORDecompressor()),     // streaming version is the same
-                new SElfStarDecompressor(new SElfStarXORDecompressor()),
+                new SElfStarDecompressor(new SElfStarXORHuffmanDecompressor())
+//                new BaseDecompressor(new ChimpXORDecompressor()),
+//                new BaseDecompressor(new ChimpNXORDecompressor(128)),
+//                new BaseDecompressor(new GorillaXORDecompressor()),
+//                new BaseDecompressor(new ChimpAdaXORDecompressor()),
+//                new BaseDecompressor(new ChimpNAdaXORDecompressor(128)),
+//                new ElfDecompressor(new ElfXORDecompressor()),
+//                new ElfPlusDecompressor(new ElfPlusXORDecompressor()),
+//                new ElfStarDecompressorNoHuff(new ElfStarXORDecompressorAdaLead()),
+//                new ElfStarDecompressorNoHuff(new ElfStarXORDecompressorAdaLeadAdaTrail()),
+//                new ElfStarDecompressorNoHuff(new ElfStarXORDecompressor()),
+//                new ElfStarDecompressor(new ElfStarXORDecompressor()),
+//                new ElfStarDecompressorNoHuff(new SElfStarXORDecompressor()),     // streaming version is the same
+//                new SElfStarDecompressor(new SElfStarXORDecompressor()),
 
         };
         boolean firstMethod = true;
