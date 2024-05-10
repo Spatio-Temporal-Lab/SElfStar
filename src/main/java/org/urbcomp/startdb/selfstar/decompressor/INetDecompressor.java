@@ -8,4 +8,5 @@ public interface INetDecompressor {
     default void refresh() {
     }
 
+    default double decompressLast(byte[] input){ return decompress(input);}
 }

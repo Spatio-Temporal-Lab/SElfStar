@@ -182,13 +182,6 @@ public class SElfStarCompressor implements ICompressor, INetCompressor {
         return getSingleBytes();
     }
 
-    public byte[] compressMiniBatch(List<Double> dbs) throws IOException {
-        compressedSizeInBits += os.writeInt(0,16);  // prepared for byteCnt in transmit test
-        for (double db:dbs){
-            addValue(db);
-        }
-        return getSingleBytes();
-    }
 
     @Override
     public byte[] compressAndClose(double v) throws IOException {

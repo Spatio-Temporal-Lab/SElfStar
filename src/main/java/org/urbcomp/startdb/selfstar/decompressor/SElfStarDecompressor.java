@@ -52,6 +52,23 @@ public class SElfStarDecompressor implements IDecompressor, INetDecompressor {
         return nextValue();
     }
 
+    /**
+     * used for transmit test, which decompress db one by one
+     *
+     * @param input bits for single db
+     * @return db decompressed
+     */
+    @Override
+    public double decompressLast(byte[] input) {
+        setBytes(input);
+        double value = nextValue();
+        nextValue();
+        frequency[16]--;
+        Code[] huffmanCode = HuffmanEncode.getHuffmanCodes(frequency);
+        root = HuffmanEncode.buildHuffmanTree(huffmanCode);
+        Arrays.fill(frequency, 0);
+        return value;
+    }
     @Override
     public void refresh() {
         lastBetaStar = Integer.MAX_VALUE;
