@@ -7,7 +7,7 @@ import org.urbcomp.startdb.selfstar.utils.OutputBitStream;
 
 import java.util.Arrays;
 
-public class SElfStarXORHuffmanCompressor implements IXORCompressor {
+public class HuffmanXORCompressor implements IXORCompressor {
     private final int[] leadingRepresentation = {
             0, 0, 0, 0, 0, 0, 0, 0,
             1, 1, 1, 1, 2, 2, 2, 2,
@@ -54,8 +54,6 @@ public class SElfStarXORHuffmanCompressor implements IXORCompressor {
     private int storedTrailingZeros = Integer.MAX_VALUE;
     private long storedVal = 0;
     private boolean first = true;
-    private int[] leadPositions = {0, 8, 12, 16, 18, 20, 22, 24};
-    private int[] trailPositions = {0, 22, 28, 32, 36, 40, 42, 46};
     private boolean updatePositions = false;
     private final OutputBitStream out;
 
@@ -69,13 +67,13 @@ public class SElfStarXORHuffmanCompressor implements IXORCompressor {
 
     private boolean isFirstBlock = true;
 
-    public SElfStarXORHuffmanCompressor(int window) {
+    public HuffmanXORCompressor(int window) {
         out = new OutputBitStream(
                 new byte[(int) (((window + 1) * 8 + window / 8 + 1) * 1.2)]);
 
     }
 
-    public SElfStarXORHuffmanCompressor() {
+    public HuffmanXORCompressor() {
         this(1000);
     }
 

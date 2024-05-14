@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestCompressor {
 
-    private static final String STORE_FILE = "src/test/resources/result/result.csv";
+    private static final String STORE_FILE = "src/test/resources/result/resulthuff.csv";
     private static final String STORE_PRUNING_FILE = "src/test/resources/result/resultPruningTime.csv";
     private static final String STORE_WINDOW_FILE = "src/test/resources/result/resultWindow.csv";
     private static final String STORE_BLOCK_FILE = "src/test/resources/result/resultBlock.csv";
@@ -266,7 +266,7 @@ public class TestCompressor {
         fileNameParamToTotalBits.put(fileNameParam, 0L);
         fileNameParamToTotalBlock.put(fileNameParam, 0L);
         ICompressor[] compressors = new ICompressor[]{
-                new SElfStarCompressor(new SElfStarXORHuffmanCompressor())
+                new SElfStarCompressor(new HuffmanXORCompressor())
 //                new BaseCompressor(new ChimpXORCompressor()),
 //                new BaseCompressor(new ChimpNXORCompressor(128)),
 //                new BaseCompressor(new GorillaXORCompressor()),
@@ -283,7 +283,7 @@ public class TestCompressor {
         };
 
         IDecompressor[] decompressors = new IDecompressor[]{
-                new SElfStarDecompressor(new SElfStarXORHuffmanDecompressor())
+                new SElfStarDecompressor(new HuffmanXORDecompressor())
 //                new BaseDecompressor(new ChimpXORDecompressor()),
 //                new BaseDecompressor(new ChimpNXORDecompressor(128)),
 //                new BaseDecompressor(new GorillaXORDecompressor()),

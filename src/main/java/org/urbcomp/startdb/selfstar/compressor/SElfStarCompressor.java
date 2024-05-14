@@ -140,8 +140,8 @@ public class SElfStarCompressor implements ICompressor, INetCompressor {
         os.align();
         int preByteCnt = byteCount;
         byteCount += (int) Math.ceil(compressedSizeInBits / 8.0);
-        compressedSizeInBits=0;
-        return Arrays.copyOfRange(xorCompressor.getOut(),preByteCnt,byteCount);
+        compressedSizeInBits = 0;
+        return Arrays.copyOfRange(xorCompressor.getOut(), preByteCnt, byteCount);
     }
 
 
@@ -172,12 +172,12 @@ public class SElfStarCompressor implements ICompressor, INetCompressor {
 
 
     public String getKey() {
-        return getClass().getSimpleName();
+        return "SelfStar" + xorCompressor.getKey();
     }
 
     @Override
     public byte[] compress(double v) throws IOException {
-        compressedSizeInBits += os.writeInt(0,8);   // prepared for byteCnt in transmit test
+        compressedSizeInBits += os.writeInt(0, 8);   // prepared for byteCnt in transmit test
         addValue(v);
         return getSingleBytes();
     }
@@ -185,20 +185,12 @@ public class SElfStarCompressor implements ICompressor, INetCompressor {
 
     @Override
     public byte[] compressAndClose(double v) throws IOException {
-        compressedSizeInBits += os.writeInt(0,8);   // prepared for byteCnt in transmit test
+        compressedSizeInBits += os.writeInt(0, 8);   // prepared for byteCnt in transmit test
         addValue(v);
         close();
         return getSingleBytes();
     }
 
-    public byte[] compressLastMiniBatch(List<Double> dbs) throws IOException {
-        compressedSizeInBits += os.writeInt(0,16);  // prepared for byteCnt in transmit test
-        for (double db:dbs){
-            addValue(db);
-        }
-        close();
-        return getSingleBytes();
-    }
 
     @Override
     public void refresh() {

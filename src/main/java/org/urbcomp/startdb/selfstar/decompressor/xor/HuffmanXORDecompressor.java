@@ -9,7 +9,7 @@ import org.urbcomp.startdb.selfstar.utils.InputBitStream;
 import java.io.IOException;
 import java.util.Arrays;
 
-public class SElfStarXORHuffmanDecompressor implements IXORDecompressor {
+public class HuffmanXORDecompressor implements IXORDecompressor {
     private long storedVal = 0;
     private int storedLeadingZeros = Integer.MAX_VALUE;
     private int storedTrailingZeros = Integer.MAX_VALUE;
@@ -33,7 +33,7 @@ public class SElfStarXORHuffmanDecompressor implements IXORDecompressor {
     private Node leadingRoot;
     private Node trailingRoot;
 
-    public SElfStarXORHuffmanDecompressor() {
+    public HuffmanXORDecompressor() {
     }
 
     @Override

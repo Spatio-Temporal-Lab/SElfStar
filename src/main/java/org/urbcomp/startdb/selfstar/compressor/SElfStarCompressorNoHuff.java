@@ -110,7 +110,7 @@ public class SElfStarCompressorNoHuff implements ICompressor, INetCompressor {
     }
 
     public String getKey() {
-        return xorCompressor.getKey();
+        return "SelfStarNoHuff" + xorCompressor.getKey();
     }
 
     public void refresh() {
