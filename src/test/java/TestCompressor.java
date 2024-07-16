@@ -49,14 +49,6 @@ public class TestCompressor {
             "Stocks-UK.csv",
             "Stocks-USA.csv",
             "Wind-Speed.csv",
-            "Blockchain-tr.csv",
-            "City-lat.csv",
-            "City-lon.csv",
-            "Food-price.csv",
-            "POI-lat.csv",
-            "POI-lon.csv",
-            "SSD-bench.csv",
-            "electric_vehicle_charging.csv"
     };
 
     private final Map<String, Long> fileNameParamToTotalBits = new HashMap<>();

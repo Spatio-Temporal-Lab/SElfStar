@@ -44,7 +44,7 @@ public class TestBeta {
             fileNameParamMethodToCompressedRatio.put(fileNameParamMethod, (compressedBits * 1.0) / fileTotalBits);
         });
         System.out.println("Test All Compressor");
-        writeResult(STORE_FILE, fileNameParamMethodToCompressedRatio, fileNameParamMethodToCompressTime, fileNameParamMethodToDecompressTime, fileNameParamToTotalBlock);
+        writeResult(fileNameParamMethodToCompressedRatio, fileNameParamMethodToCompressTime, fileNameParamMethodToDecompressTime, fileNameParamToTotalBlock);
         System.gc();
     }
 
@@ -282,8 +282,7 @@ public class TestBeta {
         }
     }
 
-    private void writeResult(String storeFile,
-                             Map<String, Double> fileNameParamMethodToRatio,
+    private void writeResult(Map<String, Double> fileNameParamMethodToRatio,
                              Map<String, Double> fileNameParamMethodToCTime,
                              Map<String, Double> fileNameParamMethodToDTime,
                              Map<String, Long> fileNameParamToTotalBlock) {
@@ -320,11 +319,11 @@ public class TestBeta {
         }
 
         try {
-            File file = new File(storeFile).getParentFile();
+            File file = new File(TestBeta.STORE_FILE).getParentFile();
             if (!file.exists() && !file.mkdirs()) {
                 throw new IOException("Create directory failed: " + file);
             }
-            try (FileWriter writer = new FileWriter(storeFile, true)) {
+            try (FileWriter writer = new FileWriter(TestBeta.STORE_FILE, true)) {
                 writer.write("Dataset, Param, Method, Ratio, CTime, DTime");
                 writer.write("\r\n");
                 // 遍历键，并写入对应的值
