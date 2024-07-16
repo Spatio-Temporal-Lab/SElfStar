@@ -62,13 +62,14 @@ public class ALPCompression {
     private final OutputBitStream out;
     ALPrdCompression aLPrd;
     private long size;
+    private int byteCnt;
 
-    public void reset(){
+    public void reset() {
         state.reset();
         aLPrd.reset();
     }
 
-    public long getSize(){
+    public long getSize() {
         return size;
     }
 
@@ -77,6 +78,7 @@ public class ALPCompression {
                 new byte[7000000]);
         this.aLPrd = new ALPrdCompression(out, size, vectorSize);
         size = 0;
+        byteCnt = 0;
         ALPConstants.selfAdaption(vectorSize);
         state = new ALPCompressionState(vectorSize);
     }
@@ -121,7 +123,7 @@ public class ALPCompression {
         for (int i = 0; i < nValues; i++) {
             double decodedValue = tmpDecodedValues.get(i);
             double actualValue = inputVector.get(i);
-            boolean isException = (decodedValue != actualValue) || Double.doubleToRawLongBits(actualValue)==-9223372036854775808L;  // 将-0.00归为异常值
+            boolean isException = (decodedValue != actualValue) || Double.doubleToRawLongBits(actualValue) == -9223372036854775808L;  // 将-0.00归为异常值
             if (isException)
                 exceptionsPositions.add((short) i);
         }
@@ -198,6 +200,7 @@ public class ALPCompression {
         int byteCount = (int) Math.ceil(size / 8.0);
         return Arrays.copyOf(out.getBuffer(), byteCount);
     }
+
 
     public void close() {
         try {

@@ -4,9 +4,13 @@ import org.urbcomp.startdb.selfstar.compressor.xor.IXORCompressor;
 import org.urbcomp.startdb.selfstar.utils.Elf64Utils;
 import org.urbcomp.startdb.selfstar.utils.OutputBitStream;
 
-public class ElfCompressor implements ICompressor {
+import java.io.IOException;
+import java.util.Arrays;
+
+public class ElfCompressor implements ICompressor, INetCompressor {
     private final IXORCompressor xorCompressor;
     private int compressedSizeInBits = 0;
+    private int byteCount = 0;
     private OutputBitStream os;
 
     private int numberOfValues = 0;
@@ -51,6 +55,14 @@ public class ElfCompressor implements ICompressor {
         return xorCompressor.getOut();
     }
 
+    private byte[] getSingleBytes() throws IOException {
+        xorCompressor.getOutputStream().align();
+        int preByteCnt = byteCount;
+        byteCount += (int) Math.ceil(compressedSizeInBits / 8.0);
+        compressedSizeInBits = 0;
+        return Arrays.copyOfRange(xorCompressor.getOut(), preByteCnt, byteCount);
+    }
+
     @Override
     public void close() {
         // we write one more bit here, for marking an end of the stream.
@@ -69,10 +81,23 @@ public class ElfCompressor implements ICompressor {
     }
 
     @Override
+    public String getKey() {
+        return "Elf" + xorCompressor.getKey();
+    }
+
+    @Override
+    public byte[] compress(double v) throws IOException {
+        compressedSizeInBits += os.writeInt(0, 8);   // prepared for byteCnt in transmit test
+        addValue(v);
+        return getSingleBytes();
+    }
+
+    @Override
     public void refresh() {
         xorCompressor.refresh();
         compressedSizeInBits = 0;
         numberOfValues = 0;
+        byteCount = 0;
         os = xorCompressor.getOutputStream();
     }
 }

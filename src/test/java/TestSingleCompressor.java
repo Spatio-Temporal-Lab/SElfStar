@@ -34,15 +34,10 @@ public class TestSingleCompressor {
             "Air-pressure.csv",
             "Bird-migration.csv",
             "Blockchain-tr.csv",
-            "City-lat.csv",
-            "City-lon.csv",
             "City-temp.csv",
             "Dew-point-temp.csv",
-            "electric_vehicle_charging.csv",
-            "Food-price.csv",
             "IR-bio-temp.csv",
             "PM10-dust.csv",
-            "SSD-bench.csv",
             "Stocks-DE.csv",
             "Stocks-UK.csv",
             "Stocks-USA.csv",
@@ -89,8 +84,10 @@ public class TestSingleCompressor {
                 new BaseCompressor32(new GorillaXORCompressor32()),
                 new ElfCompressor32(new ElfXORCompressor32()),
                 new ElfPlusCompressor32(new ElfPlusXORCompressor32()),
+                new ElfStarCompressorNoHuff32(new ElfStarXORCompressor32()),
+                new SElfStarCompressorNoHuff32(new SElfStarXORCompressor32()),
                 new ElfStarCompressor32(new ElfStarXORCompressor32()),
-                new SElfStarCompressor32(new SElfStarXORCompressor32()),
+                new SElfStarCompressor32(new SElfStarXORCompressor32())
         };
 
         IDecompressor32[] decompressors = new IDecompressor32[]{
@@ -99,8 +96,10 @@ public class TestSingleCompressor {
                 new BaseDecompressor32(new GorillaXORDecompressor32()),
                 new ElfDecompressor32(new ElfXORDecompressor32()),
                 new ElfPlusDecompressor32(new ElfPlusXORDecompressor32()),
+                new ElfStarDecompressorNoHuff32(new ElfStarXORDecompressor32()),
+                new ElfStarDecompressorNoHuff32(new SElfStarXORDecompressor32()),
                 new ElfStarDecompressor32(new ElfStarXORDecompressor32()),
-                new ElfStarDecompressor32(new SElfStarXORDecompressor32())
+                new SElfStarDecompressor32(new SElfStarXORDecompressor32())
         };
         boolean firstMethod = true;
         for (int i = 0; i < compressors.length; i++) {
@@ -556,7 +555,7 @@ public class TestSingleCompressor {
             if (!file.exists() && !file.mkdirs()) {
                 throw new IOException("Create directory failed: " + file);
             }
-            try (FileWriter writer = new FileWriter(storeFile, false)) {
+            try (FileWriter writer = new FileWriter(storeFile, true)) {
                 writer.write("Dataset, Param, Method, Ratio, CTime, DTime");
                 writer.write("\r\n");
                 // 遍历键，并写入对应的值

@@ -19,6 +19,10 @@ public class ALPrdDecompression {
         this.in = in;
     }
 
+    public ALPrdDecompression() {
+        this.in = null;
+    }
+
     public void deserialize() {
         try {
             nValues = in.readInt(32);

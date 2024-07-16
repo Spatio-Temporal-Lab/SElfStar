@@ -473,7 +473,8 @@ public class InputBitStream implements BooleanIterator, Flushable, Closeable {
             avail -= 2;
             current = current << 16 | (buffer[pos++] & 0xFF) << 8 | buffer[pos++] & 0xFF;
             return fill += 16;
-        } else {
+        } else if (avail<=0){
+            return fill;
         }
 
         current = (current << 8) | read();
@@ -1741,5 +1742,13 @@ public class InputBitStream implements BooleanIterator, Flushable, Closeable {
             remainBits = 0;
         }
         return result;
+    }
+
+    public void setBuffer(byte[] buffer) {
+        this.buffer = buffer.length == 1 ? new byte[]{buffer[0], 0} : buffer;
+        fill = 0;
+        pos = 0;
+        avail = this.buffer.length;
+        readBits = 0;
     }
 }

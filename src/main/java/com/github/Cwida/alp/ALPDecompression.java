@@ -30,7 +30,7 @@ public class ALPDecompression {
             0.0000000000000000001,
             0.00000000000000000001
     };
-    private final ALPrdDecompression ALPrdDe;
+    private ALPrdDecompression ALPrdDe;
     private long[] encodedValue;
     private int count;
     private byte vectorFactor;
@@ -39,9 +39,19 @@ public class ALPDecompression {
     private double[] exceptions;
     private short[] exceptionsPositions;
     private long frameOfReference;
-    private final InputBitStream in;
+    private InputBitStream in;
 
     public ALPDecompression(byte[] bs) {
+        in = new InputBitStream(bs);
+        this.ALPrdDe = new ALPrdDecompression(in);
+    }
+
+    public ALPDecompression() {
+        in = null;
+        this.ALPrdDe = null;
+    }
+
+    public void setBytes(byte[] bs) {
         in = new InputBitStream(bs);
         this.ALPrdDe = new ALPrdDecompression(in);
     }
@@ -109,4 +119,5 @@ public class ALPDecompression {
         }
         return result;
     }
+
 }
