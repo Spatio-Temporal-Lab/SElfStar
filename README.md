@@ -7,7 +7,7 @@ scenarios is also given.
 
 ## ElfStar & SElfStar feature
 
-- ***ElfStar*** proposes the most advanced encoding strategy at present, and optimizes the leading zeros, center bits
+- ***ElfStar*** proposes the most advanced encoding strategy at present, and Huffman coding for β∗, optimizes the leading zeros, center bits
   and sharing conditions of ***Elf*** encoding.
 - ***SElfStar*** is used in streaming scenarios and can achieve almost the same compression ratio as ***ElfStar***
   while enjoying higher efficiency.
@@ -171,6 +171,12 @@ The *BlockReader*class includes methods for reading data.
 
 The *TestCompressor* class includes the experimental methods that appear in various papers, and the experimental results
 will be saved in the corresponding path.
+
+The *TestBeta* class includes the beta experiment portion of the paper.
+
+The *TestTransmit* class includes the transmission experiment part of the paper.
+
+The *TestSingleCompressor* class includes the compression experiments for single-precision data in the paper.
 
 
 
