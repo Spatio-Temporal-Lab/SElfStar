@@ -67,10 +67,8 @@ public class TestBeta {
 
         };
         boolean firstMethod = true;
-//        System.out.println(fileName);
         for (int i = 0; i < compressors.length; i++) {
             ICompressor compressor = compressors[i];
-//            System.out.println(compressor.getKey());
             try (BlockReader br = new BlockReader(fileName, BLOCK_SIZE)) {
                 List<Double> floatings;
 
