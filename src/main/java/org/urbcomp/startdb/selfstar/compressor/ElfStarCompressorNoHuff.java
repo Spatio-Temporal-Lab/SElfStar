@@ -109,7 +109,7 @@ public class ElfStarCompressorNoHuff implements ICompressor {
     }
 
     public String getKey() {
-        return xorCompressor.getKey();
+        return "ElfStarNoHuff" + xorCompressor.getKey();
     }
 
     public void refresh() {

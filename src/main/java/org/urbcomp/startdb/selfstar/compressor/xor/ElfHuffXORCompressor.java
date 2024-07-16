@@ -7,7 +7,7 @@ import org.urbcomp.startdb.selfstar.utils.OutputBitStream;
 
 import java.util.Arrays;
 
-public class HuffmanXORCompressor implements IXORCompressor {
+public class ElfHuffXORCompressor implements IXORCompressor {
     private final int[] leadingRepresentation = {
             0, 0, 0, 0, 0, 0, 0, 0,
             1, 1, 1, 1, 2, 2, 2, 2,
@@ -48,8 +48,8 @@ public class HuffmanXORCompressor implements IXORCompressor {
             46, 46, 46, 46, 46, 46, 46, 46,
             46, 46, 46, 46, 46, 46, 46, 46,
     };
-    private final int[] leadDistribution = new int[65];
-    private final int[] trailDistribution = new int[64];
+    private int[] leadDistribution = new int[65];
+    private int[] trailDistribution = new int[64];
     private int storedLeadingZeros = Integer.MAX_VALUE;
     private int storedTrailingZeros = Integer.MAX_VALUE;
     private long storedVal = 0;
@@ -67,13 +67,13 @@ public class HuffmanXORCompressor implements IXORCompressor {
 
     private boolean isFirstBlock = true;
 
-    public HuffmanXORCompressor(int window) {
+    public ElfHuffXORCompressor(int window) {
         out = new OutputBitStream(
                 new byte[(int) (((window + 1) * 8 + window / 8 + 1) * 1.2)]);
 
     }
 
-    public HuffmanXORCompressor() {
+    public ElfHuffXORCompressor() {
         this(1000);
     }
 
@@ -133,12 +133,9 @@ public class HuffmanXORCompressor implements IXORCompressor {
             // case 01
             out.writeInt(1, 2);
             thisSize += 2;
-            leadDistribution[Long.numberOfLeadingZeros(xor)]++;
         } else {
             int leadingZeros = leadingRound[Long.numberOfLeadingZeros(xor)];
             int trailingZeros = trailingRound[Long.numberOfTrailingZeros(xor)];
-            leadDistribution[Long.numberOfLeadingZeros(xor)]++;
-            trailDistribution[Long.numberOfTrailingZeros(xor)]++;
 
             if (leadingZeros >= storedLeadingZeros && trailingZeros >= storedTrailingZeros &&
                     (leadingZeros - storedLeadingZeros) + (trailingZeros - storedTrailingZeros) < 1 + leadingBitsPerValue + trailingBitsPerValue) {
@@ -185,12 +182,9 @@ public class HuffmanXORCompressor implements IXORCompressor {
             // case 01
             out.writeInt(leadingCodes[64].code, leadingCodes[64].length);
             thisSize += leadingCodes[64].length;
-            trailDistribution[Long.numberOfLeadingZeros(xor)]++;
         } else {
             int leadingZeros = leadingRound[Long.numberOfLeadingZeros(xor)];
             int trailingZeros = trailingRound[Long.numberOfTrailingZeros(xor)];
-            leadDistribution[Long.numberOfLeadingZeros(xor)]++;
-            trailDistribution[Long.numberOfTrailingZeros(xor)]++;
 
             storedLeadingZeros = leadingZeros;
             storedTrailingZeros = trailingZeros;
@@ -213,11 +207,8 @@ public class HuffmanXORCompressor implements IXORCompressor {
     public int close() {
         int thisSize = addValue(Elf64Utils.END_SIGN);
         out.flush();
-        if (updatePositions) {
-            // we update distribution using the inner info
-            leadingCodes = HuffmanEncode.getHuffmanCodes(leadDistribution);
-            trailingCodes = HuffmanEncode.getHuffmanCodes(trailDistribution);
-        }
+        leadingCodes = HuffmanEncode.getHuffmanCodes(leadDistribution);
+        trailingCodes = HuffmanEncode.getHuffmanCodes(trailDistribution);
         return thisSize;
     }
 
@@ -236,7 +227,8 @@ public class HuffmanXORCompressor implements IXORCompressor {
     }
 
     @Override
-    public void setDistribution(int[] leadDistributionIgnore, int[] trailDistributionIgnore) {
-        this.updatePositions = true;
+    public void setDistribution(int[] leadDistribution, int[] trailDistribution) {
+        this.leadDistribution = leadDistribution;
+        this.trailDistribution = trailDistribution;
     }
 }

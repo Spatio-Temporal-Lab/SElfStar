@@ -80,8 +80,8 @@ public class ElfPlusCompressor implements ICompressor, INetCompressor {
         xorCompressor.getOutputStream().align();
         int preByteCnt = byteCount;
         byteCount += (int) Math.ceil(compressedSizeInBits / 8.0);
-        compressedSizeInBits=0;
-        return Arrays.copyOfRange(xorCompressor.getOut(),preByteCnt,byteCount);
+        compressedSizeInBits = 0;
+        return Arrays.copyOfRange(xorCompressor.getOut(), preByteCnt, byteCount);
     }
 
     public void close() {
@@ -91,12 +91,12 @@ public class ElfPlusCompressor implements ICompressor, INetCompressor {
     }
 
     public String getKey() {
-        return xorCompressor.getKey();
+        return "ElfPlus" + xorCompressor.getKey();
     }
 
     @Override
     public byte[] compress(double v) throws IOException {
-        compressedSizeInBits += os.writeInt(0,8);   // prepared for byteCnt in transmit test
+        compressedSizeInBits += os.writeInt(0, 8);   // prepared for byteCnt in transmit test
         addValue(v);
         return getSingleBytes();
     }

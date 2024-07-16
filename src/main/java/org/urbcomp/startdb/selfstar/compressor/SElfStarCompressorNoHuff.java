@@ -83,7 +83,6 @@ public class SElfStarCompressorNoHuff implements ICompressor, INetCompressor {
         compressedSizeInBits = 0;
         return Arrays.copyOfRange(xorCompressor.getOut(), preByteCnt, byteCount);
     }
-
     @Override
     public void setDistribution(int[] leadDistribution, int[] trailDistribution) {
         // for streaming scenarios, we do nothing here

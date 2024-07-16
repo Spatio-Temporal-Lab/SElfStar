@@ -117,7 +117,7 @@ public class ElfStarCompressor implements ICompressor {
     }
 
     public String getKey() {
-        return xorCompressor.getKey() + "Huff";
+        return "ElfStar" + xorCompressor.getKey();
     }
 
     public void refresh() {
