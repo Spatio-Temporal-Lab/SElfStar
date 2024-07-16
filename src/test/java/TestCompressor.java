@@ -111,16 +111,12 @@ public class TestCompressor {
         for (int window : windowSizes) {
             for (String fileName : fileNames) {
                 ICompressor[] compressors = new ICompressor[]{
-                        new ElfStarCompressorNoHuff(new ElfStarXORCompressor(window), window),
                         new ElfStarCompressor(new ElfStarXORCompressor(window), window),
-                        new SElfStarCompressorNoHuff(new SElfStarXORCompressor(window)),
                         new SElfStarCompressor(new SElfStarXORCompressor(window)),
                 };
 
                 IDecompressor[] decompressors = new IDecompressor[]{
-                        new ElfStarDecompressorNoHuff(new ElfStarXORDecompressor()),
                         new ElfStarDecompressor(new ElfStarXORDecompressor()),
-                        new ElfStarDecompressorNoHuff(new SElfStarXORDecompressor()),     // streaming version is the same
                         new SElfStarDecompressor(new SElfStarXORDecompressor()),
                 };
                 testParamCompressor(fileName, window, compressors, decompressors);
@@ -273,7 +269,6 @@ public class TestCompressor {
                 new ElfStarCompressor(new ElfStarXORCompressorNoFRZPruning()),
                 new ElfStarCompressor(new ElfStarXORCompressorNoFRPruning()),
                 new ElfStarCompressor(new ElfStarXORCompressor()),
-                new SElfStarCompressorNoHuff(new SElfStarXORCompressor()),
                 new SElfStarCompressor(new SElfStarXORCompressor()),
         };
 
@@ -293,7 +288,6 @@ public class TestCompressor {
                 new ElfStarDecompressor(new ElfStarXORDecompressorNoFRZPruning()),
                 new ElfStarDecompressor(new ElfStarXORDecompressorNoFRPruning()),
                 new ElfStarDecompressor(new ElfStarXORDecompressor()),
-                new SElfStarDecompressorNoHuff(new SElfStarXORDecompressor()),     // streaming version is the same
                 new SElfStarDecompressor(new SElfStarXORDecompressor()),
 
         };
