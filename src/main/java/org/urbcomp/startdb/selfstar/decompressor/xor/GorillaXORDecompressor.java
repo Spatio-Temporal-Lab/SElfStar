@@ -47,9 +47,6 @@ public class GorillaXORDecompressor implements IXORDecompressor {
 
     @Override
     public void refresh() {
-        storedLeadingZeros = Integer.MAX_VALUE;
-        storedTrailingZeros = 0;
-        storedVal = 0;
         first = true;
         endOfStream = false;
     }

@@ -9,7 +9,7 @@ public class Node implements Comparable<Node> {
     public int row;
     public int depth;
     public long code;
-    public Node left, right;
+    public Node[] children = new Node[2];
 
     public Node(int data, int frequency) {
         this.data = data;
@@ -45,6 +45,7 @@ public class Node implements Comparable<Node> {
         return this.frequency - o.frequency;
     }
 }
+
 class CustomComparator implements Comparator<Node> {
 
     @Override

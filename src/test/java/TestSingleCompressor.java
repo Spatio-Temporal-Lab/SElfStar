@@ -1,3 +1,7 @@
+import com.github.Cwida.alp.ALPCompression32;
+import com.github.Cwida.alp.ALPDecompression32;
+import com.github.Tranway.buff.BuffCompressor32;
+import com.github.Tranway.buff.BuffDecompressor32;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.CommonConfigurationKeys;
 import org.apache.hadoop.hbase.HBaseConfiguration;
@@ -56,6 +60,8 @@ public class TestSingleCompressor {
     public void testAllCompressor() {
         for (String fileName : fileNames) {
             testFloatingCompressor(fileName);
+            testALPCompressor(fileName);
+            testBuffCompressor(fileName);
             testXZCompressor(fileName);
             testZstdCompressor(fileName);
             testSnappyCompressor(fileName);
@@ -94,7 +100,7 @@ public class TestSingleCompressor {
                 new ElfDecompressor32(new ElfXORDecompressor32()),
                 new ElfPlusDecompressor32(new ElfPlusXORDecompressor32()),
                 new ElfStarDecompressor32(new ElfStarXORDecompressor32()),
-                new ElfStarDecompressor32(new ElfStarXORDecompressor32())     // streaming version is the same
+                new ElfStarDecompressor32(new SElfStarXORDecompressor32())
         };
         boolean firstMethod = true;
         for (int i = 0; i < compressors.length; i++) {
@@ -149,6 +155,140 @@ public class TestSingleCompressor {
                 throw new RuntimeException(fileName, e);
             }
             firstMethod = false;
+        }
+    }
+
+    private void testALPCompressor(String fileName) {
+        long compressorBits;
+        String fileNameParam = fileName + "," + NO_PARAM;
+        fileNameParamToTotalBits.put(fileNameParam, 0L);
+        fileNameParamToTotalBlock.put(fileNameParam, 0L);
+        double encodingDuration = 0;
+        double decodingDuration = 0;
+        try (BlockReader br = new BlockReader(fileName, BLOCK_SIZE)) {
+            List<List<List<Float>>> RowGroups = new ArrayList<>();
+            List<List<Float>> floatingsList = new ArrayList<>();
+            List<Float> floatings;
+            int RGsize = 100;
+            while ((floatings = br.nextSingleBlock()) != null) {
+                if (floatings.size() != BLOCK_SIZE) {
+                    break;
+                }
+                floatingsList.add(new ArrayList<>(floatings));
+                fileNameParamToTotalBits.put(fileNameParam, fileNameParamToTotalBits.get(fileNameParam) + floatings.size() * 32L);
+                if (floatingsList.size() == RGsize) {
+                    RowGroups.add(new ArrayList<>(floatingsList));
+                    floatingsList.clear();
+                }
+                fileNameParamToTotalBlock.put(fileNameParam, fileNameParamToTotalBlock.get(fileNameParam) + 1L);
+            }
+            if (!floatingsList.isEmpty()) {
+                RowGroups.add(floatingsList);
+            }
+
+            long start = System.nanoTime();
+            ALPCompression32 compressor = new ALPCompression32();
+            for (List<List<Float>> rowGroup : RowGroups) {
+                compressor.entry(rowGroup);
+                compressor.reset();
+            }
+            compressor.flush();
+            encodingDuration += System.nanoTime() - start;
+
+            byte[] result = compressor.getOut();
+
+            start = System.nanoTime();
+            ALPDecompression32 decompressor = new ALPDecompression32(result);
+
+            List<List<float[]>> deValues = new ArrayList<>();
+            for (int i = 0; i < RowGroups.size(); i++) {
+                List<float[]> deValue = decompressor.entry();
+                deValues.add(deValue);
+            }
+            decodingDuration += System.nanoTime() - start;
+
+            for (int RGidx = 0; RGidx < RowGroups.size(); RGidx++) {
+                for (int i = 0; i < RowGroups.get(RGidx).size(); i++) {
+                    for (int j = 0; j < RowGroups.get(RGidx).get(i).size(); j++) {
+                        assertEquals(RowGroups.get(RGidx).get(i).get(j), deValues.get(RGidx).get(i)[j], "Value did not match");
+                    }
+                }
+            }
+            compressorBits = compressor.getSize();
+            String fileNameParamMethod = fileNameParam + "," + "ALP32";
+            if (!fileNameParamMethodToCompressedBits.containsKey(fileNameParamMethod)) {
+                fileNameParamMethodToCompressedBits.put(fileNameParamMethod, compressorBits);
+                fileNameParamMethodToCompressTime.put(fileNameParamMethod, encodingDuration / TIME_PRECISION);
+                fileNameParamMethodToDecompressTime.put(fileNameParamMethod, decodingDuration / TIME_PRECISION);
+            } else {
+                long newSize = fileNameParamMethodToCompressedBits.get(fileNameParamMethod) + compressorBits;
+                double newCTime = fileNameParamMethodToCompressTime.get(fileNameParamMethod) + encodingDuration / TIME_PRECISION;
+                double newDTime = fileNameParamMethodToDecompressTime.get(fileNameParamMethod) + decodingDuration / TIME_PRECISION;
+                fileNameParamMethodToCompressedBits.put(fileNameParamMethod, newSize);
+                fileNameParamMethodToCompressTime.put(fileNameParamMethod, newCTime);
+                fileNameParamMethodToDecompressTime.put(fileNameParamMethod, newDTime);
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException(fileName, e);
+        }
+    }
+
+
+    private void testBuffCompressor(String fileName) {
+        long compressorBits;
+        String fileNameParam = fileName + "," + NO_PARAM;
+        fileNameParamToTotalBits.put(fileNameParam, 0L);
+        fileNameParamToTotalBlock.put(fileNameParam, 0L);
+        try (BlockReader br = new BlockReader(fileName, BLOCK_SIZE)) {
+            List<Float> floatings;
+            while ((floatings = br.nextSingleBlock()) != null) {
+                if (floatings.size() != BLOCK_SIZE) {
+                    break;
+                }
+                float[] values = new float[floatings.size()];
+                for (int i = 0; i < floatings.size(); i++) {
+                    values[i] = floatings.get(i);
+                }
+                fileNameParamToTotalBits.put(fileNameParam, fileNameParamToTotalBits.get(fileNameParam) + floatings.size() * 64L);
+                fileNameParamToTotalBlock.put(fileNameParam, fileNameParamToTotalBlock.get(fileNameParam) + 1L);
+                double encodingDuration = 0;
+                double decodingDuration = 0;
+                BuffCompressor32 compressor = new BuffCompressor32();
+                // Compress
+                long start = System.nanoTime();
+                compressor.compress(values);
+                encodingDuration += System.nanoTime() - start;
+                compressorBits = compressor.getSize();
+
+                byte[] result = compressor.getOut();
+                BuffDecompressor32 decompressor = new BuffDecompressor32(result);
+
+                start = System.nanoTime();
+
+                float[] uncompressed = decompressor.decompress();
+                decodingDuration += System.nanoTime() - start;
+
+                // Decompressed bytes should equal the original
+                for (int i = 0; i < floatings.size(); i++) {
+                    assertEquals(floatings.get(i), uncompressed[i], "Value did not match");
+                }
+                String fileNameParamMethod = fileNameParam + "," + "Buff32";
+                if (!fileNameParamMethodToCompressedBits.containsKey(fileNameParamMethod)) {
+                    fileNameParamMethodToCompressedBits.put(fileNameParamMethod, compressorBits);
+                    fileNameParamMethodToCompressTime.put(fileNameParamMethod, encodingDuration / TIME_PRECISION);
+                    fileNameParamMethodToDecompressTime.put(fileNameParamMethod, decodingDuration / TIME_PRECISION);
+                } else {
+                    long newSize = fileNameParamMethodToCompressedBits.get(fileNameParamMethod) + compressorBits;
+                    double newCTime = fileNameParamMethodToCompressTime.get(fileNameParamMethod) + encodingDuration / TIME_PRECISION;
+                    double newDTime = fileNameParamMethodToDecompressTime.get(fileNameParamMethod) + decodingDuration / TIME_PRECISION;
+                    fileNameParamMethodToCompressedBits.put(fileNameParamMethod, newSize);
+                    fileNameParamMethodToCompressTime.put(fileNameParamMethod, newCTime);
+                    fileNameParamMethodToDecompressTime.put(fileNameParamMethod, newDTime);
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(fileName, e);
         }
     }
 
@@ -391,7 +531,7 @@ public class TestSingleCompressor {
             if (fileName.equals(INIT_FILE)) {
                 continue;
             }
-            String paramMethod = param + "," + method;
+            String paramMethod = param + "\t" + method;
             if (!methodToRatios.containsKey(paramMethod)) {
                 methodToRatios.put(paramMethod, new ArrayList<>());
                 methodToCTimes.put(paramMethod, new ArrayList<>());
@@ -416,8 +556,8 @@ public class TestSingleCompressor {
             if (!file.exists() && !file.mkdirs()) {
                 throw new IOException("Create directory failed: " + file);
             }
-            try (FileWriter writer = new FileWriter(storeFile, true)) {
-                writer.write("Param, Method, Ratio, CTime, DTime");
+            try (FileWriter writer = new FileWriter(storeFile, false)) {
+                writer.write("Dataset, Param, Method, Ratio, CTime, DTime");
                 writer.write("\r\n");
                 // 遍历键，并写入对应的值
                 for (String fileNameParamMethod : fileNameParamMethodToRatio.keySet()) {

@@ -3,7 +3,6 @@ package org.urbcomp.startdb.selfstar.decompressor.xor;
 import org.urbcomp.startdb.selfstar.utils.InputBitStream;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 public class ChimpNXORDecompressor implements IXORDecompressor {
 
@@ -44,12 +43,9 @@ public class ChimpNXORDecompressor implements IXORDecompressor {
 
     @Override
     public void refresh() {
-        storedLeadingZeros = Integer.MAX_VALUE;
-        storedVal = 0;
         current = 0;
         first = true;
         endOfStream = false;
-        Arrays.fill(storedValues, 0);
     }
 
     /**

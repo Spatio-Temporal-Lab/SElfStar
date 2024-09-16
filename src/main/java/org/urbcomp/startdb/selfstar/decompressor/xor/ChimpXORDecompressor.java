@@ -36,8 +36,6 @@ public class ChimpXORDecompressor implements IXORDecompressor {
 
     @Override
     public void refresh() {
-        storedLeadingZeros = Integer.MAX_VALUE;
-        storedVal = 0;
         first = true;
         endOfStream = false;
     }
@@ -63,10 +61,7 @@ public class ChimpXORDecompressor implements IXORDecompressor {
         if (first) {
             first = false;
             storedVal = in.readLong(64);
-            if (storedVal == Elf64Utils.END_SIGN) {
-                endOfStream = true;
-            }
-
+            endOfStream = storedVal == Elf64Utils.END_SIGN;
         } else {
             nextValue();
         }
@@ -84,22 +79,14 @@ public class ChimpXORDecompressor implements IXORDecompressor {
                 storedLeadingZeros = leadingRepresentation[in.readInt(3)];
                 value = in.readLong(64 - storedLeadingZeros);
                 value = storedVal ^ value;
-                if (value == Elf64Utils.END_SIGN) {
-                    endOfStream = true;
-                    return;
-                } else {
-                    storedVal = value;
-                }
+                endOfStream = value == Elf64Utils.END_SIGN;
+                storedVal = value;
                 break;
             case 2:
                 value = in.readLong(64 - storedLeadingZeros);
                 value = storedVal ^ value;
-                if (value == Elf64Utils.END_SIGN) {
-                    endOfStream = true;
-                    return;
-                } else {
-                    storedVal = value;
-                }
+                endOfStream = value == Elf64Utils.END_SIGN;
+                storedVal = value;
                 break;
             case 1:
                 storedLeadingZeros = leadingRepresentation[in.readInt(3)];
@@ -111,12 +98,8 @@ public class ChimpXORDecompressor implements IXORDecompressor {
                 value = in.readLong(64 - storedLeadingZeros - storedTrailingZeros);
                 value <<= storedTrailingZeros;
                 value = storedVal ^ value;
-                if (value == Elf64Utils.END_SIGN) {
-                    endOfStream = true;
-                    return;
-                } else {
-                    storedVal = value;
-                }
+                endOfStream = value == Elf64Utils.END_SIGN;
+                storedVal = value;
                 break;
             default:
         }

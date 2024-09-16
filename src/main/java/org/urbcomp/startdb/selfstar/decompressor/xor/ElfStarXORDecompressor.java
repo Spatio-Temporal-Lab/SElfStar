@@ -5,7 +5,6 @@ import org.urbcomp.startdb.selfstar.utils.InputBitStream;
 import org.urbcomp.startdb.selfstar.utils.PostOfficeSolver;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 public class ElfStarXORDecompressor implements IXORDecompressor {
     private long storedVal = 0;
@@ -71,16 +70,8 @@ public class ElfStarXORDecompressor implements IXORDecompressor {
 
     @Override
     public void refresh() {
-        storedVal = 0;
-        storedLeadingZeros = Integer.MAX_VALUE;
-        storedTrailingZeros = Integer.MAX_VALUE;
         first = true;
         endOfStream = false;
-
-        Arrays.fill(trailingRepresentation, 0);
-        trailingBitsPerValue = 0;
-        Arrays.fill(leadingRepresentation, 0);
-        leadingBitsPerValue = 0;
     }
 
     /**
@@ -112,9 +103,7 @@ public class ElfStarXORDecompressor implements IXORDecompressor {
             } else {
                 storedVal = 0;
             }
-            if (storedVal == Elf64Utils.END_SIGN) {
-                endOfStream = true;
-            }
+            endOfStream = storedVal == Elf64Utils.END_SIGN;
         } else {
             nextValue();
         }
@@ -129,11 +118,8 @@ public class ElfStarXORDecompressor implements IXORDecompressor {
             centerBits = 64 - storedLeadingZeros - storedTrailingZeros;
             value = in.readLong(centerBits) << storedTrailingZeros;
             value = storedVal ^ value;
-            if (value == Elf64Utils.END_SIGN) {
-                endOfStream = true;
-            } else {
-                storedVal = value;
-            }
+            endOfStream = value == Elf64Utils.END_SIGN;
+            storedVal = value;
         } else if (in.readInt(1) == 0) {
             // case 00
             int leadAndTrail = in.readInt(leadingBitsPerValue + trailingBitsPerValue);
@@ -145,11 +131,8 @@ public class ElfStarXORDecompressor implements IXORDecompressor {
 
             value = in.readLong(centerBits) << storedTrailingZeros;
             value = storedVal ^ value;
-            if (value == Elf64Utils.END_SIGN) {
-                endOfStream = true;
-            } else {
-                storedVal = value;
-            }
+            endOfStream = value == Elf64Utils.END_SIGN;
+            storedVal = value;
         }
     }
 }

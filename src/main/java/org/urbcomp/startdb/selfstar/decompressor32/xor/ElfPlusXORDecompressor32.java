@@ -34,10 +34,6 @@ public class ElfPlusXORDecompressor32 implements IXORDecompressor32 {
 
     @Override
     public void refresh() {
-        in = new InputBitStream(new byte[0]);
-        storedVal = 0;
-        storedLeadingZeros = Integer.MAX_VALUE;
-        storedTrailingZeros = Integer.MAX_VALUE;
         first = true;
         endOfStream = false;
     }
@@ -65,9 +61,7 @@ public class ElfPlusXORDecompressor32 implements IXORDecompressor32 {
             first = false;
             int trailingZeros = in.readInt(6);
             storedVal = in.readInt(32 - trailingZeros) << trailingZeros;
-            if (storedVal == Elf32Utils.END_SIGN) {
-                endOfStream = true;
-            }
+            endOfStream = storedVal == Elf32Utils.END_SIGN;
         } else {
             nextValue();
         }
@@ -89,11 +83,8 @@ public class ElfPlusXORDecompressor32 implements IXORDecompressor32 {
                 storedTrailingZeros = 32 - storedLeadingZeros - centerBits;
                 value = in.readInt(centerBits) << storedTrailingZeros;
                 value = storedVal ^ value;
-                if (value == Elf32Utils.END_SIGN) {
-                    endOfStream = true;
-                } else {
-                    storedVal = value;
-                }
+                endOfStream = value == Elf32Utils.END_SIGN;
+                storedVal = value;
                 break;
             case 2:
                 // case 10
@@ -106,11 +97,9 @@ public class ElfPlusXORDecompressor32 implements IXORDecompressor32 {
                 storedTrailingZeros = 32 - storedLeadingZeros - centerBits;
                 value = in.readInt(centerBits) << storedTrailingZeros;
                 value = storedVal ^ value;
-                if (value == Elf32Utils.END_SIGN) {
-                    endOfStream = true;
-                } else {
-                    storedVal = value;
-                }
+
+                endOfStream = value == Elf32Utils.END_SIGN;
+                storedVal = value;
                 break;
             case 1:
                 // case 01, we do nothing, the same value as before
@@ -120,11 +109,8 @@ public class ElfPlusXORDecompressor32 implements IXORDecompressor32 {
                 centerBits = 32 - storedLeadingZeros - storedTrailingZeros;
                 value = in.readInt(centerBits) << storedTrailingZeros;
                 value = storedVal ^ value;
-                if (value == Elf32Utils.END_SIGN) {
-                    endOfStream = true;
-                } else {
-                    storedVal = value;
-                }
+                endOfStream = value == Elf32Utils.END_SIGN;
+                storedVal = value;
                 break;
         }
     }

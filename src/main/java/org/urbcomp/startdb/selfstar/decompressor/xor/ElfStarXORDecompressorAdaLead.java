@@ -5,7 +5,6 @@ import org.urbcomp.startdb.selfstar.utils.InputBitStream;
 import org.urbcomp.startdb.selfstar.utils.PostOfficeSolver;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 public class ElfStarXORDecompressorAdaLead implements IXORDecompressor {
     private long storedVal = 0;
@@ -51,15 +50,8 @@ public class ElfStarXORDecompressorAdaLead implements IXORDecompressor {
 
     @Override
     public void refresh() {
-        storedVal = 0;
-        storedLeadingZeros = Integer.MAX_VALUE;
-        storedTrailingZeros = Integer.MAX_VALUE;
         first = true;
         endOfStream = false;
-
-        Arrays.fill(leadingRepresentation, 0);
-
-        leadingBitsPerValue = 0;
     }
 
     /**
@@ -86,9 +78,7 @@ public class ElfStarXORDecompressorAdaLead implements IXORDecompressor {
             first = false;
             int trailingZeros = in.readInt(7);
             storedVal = in.readLong(64 - trailingZeros) << trailingZeros;
-            if (storedVal == Elf64Utils.END_SIGN) {
-                endOfStream = true;
-            }
+            endOfStream = storedVal == Elf64Utils.END_SIGN;
         } else {
             nextValue();
         }
@@ -110,11 +100,8 @@ public class ElfStarXORDecompressorAdaLead implements IXORDecompressor {
                 storedTrailingZeros = 64 - storedLeadingZeros - centerBits;
                 value = in.readLong(centerBits) << storedTrailingZeros;
                 value = storedVal ^ value;
-                if (value == Elf64Utils.END_SIGN) {
-                    endOfStream = true;
-                } else {
-                    storedVal = value;
-                }
+                endOfStream = value == Elf64Utils.END_SIGN;
+                storedVal = value;
                 break;
             case 2:
                 // case 10
@@ -127,11 +114,8 @@ public class ElfStarXORDecompressorAdaLead implements IXORDecompressor {
                 storedTrailingZeros = 64 - storedLeadingZeros - centerBits;
                 value = in.readLong(centerBits) << storedTrailingZeros;
                 value = storedVal ^ value;
-                if (value == Elf64Utils.END_SIGN) {
-                    endOfStream = true;
-                } else {
-                    storedVal = value;
-                }
+                endOfStream = value == Elf64Utils.END_SIGN;
+                storedVal = value;
                 break;
             case 1:
                 // case 01, we do nothing, the same value as before
@@ -141,11 +125,8 @@ public class ElfStarXORDecompressorAdaLead implements IXORDecompressor {
                 centerBits = 64 - storedLeadingZeros - storedTrailingZeros;
                 value = in.readLong(centerBits) << storedTrailingZeros;
                 value = storedVal ^ value;
-                if (value == Elf64Utils.END_SIGN) {
-                    endOfStream = true;
-                } else {
-                    storedVal = value;
-                }
+                endOfStream = value == Elf64Utils.END_SIGN;
+                storedVal = value;
                 break;
         }
     }

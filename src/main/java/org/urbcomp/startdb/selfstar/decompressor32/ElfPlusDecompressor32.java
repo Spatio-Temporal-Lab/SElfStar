@@ -54,7 +54,7 @@ public class ElfPlusDecompressor32 implements IDecompressor32 {
     private Float recoverVByBetaStar() {
         float v;
         Float vPrime = xorDecompressor.readValue();
-        int sp = Elf32Utils.getSP(Math.abs(vPrime));
+        int sp = Elf32Utils.getSP(vPrime < 0 ? -vPrime : vPrime);
         if (lastBetaStar == 0) {
             v = Elf32Utils.get10iN(-sp - 1);
             if (vPrime < 0) {

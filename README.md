@@ -1,4 +1,4 @@
-# Adaptive Encoding Strategies for Erasing-Based Lossless Floating-Point Compression
+# Adaptive Encoding Strategies for Streaming Erasing-Based Lossless Floating-Point Compression
 
 ***
 Based on the erasing method of ***Elf***, we improved it to get the ***ElfStar*** method. Compared with the ***Elf***

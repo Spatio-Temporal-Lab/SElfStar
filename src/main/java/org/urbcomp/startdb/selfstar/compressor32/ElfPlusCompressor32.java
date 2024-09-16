@@ -32,7 +32,7 @@ public class ElfPlusCompressor32 implements ICompressor32 {
             vPrimeInt = vInt;
         } else if (Float.isNaN(v)) {
             compressedSizeInBits += os.writeInt(2, 2); // case 10
-            vPrimeInt = 0xffc00000 & vInt;
+            vPrimeInt = 0x7fc00000;
         } else {
             //1
             // C1: v is a normal or subnormal

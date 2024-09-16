@@ -17,7 +17,6 @@ public class ElfCompressor32 implements ICompressor32 {
         os = xorCompressor.getOutputStream();
     }
 
-
     @Override
     public void addValue(float v) {
         int vInt = Float.floatToRawIntBits(v);
@@ -29,7 +28,7 @@ public class ElfCompressor32 implements ICompressor32 {
             vPrimeInt = vInt;
         } else if (Float.isNaN(v)) {
             compressedSizeInBits += os.writeBit(false);
-            vPrimeInt = 0xffc00000 & vInt;
+            vPrimeInt = 0x7fc00000;
         } else {
             int[] alphaAndBetaStar = Elf32Utils.getAlphaAndBetaStar(v);
             int e = (vInt >> 23) & 0xff;

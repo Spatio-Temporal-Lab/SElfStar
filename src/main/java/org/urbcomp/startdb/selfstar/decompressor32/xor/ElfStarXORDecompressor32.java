@@ -5,7 +5,6 @@ import org.urbcomp.startdb.selfstar.utils.InputBitStream;
 import org.urbcomp.startdb.selfstar.utils.PostOfficeSolver32;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 public class ElfStarXORDecompressor32 implements IXORDecompressor32 {
     private int storedVal = 0;
@@ -71,16 +70,8 @@ public class ElfStarXORDecompressor32 implements IXORDecompressor32 {
 
     @Override
     public void refresh() {
-        storedVal = 0;
-        storedLeadingZeros = Integer.MAX_VALUE;
-        storedTrailingZeros = Integer.MAX_VALUE;
         first = true;
         endOfStream = false;
-
-        Arrays.fill(trailingRepresentation, 0);
-        trailingBitsPerValue = 0;
-        Arrays.fill(leadingRepresentation, 0);
-        leadingBitsPerValue = 0;
     }
 
     /**
@@ -112,9 +103,7 @@ public class ElfStarXORDecompressor32 implements IXORDecompressor32 {
             } else {
                 storedVal = 0;
             }
-            if (storedVal == Elf32Utils.END_SIGN) {
-                endOfStream = true;
-            }
+            endOfStream = storedVal == Elf32Utils.END_SIGN;
         } else {
             nextValue();
         }
@@ -129,11 +118,8 @@ public class ElfStarXORDecompressor32 implements IXORDecompressor32 {
             centerBits = 32 - storedLeadingZeros - storedTrailingZeros;
             value = in.readInt(centerBits) << storedTrailingZeros;
             value = storedVal ^ value;
-            if (value == Elf32Utils.END_SIGN) {
-                endOfStream = true;
-            } else {
-                storedVal = value;
-            }
+            endOfStream = value == Elf32Utils.END_SIGN;
+            storedVal = value;
         } else if (in.readInt(1) == 0) {
             // case 00
             int leadAndTrail = in.readInt(leadingBitsPerValue + trailingBitsPerValue);
@@ -145,11 +131,8 @@ public class ElfStarXORDecompressor32 implements IXORDecompressor32 {
 
             value = in.readInt(centerBits) << storedTrailingZeros;
             value = storedVal ^ value;
-            if (value == Elf32Utils.END_SIGN) {
-                endOfStream = true;
-            } else {
-                storedVal = value;
-            }
+            endOfStream = value == Elf32Utils.END_SIGN;
+            storedVal = value;
         }
     }
 }
